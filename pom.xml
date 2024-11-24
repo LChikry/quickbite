@@ -20,6 +20,12 @@
             <artifactId>telegrambots-longpolling</artifactId>
             <version>7.10.0</version>
         </dependency>
+
+        <dependency>
+            <groupId>io.github.cdimascio</groupId>
+            <artifactId>dotenv-java</artifactId>
+            <version>3.0.0</version>
+        </dependency>
 <!--        <dependency>-->
 <!--            <groupId>org.telegram</groupId>-->
 <!--            <artifactId>telegrambots-meta</artifactId>-->
