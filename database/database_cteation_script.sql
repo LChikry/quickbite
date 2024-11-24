@@ -18,12 +18,6 @@ DROP TABLE IF EXISTS Customer;
 
 -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
-
-DROP TABLE IF EXISTS Category;
-DROP TABLE IF EXISTS Product;
-DROP TABLE IF EXISTS Order;
-DROP TABLE IF EXISTS Order_Item;
-
 -- Create the tables
 CREATE TABLE Customer (
     customer_id     int PRIMARY KEY,
