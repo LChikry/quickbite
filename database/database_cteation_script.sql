@@ -71,7 +71,22 @@ CREATE TABLE Product (
 );
 
 CREATE TABLE Order (
+    order_id            INT PRIMARY KEY,;
+    order_timestamp     TIMESTAMP WITH TIME ZONE NOT NULL,
+    order_type          CHAR(8) NOT NULL,
+    order_total_value   NUMERIC(12, 2) NOT NULL,
+    currency            CHAR(3) DEFAULT = 'MAD' NOT NULL,
+    order_status        VARCHAR(14) NOT NULL,
+    restaurant_id       INT NOT NULL,
+    cashier_id          INT NOT NULL,
+    customer_id         INT NOT NULL,
 
+    CONSTRAINT ck_order_timestamp CHECK (inDate <= current_date),
+    CONSTRAINT ck_currency CHECK (currency == 'MAD')
+    CONSTRAINT ck_order_date_time CHECK (order_type IN ("Pick-up", "On-site")),
+    CONSTRAINT fk_receives FOREIGN KEY (restaurant_id) REFERENCES Restaurant(restaurant_id) ON UPDATE CASCADE,
+    CONSTRAINT fk_processes FOREIGN KEY (cashier_id) REFERENCES Cashier(cashier_id) ON UPDATE CASCADE,
+    CONSTRAINT fk_places FOREIGN KEY (customer_id) REFERENCES Customer(customer_id) ON UPDATE CASCADE
 );
 
 CREATE TABLE Order_Item (
