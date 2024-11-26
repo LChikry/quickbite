@@ -56,18 +56,18 @@ CREATE TABLE Category (
 
 
 CREATE TABLE Product (
- productCode           varchar(10) PRIMARY KEY,
- description           varchar(35) not null,
- inDate                date not null,
- quantityOnHand        smallint not null,
- minQuantityOnHand     smallint not null,
- price                 decimal(8, 2),
- discountRate          decimal(2, 2) not null DEFAULT 0.00,
- vendorCode            int,
- CONSTRAINT CkProduct_InDate CHECK (inDate <= current_date),
- CONSTRAINT supplies FOREIGN KEY (vendorCode) REFERENCES Vendor(vendorCode)
-                      ON UPDATE CASCADE
-                      ON DELETE SET NULL
+    product_id          VARCHAR(10) PRIMARY KEY,
+    restaurant_id       INT NOT NULL,
+    category_id         INT NOT NULL,
+    product_name        VARCHAR(35) NOT NULL,
+    price               NUMERIC(8, 2) NOT NULL,
+    currency            CHAR(3) DEFAULT = 'MAD' NOT NULL,
+    quantity            SMALLINT NOT NULL,
+    min_quantity        SMALLINT,
+
+    CONSTRAINT ck_currency CHECK (currency == 'MAD')
+    CONSTRAINT fk_offers FOREIGN KEY (restaurant_id) REFERENCES Restaurant(restaurant_id) ON UPDATE CASCADE ON DELETE CASCADE
+    CONSTRAINT fk_labels FOREIGN KEY (category_id) REFERENCES Category(category_id) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE TABLE Order (
@@ -81,26 +81,27 @@ CREATE TABLE Order (
     cashier_id          INT NOT NULL,
     customer_id         INT NOT NULL,
 
-    CONSTRAINT ck_order_timestamp CHECK (inDate <= current_date),
+    CONSTRAINT ck_order_timestamp CHECK (order_timestamp <= current_date),
     CONSTRAINT ck_currency CHECK (currency == 'MAD')
     CONSTRAINT ck_order_date_time CHECK (order_type IN ("Pick-up", "On-site")),
     CONSTRAINT fk_receives FOREIGN KEY (restaurant_id) REFERENCES Restaurant(restaurant_id) ON UPDATE CASCADE,
-    CONSTRAINT fk_processes FOREIGN KEY (cashier_id) REFERENCES Cashier(cashier_id) ON UPDATE CASCADE,
-    CONSTRAINT fk_places FOREIGN KEY (customer_id) REFERENCES Customer(customer_id) ON UPDATE CASCADE
+    CONSTRAINT fk_processes FOREIGN KEY (cashier_id) REFERENCES Cashier(cashier_id) ON UPDATE CASCADE ON DELETE CASCADE,
+    CONSTRAINT fk_places FOREIGN KEY (customer_id) REFERENCES Customer(customer_id) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE TABLE Order_Item (
- invoiceNumber int,
- lineNumber    smallint,
- productCode   varchar(10) not null,
- quantity      smallint not null DEFAULT 1,
- unitPrice     decimal(8, 2) not null,
- PRIMARY KEY (invoiceNumber, lineNumber),
- UNIQUE(invoiceNumber, productCode),
- CONSTRAINT contains FOREIGN KEY (invoiceNumber) REFERENCES Invoice(invoiceNumber)
-                      ON UPDATE CASCADE ON DELETE CASCADE,
-  CONSTRAINT is_found_in FOREIGN KEY (productCode) REFERENCES Product(productCode)
-                          ON UPDATE CASCADE ON DELETE CASCADE
+    order_id            INT,
+    product_id          INT,
+    quantity_ordered    INT,
+    unit_price          NUMERIC(12, 2) NOT NULL,
+    total_item_value    NUMERIC(12, 2) NOT NULL,
+    currency            CHAR(3) DEFAULT = 'MAD' NOT NULL,
+
+    PRIMARY KEY (invoiceNumber, lineNumber),
+    UNIQUE(order_id, product_id),
+    CONSTRAINT ck_currency CHECK (currency == 'MAD')
+    CONSTRAINT fk_contains FOREIGN KEY (order_id) REFERENCES Order(order_id) ON UPDATE CASCADE ON DELETE CASCADE,
+    CONSTRAINT fk_is_found_in FOREIGN KEY (product_id) REFERENCES Product(product_id) ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
