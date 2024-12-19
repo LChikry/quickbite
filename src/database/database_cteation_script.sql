@@ -77,14 +77,15 @@ CREATE TABLE Order (
     order_type          CHAR(8) NOT NULL,
     order_total_value   NUMERIC(12, 2) NOT NULL,
     currency            CHAR(3) DEFAULT = 'MAD' NOT NULL,
-    order_status        VARCHAR(14) NOT NULL,
+    order_status        VARCHAR(14) NOT NULL DEFAULT = 'Pending',
     restaurant_id       INT NOT NULL,
-    cashier_id          INT NOT NULL,
+    employee_id          INT NOT NULL,
     customer_id         INT NOT NULL,
 
     CONSTRAINT ck_order_timestamp CHECK (order_timestamp <= current_date),
     CONSTRAINT ck_currency CHECK (currency == 'MAD')
-    CONSTRAINT ck_order_date_time CHECK (order_type IN ("Pick-up", "On-site")),
+    CONSTRAINT ck_order_date_time CHECK (order_type IN ('Pick-up', 'On-site')),
+    CONSTRAINT ck_order_status CHECK (order_status IN ('Pending' , 'In Preparation', 'Canceled', 'Ready'))
     CONSTRAINT fk_receives FOREIGN KEY (restaurant_id) REFERENCES Restaurant(restaurant_id) ON UPDATE CASCADE,
     CONSTRAINT fk_processes FOREIGN KEY (cashier_id) REFERENCES Cashier(cashier_id) ON UPDATE CASCADE ON DELETE CASCADE,
     CONSTRAINT fk_places FOREIGN KEY (customer_id) REFERENCES Customer(customer_id) ON UPDATE CASCADE ON DELETE CASCADE
