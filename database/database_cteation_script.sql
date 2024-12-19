@@ -1,12 +1,3 @@
-/****************************************************************/
-/* InvoicesDBINIT.sql						*/
-/*								*/
-/* This SQL script file creates the following tables:		*/
-/*   Vendor, Product, Customer, Invoice, Line			*/
-/* and loads the corresponding data rows.			*/
-/*								*								*/
-/****************************************************************/
-
 -- Drop the tables if they exist
 DROP TABLE IF EXISTS Order_Item;
 DROP TABLE IF EXISTS Order;
@@ -15,40 +6,50 @@ DROP TABLE IF EXISTS Category;
 DROP TABLE IF EXISTS Employee;
 DROP TABLE IF EXISTS Restaurant;
 DROP TABLE IF EXISTS Customer;
+DROP TABLE IF EXISTS User;
+DROP TABLE IF EXISTS Account;
 
 -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
-
--- Create the tables
-CREATE TABLE Customer (
-    customer_id     int PRIMARY KEY,
-    cus_fname       varchar(15) not null,
-    cus_lname       varchar(15) not null,
-    cus_initial     char(1),
-    cus_telegram_id     char(4),
-    cus_telegram_username         char(8),
-    cus_signup_date       decimal(8, 2) not null DEFAULT 0
+CREATE TABLE User (
+    user_id         INT PRIMARY KEY,
+    first_name      VARCHAR(15) NOT NULL,
+    last_name       VARCHAR(25) NOT NULL,
+    middle_names    VARCHAR(40),
+    user_type       VARCHAR(10) NOT NULL
 );
+
+
+CREATE TABLE Account (
+    account_id              INT PRIMARY KEY,
+    email                   VARCHAR(100) NOT NULL,
+    password                VARCHAR(128) NOT NULL,
+    user_id                 INT NOT NULL,
+    telegram_id             INT NOT NULL,
+    telegram_username       VARCHAR(50) NOT NULL,
+    signup_date             TIMESTAMP WITH TIME ZONE NOT NULL,
+
+    CONSTRAINT fk_belongs_to FOREIGN KEY (user_id) REFERENCES User(user_id) ON UPDATE CASCADE
+);
+
+
+CREATE TABLE Customer (
+    customer_balance           NUMERIC(8, 2) NOT NULL,
+    currency        CHAR(3) DEFAULT = 'MAD' NOT NULL,
+) INHERITS (User);
+
 
 CREATE TABLE Restaurant (
-    vendorCode    int PRIMARY KEY,
-    name          varchar(35) not null,
-    contactPerson varchar(15) not null,
-    areaCode      char(4) not null,
-    phone         char(8) not null,
-    country       char(2) not null,
-    previousOrder char(1),
-    CONSTRAINT CkVendor_PreviousOrder CHECK (previousOrder in ('Y', 'N'))
+    restaurant_id INT PRIMARY KEY,
+
 );
 
+
 CREATE TABLE Employee (
-    customer_id     int PRIMARY KEY,
-    cus_fname       varchar(15) not null,
-    cus_lname       varchar(15) not null,
-    cus_initial     char(1),
-    cus_telegram_id     char(4),
-    cus_telegram_username         char(8),
-    cus_signup_date       decimal(8, 2) not null DEFAULT 0
-);
+    restaurant_id       INT NOT NULL,
+
+    CONSTRAINT fk_employs FOREIGN KEY (restaurant_id) REFERENCES Restaurant(restaurant_id) ON UPDATE CASCADE
+) INHERITS (User);
+
 
 CREATE TABLE Category (
 
@@ -62,8 +63,8 @@ CREATE TABLE Product (
     product_name        VARCHAR(35) NOT NULL,
     price               NUMERIC(8, 2) NOT NULL,
     currency            CHAR(3) DEFAULT = 'MAD' NOT NULL,
-    quantity            SMALLINT NOT NULL,
-    min_quantity        SMALLINT,
+    quantity            INT NOT NULL,
+    min_quantity        INT,
 
     CONSTRAINT ck_currency CHECK (currency == 'MAD')
     CONSTRAINT fk_offers FOREIGN KEY (restaurant_id) REFERENCES Restaurant(restaurant_id) ON UPDATE CASCADE ON DELETE CASCADE
