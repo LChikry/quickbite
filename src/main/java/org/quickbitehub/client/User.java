@@ -9,8 +9,8 @@ public class User {
 	private final UserType userType;
 
 	public User(String firstName, String lastName, String middleNames, UserType userType) {
-        this.firstName = firstName;
-        this.lastName = lastName;
+		this.firstName = firstName;
+		this.lastName = lastName;
 		this.middleNames = middleNames;
 		this.userType = userType;
 	}
