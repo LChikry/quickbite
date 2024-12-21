@@ -67,7 +67,7 @@ public class Main {
 				// Database connection details
 				String url = "jdbc:postgresql://localhost:5432/test2"; // Update with your database name
 				String user = "postgres"; // Update with your username
-				String password = "#Barakamon12"; // Update with your password
+				String password = ""; // Update with your password
 
 				// SQL query
 				String query = "SELECT customer_balance FROM Customer WHERE customer_id = ?";
@@ -103,7 +103,7 @@ public class Main {
         public static HashMap<Integer, HashMap<String, Object>> getAllCustomers() {
             String url = "jdbc:postgresql://localhost:5432/test2"; // Your DB details
             String user = "postgres"; // Your DB username
-            String password = "#Barakamon12"; // Your DB password
+            String password = ""; // Your DB password
 
             String query = "SELECT customer_id, cus_fname, customer_balance FROM Customer";
             HashMap<Integer, HashMap<String, Object>> customers = new HashMap<>();  // HashMap to store customer data by customer_id
