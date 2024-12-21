@@ -2,6 +2,7 @@ package org.quickbitehub;
 
 import io.github.cdimascio.dotenv.Dotenv;
 import org.quickbitehub.client.Account;
+import org.quickbitehub.client.NavigationState;
 import org.quickbitehub.client.User;
 import org.telegram.telegrambots.client.okhttp.OkHttpTelegramClient;
 import org.telegram.telegrambots.longpolling.util.LongPollingSingleThreadUpdateConsumer;
@@ -11,12 +12,14 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 
 import java.util.HashMap;
+import java.util.Stack;
 
 public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
     private final String botToken;
     private final String botUsername = "QuickBiteHub_bot";
     private TelegramClient telegramClient;
-    private HashMap<Long, Account> users;
+    private HashMap<Long, Account> usersAccounts;
+    private HashMap<Long, Stack<NavigationState>> usersState = new HashMap<>();
 
     public QuickBite() {
         Dotenv dotenv = Dotenv.load();
@@ -33,7 +36,7 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
     }
 
     public boolean isAccountExist(String telegramId) {
-        return users.containsKey(telegramId);
+        return usersAccounts.containsKey(telegramId);
     }
 
     @Override
