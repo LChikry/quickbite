@@ -1,18 +1,24 @@
 package org.quickbitehub.client;
 
-public class Account {
-	private String email;
-	private String password;
-	private final Long ACCOUNT_ID;
-	private boolean isAuthenticated = false;
-	private final User USER;
+import java.time.Instant;
 
-	public Account(String email, String password, Long ACCOUNT_ID, User USER) {
-		this.email = email;
-		this.password = password;
+public class Account {
+	private final Long ACCOUNT_ID;
+	private final String EMAIL;
+	private final String USER_ID;
+	private final User USER;
+	private final Instant ACCOUNT_SIGN_UP_DATE;
+	private boolean isAuthenticated = false;
+	private String password;
+
+	public Account(String EMAIL, String password, Long ACCOUNT_ID, User USER) {
+		this.ACCOUNT_SIGN_UP_DATE = Instant.now();
+		this.EMAIL = EMAIL;
 		this.ACCOUNT_ID = ACCOUNT_ID;
-		this.isAuthenticated = true;
 		this.USER = USER;
+		this.USER_ID = USER.getUserId();
+		this.password = password;
+		this.isAuthenticated = true;
 	}
 
 	public boolean isAuthenticated() {
@@ -20,7 +26,7 @@ public class Account {
 	}
 
 	public boolean authenticate(String email, String password) {
-		if (email.equals(this.email) && password.equals(this.password)) {
+		if (email.equals(this.EMAIL) && password.equals(this.password)) {
 			this.isAuthenticated = true;
 			return true;
 		}
@@ -28,25 +34,10 @@ public class Account {
 		return false;
 	}
 
-	public boolean logout() {
+	public boolean logOut() {
 		if (!this.isAuthenticated) return false;
 
 		this.isAuthenticated = false;
-		return true;
-	}
-
-	public Long getAccountId() {
-		return ACCOUNT_ID;
-	}
-
-	public String getAccountEmail() {
-		return email;
-	}
-
-	public boolean changeAccountEmail(String oldEmail, String newEmail) {
-		if (!this.isAuthenticated && oldEmail.equals(this.email)) return false;
-
-		this.email = newEmail;
 		return true;
 	}
 
@@ -57,9 +48,25 @@ public class Account {
 		return true;
 	}
 
+	public Long getAccountId() {
+		return ACCOUNT_ID;
+	}
+
+	public String getAccountEmail() {
+		return EMAIL;
+	}
+
 	public User getUser() {
 		if (!this.isAuthenticated) return null;
 
 		return USER;
+	}
+
+	public Instant getAccountSignUpDate() {
+		return ACCOUNT_SIGN_UP_DATE;
+	}
+
+	public String getUserId() {
+		return USER_ID;
 	}
 }

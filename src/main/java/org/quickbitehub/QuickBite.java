@@ -7,7 +7,6 @@ import io.github.cdimascio.dotenv.Dotenv;
 import org.telegram.telegrambots.client.okhttp.OkHttpTelegramClient;
 import org.telegram.telegrambots.longpolling.util.LongPollingSingleThreadUpdateConsumer;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.objects.LoginUrl;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.message.Message;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
@@ -21,6 +20,7 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 	private final String botUsername = "QuickBiteHub_bot";
 	private TelegramClient telegramClient;
 	private HashMap<Long, Account> usersAccounts;
+	private HashMap<Long, String> userSessions;
 	private HashMap<Long, Stack<NavigationState>> usersState = new HashMap<>();
 
 	public QuickBite() {
@@ -29,6 +29,7 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 		this.telegramClient = new OkHttpTelegramClient(this.botToken);
 		usersAccounts = new HashMap<>();
 		usersState = new HashMap<>();
+		userSessions = new HashMap<>();
 	}
 
 	public String getBotUsername() {
@@ -74,15 +75,18 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 //			case "/cancel" -> cancelPendingOrder();
 //			case "/manage_orders" -> viewManageOrdersMenu();
 //			case "/settings" -> viewSettingsMenu();
-			case "/logout" -> logoutHandler(message.getFrom().getId());
+			case "/logOut" -> logoutHandler(message.getFrom().getId());
 			case "/help" -> viewHelpPage();
 		}
 
 	}
 
 	private void logoutHandler(Long accountId) {
+		accountId
+
+
 		Account userAccount = usersAccounts.get(accountId);
-		if (userAccount == null || userAccount.logout()) {
+		if (userAccount == null || userAccount.logOut()) {
 			String msg = "\u26a0\ufe0f *_Warning:_* You are not logged in\\!";
 			try {
 				sendTextMessage(accountId, msg);
@@ -92,7 +96,7 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 			return;
 		}
 
-		if (userAccount.isAuthenticated()) userAccount.logout();
+		if (userAccount.isAuthenticated()) userAccount.logOut();
 		String msg = "\u2705 *_You have log out successfully. See you soon\\! \\ud83d\\udc4b_*";
 		try {
 			sendTextMessage(accountId, msg);
