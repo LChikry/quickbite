@@ -1,13 +1,13 @@
 -- Drop the tables if they exist
-DROP TABLE IF EXISTS Order_Item;
-DROP TABLE IF EXISTS Orders;
-DROP TABLE IF EXISTS Product;
-DROP TABLE IF EXISTS Category;
-DROP TABLE IF EXISTS Employee;
-DROP TABLE IF EXISTS Restaurant;
-DROP TABLE IF EXISTS Customer;
-DROP TABLE IF EXISTS Users;
-DROP TABLE IF EXISTS Account;
+DROP TABLE IF EXISTS Order_Item CASCADE;
+DROP TABLE IF EXISTS Orders CASCADE;
+DROP TABLE IF EXISTS Product CASCADE;
+DROP TABLE IF EXISTS Category CASCADE;
+DROP TABLE IF EXISTS Employee CASCADE;
+DROP TABLE IF EXISTS Restaurant CASCADE;
+DROP TABLE IF EXISTS Customer CASCADE;
+DROP TABLE IF EXISTS Account CASCADE;
+DROP TABLE IF EXISTS Users CASCADE;
 
 ------------------------------------------
 CREATE TABLE Users (
@@ -32,7 +32,9 @@ CREATE TABLE Account (
 
 CREATE TABLE Customer (
 	customer_balance NUMERIC(8, 2) NOT NULL,
-	currency CHAR(3) DEFAULT 'MAD' NOT NULL
+	currency CHAR(3) DEFAULT 'MAD' NOT NULL,
+
+	CONSTRAINT uq_customer_primary_key UNIQUE (user_id)
 ) INHERITS (Users);
 
 CREATE TABLE Restaurant (
@@ -41,7 +43,9 @@ CREATE TABLE Restaurant (
 
 CREATE TABLE Employee (
 	restaurant_id       INT NOT NULL,
-	CONSTRAINT fk_employs FOREIGN KEY (restaurant_id) REFERENCES Restaurant(restaurant_id) ON UPDATE CASCADE
+
+	CONSTRAINT fk_employs FOREIGN KEY (restaurant_id) REFERENCES Restaurant(restaurant_id) ON UPDATE CASCADE,
+	CONSTRAINT uq_employee_primary_key UNIQUE (user_id)
 ) INHERITS (Users);
 
 CREATE TABLE Category (
@@ -50,7 +54,7 @@ CREATE TABLE Category (
 );
 
 CREATE TABLE Product (
-	product_id          VARCHAR(10) PRIMARY KEY,
+	product_id          INT PRIMARY KEY,
 	restaurant_id       INT NOT NULL,
 	category_id         INT NOT NULL,
 	product_name        VARCHAR(35) NOT NULL,
@@ -64,7 +68,7 @@ CREATE TABLE Product (
 	CONSTRAINT fk_labels FOREIGN KEY (category_id) REFERENCES Category(category_id) ON UPDATE CASCADE ON DELETE CASCADE
  );
 
-CREATE TABLE orders (
+CREATE TABLE Orders (
 	order_id            INT PRIMARY KEY,
 	order_timestamp     TIMESTAMP WITH TIME ZONE NOT NULL,
 	order_type          CHAR(8) NOT NULL,
