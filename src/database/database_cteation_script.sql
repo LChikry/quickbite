@@ -20,12 +20,11 @@ CREATE TABLE Users (
 
 CREATE TABLE Account (
 	account_id              INT PRIMARY KEY,
-	email                   VARCHAR(100) NOT NULL,
-	password                VARCHAR(128) NOT NULL,
+	account_email           VARCHAR(100) NOT NULL,
+	account_password        VARCHAR(128) NOT NULL,
 	user_id                 INT NOT NULL,
-	telegram_id             INT NOT NULL,
 	telegram_username       VARCHAR(50) NOT NULL,
-	signup_date             TIMESTAMP WITH TIME ZONE NOT NULL,
+	account_signup_date     TIMESTAMP WITH TIME ZONE NOT NULL,
 
 	CONSTRAINT fk_belongs_to FOREIGN KEY (user_id) REFERENCES users(user_id) ON UPDATE CASCADE
  );
