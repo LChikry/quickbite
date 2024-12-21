@@ -1,7 +1,8 @@
 package org.quickbitehub;
-
 import org.telegram.telegrambots.longpolling.TelegramBotsLongPollingApplication;
 import java.sql.*;
+import java.util.HashMap;
+
 
 public class Main {
 	public static void main(String[] args) {
@@ -24,6 +25,22 @@ public class Main {
 		else {
 			System.out.println("Customer not found.");
 		}
+
+
+        HashMap<Integer, HashMap<String, Object>> customers = getAllCustomers();
+
+        if (!customers.isEmpty()) {
+            for (HashMap.Entry<Integer, HashMap<String, Object>> entry : customers.entrySet()) {
+                customerId = entry.getKey();
+                HashMap<String, Object> customerData = entry.getValue();
+                System.out.println("Customer ID: " + customerId);
+                System.out.println("First Name: " + customerData.get("cus_fname"));
+                System.out.println("Balance: " + customerData.get("customer_balance"));
+                System.out.println("-----------------------------");
+            }
+        } else {
+            System.out.println("No customers found.");
+        }
 	}
 
 
@@ -48,9 +65,9 @@ public class Main {
 
 	public static double getCustomerBalance (int customerId) {
 				// Database connection details
-				String url = "jdbc:postgresql://localhost:5432/your_databasename"; // Update with your database name
-				String user = "your_username"; // Update with your username
-				String password = "your_password"; // Update with your password
+				String url = "jdbc:postgresql://localhost:5432/test2"; // Update with your database name
+				String user = "postgres"; // Update with your username
+				String password = ""; // Update with your password
 
 				// SQL query
 				String query = "SELECT customer_balance FROM Customer WHERE customer_id = ?";
@@ -77,9 +94,42 @@ public class Main {
 					System.err.println("Database error: " + e.getMessage());
 				}
 
+
 				return balance;
 			}
 
 
+        // Method to get all customers and store them in a HashMap
+        public static HashMap<Integer, HashMap<String, Object>> getAllCustomers() {
+            String url = "jdbc:postgresql://localhost:5432/test2"; // Your DB details
+            String user = "postgres"; // Your DB username
+            String password = ""; // Your DB password
 
+            String query = "SELECT customer_id, cus_fname, customer_balance FROM Customer";
+            HashMap<Integer, HashMap<String, Object>> customers = new HashMap<>();  // HashMap to store customer data by customer_id
+
+            try (Connection connection = DriverManager.getConnection(url, user, password);
+                 PreparedStatement statement = connection.prepareStatement(query);
+                 ResultSet resultSet = statement.executeQuery()) {
+
+                // Loop through the result set and add rows to the HashMap
+                while (resultSet.next()) {
+                    int customerId = resultSet.getInt("customer_id");
+
+                    // Create a HashMap for each row
+                    HashMap<String, Object> customerData = new HashMap<>();
+	                customerData.put("cus_fname", resultSet.getString("cus_fname"));
+	                customerData.put("customer_balance", resultSet.getDouble("customer_balance"));
+
+	                // Add this HashMap to the customers map using customer_id as the key
+                    customers.put(customerId, customerData);
+
+                }
+
+            } catch (SQLException e) {
+                System.err.println("Database error: " + e.getMessage());
+            }
+
+            return customers;
+        }
 }
