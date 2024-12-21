@@ -3,14 +3,14 @@ package org.quickbitehub.client;
 public class Account {
 	private String email;
 	private String password;
-	private final Long TELEGRAM_ID;
+	private final Long ACCOUNT_ID;
 	private boolean isAuthenticated = false;
 	private final User USER;
 
-	public Account(String email, String password, Long TELEGRAM_ID, User USER) {
+	public Account(String email, String password, Long ACCOUNT_ID, User USER) {
 		this.email = email;
 		this.password = password;
-		this.TELEGRAM_ID = TELEGRAM_ID;
+		this.ACCOUNT_ID = ACCOUNT_ID;
 		this.isAuthenticated = true;
 		this.USER = USER;
 	}
@@ -35,8 +35,8 @@ public class Account {
 		return true;
 	}
 
-	public Long getTELEGRAM_ID() {
-		return TELEGRAM_ID;
+	public Long getAccountId() {
+		return ACCOUNT_ID;
 	}
 
 	public String getAccountEmail() {

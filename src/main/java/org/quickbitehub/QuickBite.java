@@ -1,12 +1,13 @@
 package org.quickbitehub;
 
-import io.github.cdimascio.dotenv.Dotenv;
 import org.quickbitehub.client.Account;
 import org.quickbitehub.client.NavigationState;
-import org.quickbitehub.client.User;
+
+import io.github.cdimascio.dotenv.Dotenv;
 import org.telegram.telegrambots.client.okhttp.OkHttpTelegramClient;
 import org.telegram.telegrambots.longpolling.util.LongPollingSingleThreadUpdateConsumer;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.LoginUrl;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.message.Message;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
@@ -26,6 +27,8 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 		Dotenv dotenv = Dotenv.load();
 		this.botToken = dotenv.get("BOT_TOKEN");
 		this.telegramClient = new OkHttpTelegramClient(this.botToken);
+		usersAccounts = new HashMap<>();
+		usersState = new HashMap<>();
 	}
 
 	public String getBotUsername() {
@@ -63,6 +66,42 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 	}
 
 	private void botCommandsHandler(Message message) {
+		String command = message.getText();
+
+		switch (command) {
+//			case "/start" -> viewDashboard();
+//			case "/order" -> issueOrder();
+//			case "/cancel" -> cancelPendingOrder();
+//			case "/manage_orders" -> viewManageOrdersMenu();
+//			case "/settings" -> viewSettingsMenu();
+			case "/logout" -> logoutHandler(message.getFrom().getId());
+			case "/help" -> viewHelpPage();
+		}
+
+	}
+
+	private void logoutHandler(Long accountId) {
+		Account userAccount = usersAccounts.get(accountId);
+		if (userAccount == null || userAccount.logout()) {
+			String msg = "\u26a0\ufe0f *_Warning:_* You are not logged in\\!";
+			try {
+				sendTextMessage(accountId, msg);
+			} catch (TelegramApiException e) {
+				throw new RuntimeException(e);
+			}
+			return;
+		}
+
+		if (userAccount.isAuthenticated()) userAccount.logout();
+		String msg = "\u2705 *_You have log out successfully. See you soon\\! \\ud83d\\udc4b_*";
+		try {
+			sendTextMessage(accountId, msg);
+		} catch (TelegramApiException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	private void viewHelpPage() {
 
 	}
 
@@ -71,6 +110,7 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 				.builder()
 				.chatId(user)
 				.text(textMessage)
+				.parseMode("MarkdownV2")
 				.build();
 
 		telegramClient.execute(msg);
