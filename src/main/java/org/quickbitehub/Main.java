@@ -9,8 +9,8 @@ public class Main {
         try (TelegramBotsLongPollingApplication botsApplication = new TelegramBotsLongPollingApplication()) {
             QuickBite quickBiteBot = new QuickBite();
             botsApplication.registerBot(quickBiteBot.getBotToken(), quickBiteBot);
+
             System.out.println("The Bot is successfully started!");
-            // Ensure this prcess wait forever
             Thread.currentThread().join();
         } catch (Exception e) {
             e.printStackTrace();
