@@ -1,4 +1,5 @@
--- Drop the tables if they exist
+------------------------- Drop the tables if they exist
+DROP TABLE IF EXISTS Account CASCADE;
 DROP TABLE IF EXISTS Order_Item CASCADE;
 DROP TABLE IF EXISTS Orders CASCADE;
 DROP TABLE IF EXISTS Product CASCADE;
@@ -6,10 +7,11 @@ DROP TABLE IF EXISTS Category CASCADE;
 DROP TABLE IF EXISTS Employee CASCADE;
 DROP TABLE IF EXISTS Restaurant CASCADE;
 DROP TABLE IF EXISTS Customer CASCADE;
-DROP TABLE IF EXISTS Account CASCADE;
 DROP TABLE IF EXISTS Users CASCADE;
 
-------------------------------------------
+
+
+--------------------------- Create Tables
 CREATE TABLE Users (
 	user_id                 SERIAL PRIMARY KEY,
 	user_first_name         VARCHAR(15) NOT NULL,
