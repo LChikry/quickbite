@@ -1,54 +1,56 @@
 package org.quickbitehub.client;
 
+import java.io.Serializable;
 import java.time.Instant;
+import java.util.HashMap;
 
-public class Account {
-	private final Long ACCOUNT_ID;
-	private final String EMAIL;
+public class Account implements Serializable {
+	private final String ACCOUNT_ID;
 	private final String USER_ID;
+	private final String EMAIL;
 	private final User USER;
 	private final Instant ACCOUNT_SIGN_UP_DATE;
-	private boolean isAuthenticated = false;
 	private String password;
+	private HashMap<Long, Boolean> isAuthenticated = new HashMap<>(); // TelegramId (device) to isAuthentication
+	static public HashMap<String, Account> usersAccount; // ACCOUNT_ID to Account
 
-	public Account(String EMAIL, String password, Long ACCOUNT_ID, User USER) {
+	public Account(String EMAIL, String password, String ACCOUNT_ID, User USER, Long telegramId) {
 		this.ACCOUNT_SIGN_UP_DATE = Instant.now();
 		this.EMAIL = EMAIL;
 		this.ACCOUNT_ID = ACCOUNT_ID;
 		this.USER = USER;
 		this.USER_ID = USER.getUserId();
 		this.password = password;
-		this.isAuthenticated = true;
+		this.isAuthenticated.put(telegramId, true);
+
+		this.usersAccount = new HashMap<>();
 	}
 
-	public boolean isAuthenticated() {
-		return isAuthenticated;
+	public Boolean isAuthenticated(Long telegramId) {
+		return isAuthenticated.getOrDefault(telegramId, false);
 	}
 
-	public boolean authenticate(String email, String password) {
+	public boolean authenticate(Long telegramId, String email, String password) {
 		if (email.equals(this.EMAIL) && password.equals(this.password)) {
-			this.isAuthenticated = true;
+			this.isAuthenticated.put(telegramId, true);
 			return true;
 		}
 
 		return false;
 	}
 
-	public boolean logOut() {
-		if (!this.isAuthenticated) return false;
-
-		this.isAuthenticated = false;
-		return true;
+	public void logOut(Long telegramId) {
+		this.isAuthenticated.put(telegramId, false);
 	}
 
-	public boolean changeAccountPassword(String oldPassword, String newPassword) {
-		if (!this.isAuthenticated && oldPassword.equals(this.password)) return false;
+	public boolean changeAccountPassword(Long telegramId, String oldPassword, String newPassword) {
+		if (!this.isAuthenticated.get(telegramId) && oldPassword.equals(this.password)) return false;
 
 		this.password = newPassword;
 		return true;
 	}
 
-	public Long getAccountId() {
+	public String getAccountId() {
 		return ACCOUNT_ID;
 	}
 
@@ -56,8 +58,8 @@ public class Account {
 		return EMAIL;
 	}
 
-	public User getUser() {
-		if (!this.isAuthenticated) return null;
+	public User getUser(Long telegramId) {
+		if (!this.isAuthenticated.get(telegramId)) return null;
 
 		return USER;
 	}
