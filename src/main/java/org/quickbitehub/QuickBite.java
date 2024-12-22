@@ -104,8 +104,19 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 			}
 		}
 
+		if (userProcessInfo.get(KeyConstant.SIGNUP_EMAIL_MSG.getKey()) != null) {
+			Message enteredEmail = (Message) userProcessInfo.get(KeyConstant.SIGNIN_EMAIL_MSG.getKey());
+			if (Objects.equals(message.getReplyToMessage().getMessageId(), enteredEmail.getMessageId())) {
+				userProcessInfo.put(KeyConstant.SIGNIN_EMAIL_TXT.getKey(), message.getText()); // save the email
+				communicator.deleteMessage(telegramId, message.getReplyToMessage().getMessageId());
+				communicator.deleteMessage(telegramId, message.getMessageId());
+				inProgressInformation.put(telegramId, userProcessInfo); // save the email
 
-
+				Message msg = communicator.sendForceReply(telegramId, "Enter Password\\:");
+				userProcessInfo.put(KeyConstant.SIGNIN_PASSWORD_MSG.getKey(), msg);
+				inProgressInformation.put(telegramId, userProcessInfo);
+			}
+		}
 
 
 	}

@@ -9,8 +9,6 @@ DROP TABLE IF EXISTS Restaurant CASCADE;
 DROP TABLE IF EXISTS Customer CASCADE;
 DROP TABLE IF EXISTS Users CASCADE;
 
-
-
 --------------------------- Create Tables
 CREATE TABLE Users (
 	user_id                 SERIAL PRIMARY KEY,
