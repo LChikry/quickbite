@@ -40,7 +40,7 @@ CREATE TABLE Restaurant (
 );
 
 CREATE TABLE Customer (
-	customer_balance        NUMERIC(8, 2) NOT NULL,
+	customer_balance        NUMERIC(8, 2) DEFAULT 5000 NOT NULL,
 	currency CHAR(3)        DEFAULT 'MAD' NOT NULL,
 
 	CONSTRAINT uq_customer_primary_key UNIQUE (user_id),
@@ -79,7 +79,7 @@ CREATE TABLE Orders (
 	order_id            SERIAL PRIMARY KEY,
 	order_timestamp     DATE NOT NULL,
 	order_type          CHAR(8) NOT NULL,
-	order_total_value   NUMERIC(12, 2) NOT NULL,
+	order_total_value   NUMERIC(12, 2) DEFAULT 0 NOT NULL,
 	currency            CHAR(3) DEFAULT 'MAD' NOT NULL,
 	order_status        VARCHAR(14) NOT NULL DEFAULT 'Pending',
 	restaurant_id       INT NOT NULL,
@@ -100,7 +100,7 @@ CREATE TABLE Order_Item (
 	product_id          INT,
 	quantity_ordered    INT,
 	product_unit_price          NUMERIC(12, 2) NOT NULL,
-	total_item_value    NUMERIC(12, 2) NOT NULL,
+	total_item_value    NUMERIC(12, 2) DEFAULT 0 NOT NULL,
 	currency            CHAR(3) DEFAULT 'MAD' NOT NULL,
 
 	PRIMARY KEY (order_id, product_id),
