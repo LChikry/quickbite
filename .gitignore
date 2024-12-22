@@ -1,6 +1,6 @@
 ### Project Specifics ###
 .env
-database/
+./database/
 
 ## AWS User-specific
 .idea/**/aws.xml

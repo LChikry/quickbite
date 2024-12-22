@@ -12,7 +12,7 @@ public class Account implements Serializable {
 	private final Instant ACCOUNT_SIGN_UP_DATE;
 	private String password;
 	private HashMap<Long, Boolean> isAuthenticated = new HashMap<>(); // TelegramId (device) to isAuthentication
-	static public HashMap<String, Account> usersAccount; // ACCOUNT_ID to Account
+	static public HashMap<String, Account> usersAccount = new HashMap<>(); // EMAIL to Account
 
 	public Account(String EMAIL, String password, String ACCOUNT_ID, User USER, Long telegramId) {
 		this.ACCOUNT_SIGN_UP_DATE = Instant.now();
@@ -22,21 +22,19 @@ public class Account implements Serializable {
 		this.USER_ID = USER.getUserId();
 		this.password = password;
 		this.isAuthenticated.put(telegramId, true);
-
-		this.usersAccount = new HashMap<>();
 	}
 
 	public Boolean isAuthenticated(Long telegramId) {
 		return isAuthenticated.getOrDefault(telegramId, false);
 	}
 
-	public boolean authenticate(Long telegramId, String email, String password) {
-		if (email.equals(this.EMAIL) && password.equals(this.password)) {
-			this.isAuthenticated.put(telegramId, true);
-			return true;
-		}
+	static public Account authenticate(Long telegramId, String email, String password) {
+		Account userAccount = usersAccount.get(email);
+		if (userAccount == null) return null;
+		if (!password.equals(userAccount.password)) return null;
 
-		return false;
+		userAccount.isAuthenticated.put(telegramId, true);
+		return userAccount;
 	}
 
 	public void logOut(Long telegramId) {
@@ -48,6 +46,14 @@ public class Account implements Serializable {
 
 		this.password = newPassword;
 		return true;
+	}
+
+	static public boolean isValidEmail(String email) {
+		return email.endsWith("@aui.ma");
+	}
+
+	static public boolean isAccountExist(String email) {
+		return usersAccount.get(email.strip().trim().toLowerCase()) != null;
 	}
 
 	public String getAccountId() {
