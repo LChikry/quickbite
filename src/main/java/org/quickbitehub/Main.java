@@ -48,6 +48,26 @@ public class Main {
 			throw new RuntimeException(e);
 		}
 
+		try {
+			int var = insertOrder("2024-12-22", "Pick-up", 2, 4);
+			System.out.println("The order ID is: "+ var);
+		} catch (SQLException e) {
+			throw new RuntimeException(e);
+		}
+
+		try {
+			updateOrderStatus(4, "Ready");
+		} catch (SQLException e) {
+			throw new RuntimeException(e);
+		}
+
+		/*
+		try {
+			insertOrderItem(4, 5, 1, 200.00);
+		} catch (SQLException e) {
+			throw new RuntimeException(e);
+		}*/
+
 
 		//Returning All Employees
 		HashMap<Integer, HashMap<String, Object>> employees = getAllEmployees();
@@ -379,5 +399,84 @@ public class Main {
 		}
 	}
 
+	//Method to insert into the order table
+	public static int insertOrder(String order_timestamp, String order_type, Integer res_id, Integer cus_id) throws SQLException {
+		String url = "jdbc:postgresql://localhost:5432/test2"; // Your DB details
+		String user = "postgres"; // Your DB username
+		String password = "";
 
+		// Insert query for the Users table
+		String insertSQL = "INSERT INTO Orders (order_timestamp, order_type, restaurant_id, customer_id) VALUES (?, ?, ?, ?) RETURNING order_id";
+
+
+		try (Connection con = DriverManager.getConnection(url, user, password)) {
+
+			// Now, insert into the Customer table using the user_id
+			try (PreparedStatement insertStatement = con.prepareStatement(insertSQL)) {
+
+				// Parse the signupDate String to java.sql.Date (for DATE column)
+				DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+				LocalDate localDate = LocalDate.parse(order_timestamp, formatter);
+				java.sql.Date sqlTimestamp = Date.valueOf(localDate);
+
+				insertStatement.setDate(1, sqlTimestamp);
+				insertStatement.setString(2, order_type);
+				insertStatement.setInt(3, res_id);
+				insertStatement.setInt(4, cus_id);
+				//insertStatement.setDouble(5, 0.00);
+
+				// Execute the insert and get the user_id
+				try (ResultSet rs = insertStatement.executeQuery()) {
+					if (rs.next()) {
+						return rs.getInt("order_id");
+					}
+				}
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return 0;
+	}
+
+	//Method to insert Order_item
+	/*public static void insertOrderItem(Integer order_id, Integer product_id, Integer quantity, Double unit_price) throws SQLException {
+		String url = "jdbc:postgresql://localhost:5432/test2"; // Your DB details
+		String user = "postgres"; // Your DB username
+		String password = "#Barakamon12";
+		String insertSQL = "INSERT INTO Order_item (order_id, product_id, quantity_ordered, product_unit_price) VALUES (?, ?, ?, ?)";
+
+		try (Connection connection = DriverManager.getConnection(url, user, password);
+		     PreparedStatement preparedStatement = connection.prepareStatement(insertSQL)) {
+
+			preparedStatement.setInt(1, order_id);
+			preparedStatement.setInt(2, product_id);
+			preparedStatement.setInt(3, quantity);
+			preparedStatement.setDouble(4, unit_price);
+
+			int rowsAffected = preparedStatement.executeUpdate();
+			System.out.println("Insert successful, rows affected: " + rowsAffected);
+		}
+	}*/
+
+	public static void updateOrderStatus(Integer order_id, String order_status) throws SQLException {
+		String url = "jdbc:postgresql://localhost:5432/test2"; // Your DB details
+		String user = "postgres"; // Your DB username
+		String password = "";
+
+		// Update query for the Orders table
+		String updateSQL = "UPDATE Orders SET order_status = ? WHERE order_id = ?";
+
+		try (Connection con = DriverManager.getConnection(url, user, password);
+		     PreparedStatement updateStatement = con.prepareStatement(updateSQL)) {
+
+			updateStatement.setString(1, order_status);
+			updateStatement.setInt(2, order_id);
+
+			// Execute the update
+			int rowsUpdated = updateStatement.executeUpdate();
+			System.out.println(rowsUpdated + " rows updated.");
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
 }
