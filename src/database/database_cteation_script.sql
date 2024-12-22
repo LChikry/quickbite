@@ -48,8 +48,8 @@ CREATE TABLE Customer (
 CREATE TABLE Employee (
 	restaurant_id       INT NOT NULL,
 
-	CONSTRAINT uq_employee_primary_key UNIQUE (user_id)
-	CONSTRAINT fk_employs FOREIGN KEY (restaurant_id) REFERENCES Restaurant(restaurant_id) ON UPDATE CASCADE,
+	CONSTRAINT uq_employee_primary_key UNIQUE (user_id),
+	CONSTRAINT fk_employs FOREIGN KEY (restaurant_id) REFERENCES Restaurant(restaurant_id) ON UPDATE CASCADE
 ) INHERITS (Users);
 
 CREATE TABLE Category (
