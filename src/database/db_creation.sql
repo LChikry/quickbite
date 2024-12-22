@@ -88,7 +88,7 @@ CREATE TABLE Orders (
 
 	CONSTRAINT ck_order_timestamp CHECK (order_timestamp <= current_date),
 	CONSTRAINT ck_currency CHECK (currency = 'MAD'),
-	CONSTRAINT ck_order_date_time CHECK (order_type IN ('Pick-up', 'On-site')),
+	CONSTRAINT ck_order_type CHECK (order_type IN ('Pick-up', 'On-site')),
 	CONSTRAINT ck_order_status CHECK (order_status IN ('Pending' , 'In Preparation', 'Canceled', 'Ready')),
 	CONSTRAINT fk_receives FOREIGN KEY (restaurant_id) REFERENCES Restaurant(restaurant_id) ON UPDATE CASCADE,
 	CONSTRAINT fk_processes FOREIGN KEY (employee_id) REFERENCES Employee(user_id) ON UPDATE CASCADE ON DELETE CASCADE,
