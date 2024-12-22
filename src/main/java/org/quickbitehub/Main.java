@@ -17,7 +17,7 @@ public class Main {
 			e.printStackTrace();
 		}
 
-		int customerId = 1; // Replace with a valid customer_id
+		int customerId = 4; // Replace with a valid customer_id
 		double res = getCustomerBalance(customerId);
 		if (res != -1) {
 			System.out.println("Customer balance: " + res);
@@ -70,7 +70,7 @@ public class Main {
 				String password = ""; // Update with your password
 
 				// SQL query
-				String query = "SELECT customer_balance FROM Customer WHERE customer_id = ?";
+				String query = "SELECT customer_balance FROM Customer WHERE user_id = ?";
 				double balance = -1.00; // Default value if customer is not found
 
 				try (
