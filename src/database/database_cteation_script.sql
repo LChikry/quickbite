@@ -11,56 +11,61 @@ DROP TABLE IF EXISTS Users CASCADE;
 
 ------------------------------------------
 CREATE TABLE Users (
-	user_id         INT PRIMARY KEY,
-	first_name      VARCHAR(15) NOT NULL,
-	last_name       VARCHAR(25) NOT NULL,
-	middle_names    VARCHAR(40),
-	user_type       VARCHAR(10) NOT NULL
+	user_id                 SERIAL PRIMARY KEY,
+	user_first_name         VARCHAR(15) NOT NULL,
+	user_last_name          VARCHAR(25) NOT NULL,
+	user_middle_names       VARCHAR(40),
+	user_type               VARCHAR(10) NOT NULL
 );
 
 CREATE TABLE Account (
-	account_id              INT PRIMARY KEY,
+	account_id              SERIAL PRIMARY KEY,
 	account_email           VARCHAR(100) NOT NULL,
 	account_password        VARCHAR(128) NOT NULL,
 	user_id                 INT NOT NULL,
-	telegram_username       VARCHAR(50) NOT NULL,
 	account_signup_date     TIMESTAMP WITH TIME ZONE NOT NULL,
 
-	CONSTRAINT fk_belongs_to FOREIGN KEY (user_id) REFERENCES users(user_id) ON UPDATE CASCADE
+	CONSTRAINT fk_belongs_to FOREIGN KEY (user_id) REFERENCES Users(user_id) ON UPDATE CASCADE
  );
 
+
+CREATE TABLE Restaurant (
+	restaurant_id                   SERIAL PRIMARY KEY,
+	restaurant_name                 VARCHAR(50) NOT NULL,
+	restaurant_opening_time         TIME NOT NULL,
+	restaurant_closing_time         TIME NOT NULL,
+
+	CONSTRAINT ck_restaurant_time CHECK (restaurant_closing_time != restaurant_closing_time)
+);
+
 CREATE TABLE Customer (
-	customer_balance NUMERIC(8, 2) NOT NULL,
-	currency CHAR(3) DEFAULT 'MAD' NOT NULL,
+	customer_balance        NUMERIC(8, 2) NOT NULL,
+	currency CHAR(3)        DEFAULT 'MAD' NOT NULL,
 
 	CONSTRAINT uq_customer_primary_key UNIQUE (user_id)
 ) INHERITS (Users);
 
-CREATE TABLE Restaurant (
-	restaurant_id INT PRIMARY KEY
-);
-
 CREATE TABLE Employee (
 	restaurant_id       INT NOT NULL,
 
-	CONSTRAINT fk_employs FOREIGN KEY (restaurant_id) REFERENCES Restaurant(restaurant_id) ON UPDATE CASCADE,
 	CONSTRAINT uq_employee_primary_key UNIQUE (user_id)
+	CONSTRAINT fk_employs FOREIGN KEY (restaurant_id) REFERENCES Restaurant(restaurant_id) ON UPDATE CASCADE,
 ) INHERITS (Users);
 
 CREATE TABLE Category (
-	category_id INT PRIMARY KEY,
+	category_id SERIAL PRIMARY KEY,
 	category_name VARCHAR(50) NOT NULL
 );
 
 CREATE TABLE Product (
-	product_id          INT PRIMARY KEY,
-	restaurant_id       INT NOT NULL,
-	category_id         INT NOT NULL,
-	product_name        VARCHAR(35) NOT NULL,
-	price               NUMERIC(8, 2) NOT NULL,
-	currency            CHAR(3) DEFAULT 'MAD' NOT NULL,
-	quantity            INT NOT NULL,
-	min_quantity        INT,
+	product_id                  SERIAL PRIMARY KEY,
+	restaurant_id               INT NOT NULL,
+	category_id                 INT NOT NULL,
+	product_name                VARCHAR(35) NOT NULL,
+	product_price               NUMERIC(8, 2) NOT NULL,
+	currency                    CHAR(3) DEFAULT 'MAD' NOT NULL,
+	available_quantity          INT NOT NULL,
+	min_quantity_allowed        INT NOT NULL,
 
 	CONSTRAINT ck_currency CHECK (currency = 'MAD'),
 	CONSTRAINT fk_offers FOREIGN KEY (restaurant_id) REFERENCES Restaurant(restaurant_id) ON UPDATE CASCADE ON DELETE CASCADE,
@@ -68,7 +73,7 @@ CREATE TABLE Product (
  );
 
 CREATE TABLE Orders (
-	order_id            INT PRIMARY KEY,
+	order_id            SERIAL PRIMARY KEY,
 	order_timestamp     TIMESTAMP WITH TIME ZONE NOT NULL,
 	order_type          CHAR(8) NOT NULL,
 	order_total_value   NUMERIC(12, 2) NOT NULL,
@@ -91,12 +96,12 @@ CREATE TABLE Order_Item (
 	order_id            INT,
 	product_id          INT,
 	quantity_ordered    INT,
-	unit_price          NUMERIC(12, 2) NOT NULL,
+	product_unit_price          NUMERIC(12, 2) NOT NULL,
 	total_item_value    NUMERIC(12, 2) NOT NULL,
 	currency            CHAR(3) DEFAULT 'MAD' NOT NULL,
 
 	PRIMARY KEY (order_id, product_id),
-	UNIQUE(order_id, product_id),
+	CONSTRAINT uq_orderitem_primarykey UNIQUE (order_id, product_id),
 	CONSTRAINT ck_currency CHECK (currency = 'MAD'),
 	CONSTRAINT fk_contains FOREIGN KEY (order_id) REFERENCES Orders(order_id) ON UPDATE CASCADE ON DELETE CASCADE,
 	CONSTRAINT fk_is_found_in FOREIGN KEY (product_id) REFERENCES Product(product_id) ON UPDATE CASCADE ON DELETE CASCADE
@@ -104,4 +109,3 @@ CREATE TABLE Order_Item (
 
  -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- --
 
- -- Populate tables
