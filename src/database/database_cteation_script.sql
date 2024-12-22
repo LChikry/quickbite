@@ -18,6 +18,8 @@ CREATE TABLE Users (
 	user_last_name          VARCHAR(25) NOT NULL,
 	user_middle_names       VARCHAR(40),
 	user_type               VARCHAR(10) NOT NULL
+
+	CONSTRAINT ck_user_type CHECK (user_type IN ('Customer', 'Employee'))
 );
 
 CREATE TABLE Account (
@@ -44,13 +46,15 @@ CREATE TABLE Customer (
 	customer_balance        NUMERIC(8, 2) NOT NULL,
 	currency CHAR(3)        DEFAULT 'MAD' NOT NULL,
 
-	CONSTRAINT uq_customer_primary_key UNIQUE (user_id)
+	CONSTRAINT uq_customer_primary_key UNIQUE (user_id),
+	CONSTRAINT ck_user_type CHECK (user_type IN ('Customer', 'Employee'))
 ) INHERITS (Users);
 
 CREATE TABLE Employee (
 	restaurant_id       INT NOT NULL,
 
 	CONSTRAINT uq_employee_primary_key UNIQUE (user_id),
+	CONSTRAINT ck_user_type CHECK (user_type IN ('Customer', 'Employee')),
 	CONSTRAINT fk_employs FOREIGN KEY (restaurant_id) REFERENCES Restaurant(restaurant_id) ON UPDATE CASCADE
 ) INHERITS (Users);
 
