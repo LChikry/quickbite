@@ -83,7 +83,7 @@ CREATE TABLE Orders (
 	currency            CHAR(3) DEFAULT 'MAD' NOT NULL,
 	order_status        VARCHAR(14) NOT NULL DEFAULT 'Pending',
 	restaurant_id       INT NOT NULL,
-	employee_id         INT NOT NULL,
+	employee_id         INT,
 	customer_id         INT NOT NULL,
 
 	CONSTRAINT ck_order_timestamp CHECK (order_timestamp <= current_date),
