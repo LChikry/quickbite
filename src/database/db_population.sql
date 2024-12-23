@@ -7,15 +7,6 @@ VALUES
 ('Lahoucine', 'Chikry', NULL, 'Employee'),
 ('Mohammed', 'Rourou', 'Amine', 'Employee');
 
-INSERT INTO Account (account_email, account_password, user_id, account_signup_date)
-VALUES
-('john.doe@example.com', 'hashedpassword1', 1, '2024-12-01 10:00:00+00'),
-('jane.smith@example.com', 'hashedpassword2', 2, '2024-12-02 11:30:00+00'),
-('carlos.gomez@example.com', 'hashedpassword3', 3, '2024-12-03 12:00:00+00'),
-('younes.rahati@lilo.org', 'hashedpassword4', 4, '2024-12-04 9:30:00+00'),
-('lahoucine@example.com', 'hashedpassword5', 5, '2024-12-5 8:00:00+00'),
-('rourou@example.com', 'hashedpassword6', 6, '2024-12-6 7:00:00+00');
-
 INSERT INTO Restaurant (restaurant_name, restaurant_opening_time, restaurant_closing_time)
 VALUES
 ('La Cuisine', '08:00:00', '22:00:00'),
@@ -33,6 +24,15 @@ VALUES
 (2, 'Jane', 'Smith', NULL, 1, 'Employee'),
 (5, 'Lahoucine', 'Chikry', NULL, 2, 'Employee'),
 (6, 'Mohammed', 'Rourou', 'Amine', 3, 'Employee');
+
+INSERT INTO Account (account_email, account_password, user_id, account_signup_date)
+VALUES
+('john.doe@example.com', 'hashedpassword1', 1, '2024-12-01 10:00:00+00'),
+('jane.smith@example.com', 'hashedpassword2', 2, '2024-12-02 11:30:00+00'),
+('carlos.gomez@example.com', 'hashedpassword3', 3, '2024-12-03 12:00:00+00'),
+('younes.rahati@lilo.org', 'hashedpassword4', 4, '2024-12-04 9:30:00+00'),
+('lahoucine@example.com', 'hashedpassword5', 5, '2024-12-5 8:00:00+00'),
+('rourou@example.com', 'hashedpassword6', 6, '2024-12-6 7:00:00+00');
 
 INSERT INTO Category (category_name)
 VALUES
