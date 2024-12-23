@@ -1,27 +1,83 @@
 package org.quickbitehub.client;
 
+import io.github.cdimascio.dotenv.Dotenv;
+
 import java.io.Serializable;
+import java.sql.*;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.HashMap;
+import java.util.Objects;
 
 public class Account implements Serializable {
 	private final String ACCOUNT_ID;
 	private final String USER_ID;
 	private final String EMAIL;
 	private final User USER;
-	private final Instant ACCOUNT_SIGN_UP_DATE;
+	private final LocalDate ACCOUNT_SIGN_UP_DATE;
 	private String password;
 	private HashMap<Long, Boolean> isAuthenticated = new HashMap<>(); // TelegramId (device) to isAuthentication
-	static public HashMap<String, Account> usersAccount = new HashMap<>(); // EMAIL to Account
+	static public HashMap<String, Account> usersAccount = getAllAccounts(); // EMAIL to Account
+
+	static private String dbUser = Dotenv.load().get("DB_USER");
+	static private String dbPassword = Dotenv.load().get("DB_PASSWORD");
+	static private String url = "jdbc:postgresql://localhost:5432/qbtest"; // Your DB details
+
 
 	public Account(String EMAIL, String password, User USER, Long telegramId) {
-		this.ACCOUNT_SIGN_UP_DATE = Instant.now();
+		this.ACCOUNT_SIGN_UP_DATE = LocalDate.now();
 		this.EMAIL = EMAIL;
-		this.ACCOUNT_ID = ""; // db command
 		this.USER = USER;
 		this.USER_ID = USER.getUserId();
 		this.password = password;
 		this.isAuthenticated.put(telegramId, true);
+
+		insertAccount(EMAIL, password, Integer.valueOf(USER.getUserId()), this.ACCOUNT_SIGN_UP_DATE);
+		this.ACCOUNT_ID = Account.getAccountIdFromDB(EMAIL);
+	}
+
+	public Account(String EMAIL, String password, String accountId, String userId, LocalDate signUpDate) {
+		this.ACCOUNT_SIGN_UP_DATE = signUpDate;
+		this.EMAIL = EMAIL;
+		this.ACCOUNT_ID = accountId;
+		this.USER_ID = userId;
+		this.password = password;
+
+		Customer cus = Customer.getCustomer(userId);
+		if (cus != null) {
+			this.USER = cus;
+			return;
+		}
+
+		Employee emp = Employee.getEmployee(userId);
+		this.USER = emp;
+	}
+
+
+	//Method to insert into the account table
+	public static void insertAccount(String email, String pwd, Integer userId, LocalDate signupDate) {
+		String insertSQL = "INSERT INTO Account (account_email, account_password, user_id, account_signup_date) VALUES (?, ?, ?, ?)";
+
+		try (Connection connection = DriverManager.getConnection(url, dbUser, dbPassword);
+		     PreparedStatement preparedStatement = connection.prepareStatement(insertSQL)) {
+
+			// Parse the signupDate String to java.sql.Date (for DATE column)
+			java.sql.Date sqlDate = java.sql.Date.valueOf(signupDate);
+//			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+//			LocalDate localDate = LocalDate.parse(signupDate, formatter);
+//			java.sql.Date sqlDate = Date.valueOf(localDate);
+
+			preparedStatement.setString(1, email);
+			preparedStatement.setString(2, pwd);
+			preparedStatement.setInt(3, userId);
+			preparedStatement.setDate(4, sqlDate);
+
+			int rowsAffected = preparedStatement.executeUpdate();
+			System.out.println("Insert successful, rows affected: " + rowsAffected);
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public Boolean isAuthenticated(Long telegramId) {
@@ -37,9 +93,20 @@ public class Account implements Serializable {
 		return userAccount;
 	}
 
-	static public Account signUp(String email, String password, Long telegramId, String first_name, String last_name, String middle_names) {
-		Customer customer = new Customer(first_name, last_name, middle_names);
-		Account userAccount = new Account(email, password, customer, telegramId);
+	static public Account signUp(String email, String password, Long telegramId, String first_name, String last_name, String middle_names, String userType, String restaurantId) {
+		Customer customer = null;
+		Employee employee = null;
+		if (Objects.equals(userType, UserType.CUSTOMER.getText())) {
+			customer = new Customer(first_name, last_name, middle_names);
+		} else {
+			employee = new Employee(first_name, last_name, middle_names, restaurantId);
+		}
+		Account userAccount;
+		if (customer != null) {
+			userAccount = new Account(email, password, customer, telegramId);
+		} else {
+			userAccount = new Account(email, password, employee, telegramId);
+		}
 
 		usersAccount.put(email, userAccount);
 		return userAccount;
@@ -78,11 +145,69 @@ public class Account implements Serializable {
 		return USER;
 	}
 
-	public Instant getAccountSignUpDate() {
+	public LocalDate getAccountSignUpDate() {
 		return ACCOUNT_SIGN_UP_DATE;
 	}
 
 	public String getUserId() {
 		return USER_ID;
+	}
+
+
+	public static String getAccountIdFromDB(String email) {
+		String query = "SELECT account_id FROM Account WHERE account_email = ?;";
+		String accountId = null;
+
+		try (
+				Connection connection = DriverManager.getConnection(url, dbUser, dbPassword);
+				PreparedStatement statement = connection.prepareStatement(query)) {
+			// Set the customer_id parameter in the query
+			statement.setString(1, email);
+
+			// Execute the query
+			try (ResultSet rs = statement.executeQuery()) {
+				if (rs.next()) {
+					// Retrieve the balance from the result set
+					accountId = rs.getString("account_id");
+				}
+			}
+		} catch (SQLException e) {
+			// Handle SQL exception
+			System.err.println("Database error: " + e.getMessage());
+		}
+
+		return accountId;
+	}
+
+	public static HashMap<String, Account> getAllAccounts() {
+		String query = "SELECT * FROM Account";
+		HashMap<String, Account> accounts = new HashMap<>();  // HashMap to store customer data by customer_id
+
+		try (Connection connection = DriverManager.getConnection(url, dbUser, dbPassword);
+		     PreparedStatement statement = connection.prepareStatement(query);
+		     ResultSet resultSet = statement.executeQuery()) {
+
+			// Loop through the result set and add rows to the HashMap
+			while (resultSet.next()) {
+				// Create a HashMap for each row
+				HashMap<String, Account> accountData = new HashMap<>();
+				String account_id = resultSet.getString("account_id");
+				String email = resultSet.getString("account_email");
+				String password = resultSet.getString("account_password");
+				String userId = String.valueOf(resultSet.getInt("user_id"));
+				Date sqlDate = resultSet.getDate("account_signup_date");
+				LocalDate signUpDate = sqlDate.toLocalDate();
+
+				Account userAccount = new Account(email, password, account_id, userId, signUpDate);
+
+				// Add this HashMap to the customers map using customer_id as the key
+				accounts.put(email, userAccount);
+			}
+
+		} catch (SQLException e) {
+			System.err.println("Database error: " + e.getMessage());
+		}
+
+		return accounts;
 	}
 }

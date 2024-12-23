@@ -5,6 +5,7 @@ import org.quickbitehub.client.Customer;
 import org.quickbitehub.client.NavigationState;
 
 import io.github.cdimascio.dotenv.Dotenv;
+import org.quickbitehub.client.UserType;
 import org.telegram.telegrambots.client.okhttp.OkHttpTelegramClient;
 import org.telegram.telegrambots.longpolling.util.LongPollingSingleThreadUpdateConsumer;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
@@ -207,10 +208,6 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 			communicator.sendButtonKeyboard(telegramId, msg, (InlineKeyboardMarkup) keyboards.get(KeyboardType.LOGIN));
 			return;
 		}
-		System.out.println(!Account.isValidEmail(email));
-		System.out.println(Account.isAccountExist(email));
-		System.out.println(userSessions.get(telegramId) != null);
-
 		if (!Account.isValidEmail(email) || !Account.isAccountExist(email) || userSessions.get(telegramId) != null) {
 			communicator.sendText(telegramId, "Sign in process failed \ud83d\ude1e\\; incorrect email or you are already logged in");
 			return;
@@ -229,7 +226,7 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 			communicator.sendText(telegramId, "Sign up process failed\\; incorrect email \ud83d\ude1e");
 			return;
 		}
-		Account userAccount = Account.signUp(email, password, telegramId, first_name, last_name, middle_names);
+		Account userAccount = Account.signUp(email, password, telegramId, first_name, last_name, middle_names, UserType.CUSTOMER.getText(), null);
 
 		userSessions.put(telegramId, userAccount);
 		communicator.sendText(telegramId, "Welcome\\! \u2728");
