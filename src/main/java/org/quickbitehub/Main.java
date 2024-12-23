@@ -385,6 +385,7 @@ public class Main {
 		return menu;
 	}
 
+
 	//Method to insert into the account table
 	public static void insertAccount(String email, String pwd, Integer userId, String signupDate) throws SQLException {
 		String url = "jdbc:postgresql://localhost:5432/test2"; // Your DB details
