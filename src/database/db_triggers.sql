@@ -1,3 +1,4 @@
+
 --Check if a product can be ordered (new order_item)
 CREATE OR REPLACE FUNCTION check_qoh() RETURNS TRIGGER
 AS
@@ -25,13 +26,15 @@ AS
 $$
 BEGIN
 UPDATE Product
-SET available_quantity = avaialable_quantity - NEW.quantity_ordered
+SET available_quantity = available_quantity - NEW.quantity_ordered
 WHERE Product_id = NEW.Product_id;
+RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER tr_updateAvailableQuantity AFTER INSERT ON Order_item
-FOR EACH ROW EXECUTE Function updateAvailableQuantity();
+FOR EACH ROW
+EXECUTE Function updateAvailableQuantity();
 
 --Update Customer Balance
 CREATE OR REPLACE FUNCTION updateCustomerBalance() RETURNS TRIGGER
@@ -41,10 +44,11 @@ BEGIN
 UPDATE Customer
 SET customer_balance = customer_balance - NEW.order_total_value
 WHERE user_id = NEW.customer_id;
+RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER tr_updateCustomerBalance AFTER INSERT ON Orders
+CREATE TRIGGER tr_updateCustomerBalance AFTER INSERT OR UPDATE ON Orders
 FOR EACH ROW EXECUTE Function updateCustomerBalance();
 
 --Update Order Total Value
@@ -53,8 +57,9 @@ AS
 $$
 BEGIN
 UPDATE Orders
-SET Order_total_value = Order_total_value - NEW.total_item_value
+SET Order_total_value = Order_total_value + NEW.quantity_ordered * NEW.product_unit_price
 WHERE order_id = NEW.order_id;
+RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
 
@@ -67,7 +72,9 @@ AS
 $$
 BEGIN
 UPDATE Order_item
-SET total_item_value = total_item_value - NEW.quantity_ordered * NEW.product_unit_price;
+SET total_item_value = total_item_value + NEW.quantity_ordered * NEW.product_unit_price
+WHERE product_id = NEW.product_id;
+RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
 
