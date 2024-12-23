@@ -56,7 +56,7 @@ public class Main {
 		}
 
 		try {
-			updateOrderStatus(4, "Ready");
+			updateOrderStatus(4, "In Preparation");
 		} catch (SQLException e) {
 			throw new RuntimeException(e);
 		}
@@ -214,6 +214,8 @@ public class Main {
 		return customers;
 	}
 
+
+
 	//Method to get all employees
 	public static HashMap<Integer, HashMap<String, Object>> getAllEmployees() {
 		String url = "jdbc:postgresql://localhost:5432/test2"; // Your DB details
@@ -287,6 +289,101 @@ public class Main {
 		return accounts;
 	}
 
+	public static HashMap<Integer, HashMap<String, Object>> getRestaurantMenu(Integer res_id) {
+		String url = "jdbc:postgresql://localhost:5432/test2"; // Your DB details
+		String user = "postgres"; // Your DB username
+		String password = "#Barakamon12"; // Your DB password
+		String query;
+		HashMap<Integer, HashMap<String, Object>> menu = new HashMap<>();
+
+		if(res_id==1) {
+			query = "SELECT * FROM vwRes1Menu";
+
+			try (Connection connection = DriverManager.getConnection(url, user, password);
+			     PreparedStatement statement = connection.prepareStatement(query);
+			     ResultSet resultSet = statement.executeQuery()) {
+
+				// Loop through the result set and add rows to the HashMap
+				while (resultSet.next()) {
+					int product_id = resultSet.getInt("product_id");
+
+					// Create a HashMap for each row
+					HashMap<String, Object> menuData = new HashMap<>();
+					menuData.put("restaurant_id", resultSet.getInt("restaurant_id"));
+					menuData.put("category_id", resultSet.getInt("category_id"));
+					menuData.put("product_name", resultSet.getString("product_name"));
+					menuData.put("product_price", resultSet.getDouble("product_price"));
+					menuData.put("currency", resultSet.getString("currency"));
+					menuData.put("available_quantity", resultSet.getInt("available_quantity"));
+					menuData.put("min_quantity_allowed", resultSet.getInt("min_quantity_allowed"));
+
+					// Add this HashMap to the customers map using customer_id as the key
+					menu.put(product_id, menuData);
+				}
+
+			} catch (SQLException e) {
+				System.err.println("Database error: " + e.getMessage());
+			}
+		} else if (res_id==2) {
+			query = "SELECT * FROM vwRes2Menu";
+
+			try (Connection connection = DriverManager.getConnection(url, user, password);
+			     PreparedStatement statement = connection.prepareStatement(query);
+			     ResultSet resultSet = statement.executeQuery()) {
+
+				// Loop through the result set and add rows to the HashMap
+				while (resultSet.next()) {
+					int product_id = resultSet.getInt("product_id");
+
+					// Create a HashMap for each row
+					HashMap<String, Object> menuData = new HashMap<>();
+					menuData.put("restaurant_id", resultSet.getInt("restaurant_id"));
+					menuData.put("category_id", resultSet.getInt("category_id"));
+					menuData.put("product_name", resultSet.getString("product_name"));
+					menuData.put("product_price", resultSet.getDouble("product_price"));
+					menuData.put("currency", resultSet.getString("currency"));
+					menuData.put("available_quantity", resultSet.getInt("available_quantity"));
+					menuData.put("min_quantity_allowed", resultSet.getInt("min_quantity_allowed"));
+
+					// Add this HashMap to the customers map using customer_id as the key
+					menu.put(product_id, menuData);
+				}
+
+			} catch (SQLException e) {
+				System.err.println("Database error: " + e.getMessage());
+			}
+		} else if (res_id==3) {
+			query = "SELECT * FROM vwRes3Menu";
+
+			try (Connection connection = DriverManager.getConnection(url, user, password);
+			     PreparedStatement statement = connection.prepareStatement(query);
+			     ResultSet resultSet = statement.executeQuery()) {
+
+				// Loop through the result set and add rows to the HashMap
+				while (resultSet.next()) {
+					int product_id = resultSet.getInt("product_id");
+
+					// Create a HashMap for each row
+					HashMap<String, Object> menuData = new HashMap<>();
+					menuData.put("restaurant_id", resultSet.getInt("restaurant_id"));
+					menuData.put("category_id", resultSet.getInt("category_id"));
+					menuData.put("product_name", resultSet.getString("product_name"));
+					menuData.put("product_price", resultSet.getDouble("product_price"));
+					menuData.put("currency", resultSet.getString("currency"));
+					menuData.put("available_quantity", resultSet.getInt("available_quantity"));
+					menuData.put("min_quantity_allowed", resultSet.getInt("min_quantity_allowed"));
+
+					// Add this HashMap to the customers map using customer_id as the key
+					menu.put(product_id, menuData);
+				}
+
+			} catch (SQLException e) {
+				System.err.println("Database error: " + e.getMessage());
+			}
+		}
+
+		return menu;
+	}
 
 	//Method to insert into the account table
 	public static void insertAccount(String email, String pwd, Integer userId, String signupDate) throws SQLException {
@@ -464,13 +561,13 @@ public class Main {
 		String password = "#Barakamon12";
 
 		// Update query for the Orders table
-		String updateSQL = "UPDATE Orders SET order_status = ? WHERE order_id = ?";
+		String updateSQL = "CALL update_order_status(?, ?)";
 
 		try (Connection con = DriverManager.getConnection(url, user, password);
 		     PreparedStatement updateStatement = con.prepareStatement(updateSQL)) {
 
-			updateStatement.setString(1, order_status);
-			updateStatement.setInt(2, order_id);
+			updateStatement.setInt(1, order_id);
+			updateStatement.setString(2, order_status);
 
 			// Execute the update
 			int rowsUpdated = updateStatement.executeUpdate();
