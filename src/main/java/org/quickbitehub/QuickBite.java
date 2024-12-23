@@ -1,6 +1,7 @@
 package org.quickbitehub;
 
 import org.quickbitehub.client.Account;
+import org.quickbitehub.client.Customer;
 import org.quickbitehub.client.NavigationState;
 
 import io.github.cdimascio.dotenv.Dotenv;
@@ -75,46 +76,93 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 		}
 	}
 
+	private void getReplySendNextPrompt(Message message, Long telegramId, HashMap<String, Object> userProcessInfo, String msg, String txt, String nextMsgKey, String nextMsgPrompt) {
+		if (userProcessInfo.get(msg) == null) return;
+		Message enteredEmail = (Message) userProcessInfo.get(msg);
+		if (!Objects.equals(message.getReplyToMessage().getMessageId(), enteredEmail.getMessageId())) return;
+
+		userProcessInfo.put(txt, message.getText().trim().strip());
+		communicator.deleteMessage(telegramId, message.getReplyToMessage().getMessageId());
+		communicator.deleteMessage(telegramId, message.getMessageId());
+
+		Message nextMessage = communicator.sendForceReply(telegramId, nextMsgPrompt);
+		userProcessInfo.put(nextMsgKey, nextMessage);
+		inProgressInformation.put(telegramId, userProcessInfo);
+	}
+
 	private void botRepliesHandler(Message message) {
 		Long telegramId = message.getFrom().getId();
+		getReplySendNextPrompt(message, telegramId, inProgressInformation.get(telegramId),
+				KeyConstant.SIGNING_EMAIL_MSG.getKey(),
+				KeyConstant.SIGNING_EMAIL_TXT.getKey(),
+				KeyConstant.SIGNING_PASSWORD_MSG.getKey(),
+				"Enter Password\\:"
+		);
+
 		var userProcessInfo = inProgressInformation.get(telegramId);
-
-		if (userProcessInfo.get(KeyConstant.SIGNIN_EMAIL_MSG.getKey()) != null) {
-			Message enteredEmail = (Message) userProcessInfo.get(KeyConstant.SIGNIN_EMAIL_MSG.getKey());
-			if (Objects.equals(message.getReplyToMessage().getMessageId(), enteredEmail.getMessageId())) {
-				userProcessInfo.put(KeyConstant.SIGNIN_EMAIL_TXT.getKey(), message.getText()); // save the email
-				communicator.deleteMessage(telegramId, message.getReplyToMessage().getMessageId());
-				communicator.deleteMessage(telegramId, message.getMessageId());
-				inProgressInformation.put(telegramId, userProcessInfo); // save the email
-
-				Message msg = communicator.sendForceReply(telegramId, "Enter Password\\:");
-				userProcessInfo.put(KeyConstant.SIGNIN_PASSWORD_MSG.getKey(), msg);
-				inProgressInformation.put(telegramId, userProcessInfo);
-			}
-		}
-
-		if (userProcessInfo.get(KeyConstant.SIGNIN_PASSWORD_MSG.getKey()) != null) {
-			Message enteredPass = (Message) userProcessInfo.get(KeyConstant.SIGNIN_PASSWORD_MSG.getKey());
-			if (Objects.equals(message.getReplyToMessage().getMessageId(), enteredPass.getMessageId())) {
+		if (userProcessInfo.get(KeyConstant.SIGNING_PASSWORD_MSG.getKey()) != null) {
+			Message enteredPassword = (Message) userProcessInfo.get(KeyConstant.SIGNING_PASSWORD_MSG.getKey());
+			if (Objects.equals(message.getReplyToMessage().getMessageId(), enteredPassword.getMessageId())) {
 				String password = message.getText();
 				communicator.deleteMessage(telegramId, message.getReplyToMessage().getMessageId());
 				communicator.deleteMessage(telegramId, message.getMessageId());
-				String email = ((String) userProcessInfo.get(KeyConstant.SIGNIN_EMAIL_TXT.getKey())).trim().strip().toLowerCase();
-				SignInHandler(telegramId, email, password, CBQData.SIGNING_VERIFICATION.getData());
+
+				String email = (String) userProcessInfo.get(KeyConstant.SIGNING_EMAIL_TXT.getKey());
+				signInHandler(telegramId, email.toLowerCase(), password, CBQData.SIGNING_VERIFICATION.getData());
 			}
 		}
 
-		if (userProcessInfo.get(KeyConstant.SIGNUP_EMAIL_MSG.getKey()) != null) {
-			Message enteredEmail = (Message) userProcessInfo.get(KeyConstant.SIGNIN_EMAIL_MSG.getKey());
-			if (Objects.equals(message.getReplyToMessage().getMessageId(), enteredEmail.getMessageId())) {
-				userProcessInfo.put(KeyConstant.SIGNIN_EMAIL_TXT.getKey(), message.getText()); // save the email
+		getReplySendNextPrompt(message, telegramId, inProgressInformation.get(telegramId),
+				KeyConstant.SIGNUP_EMAIL_MSG.getKey(),
+				KeyConstant.SIGNUP_EMAIL_TXT.getKey(),
+				KeyConstant.SIGNUP_PASSWORD_MSG.getKey(),
+				"Enter Password\\:"
+		);
+
+		getReplySendNextPrompt(message, telegramId, inProgressInformation.get(telegramId),
+				KeyConstant.SIGNUP_PASSWORD_MSG.getKey(),
+				KeyConstant.SIGNUP_PASSWORD_TXT.getKey(),
+				KeyConstant.SIGNUP_ID_MSG.getKey(),
+				"Enter University ID\\:"
+		);
+
+		getReplySendNextPrompt(message, telegramId, inProgressInformation.get(telegramId),
+				KeyConstant.SIGNUP_ID_MSG.getKey(),
+				KeyConstant.SIGNUP_ID_TXT.getKey(),
+				KeyConstant.SIGNUP_FIRST_NAME_MSG.getKey(),
+				"Enter First Name\\:"
+		);
+
+		getReplySendNextPrompt(message, telegramId, inProgressInformation.get(telegramId),
+				KeyConstant.SIGNUP_FIRST_NAME_MSG.getKey(),
+				KeyConstant.SIGNUP_FIRST_NAME_TXT.getKey(),
+				KeyConstant.SIGNUP_LAST_NAME_MSG.getKey(),
+				"Enter Last Name\\:"
+		);
+
+		getReplySendNextPrompt(message, telegramId, inProgressInformation.get(telegramId),
+				KeyConstant.SIGNUP_LAST_NAME_MSG.getKey(),
+				KeyConstant.SIGNUP_LAST_NAME_TXT.getKey(),
+				KeyConstant.SIGNUP_MIDDLE_NAMES_MSG.getKey(),
+				"Enter Middle Names \\(enter 0 if you don\\'t have middle name\\(s\\)\\)"
+		);
+
+		userProcessInfo = inProgressInformation.get(telegramId);
+		if (userProcessInfo.get(KeyConstant.SIGNUP_MIDDLE_NAMES_MSG.getKey()) != null) {
+			Message enteredPassword = (Message) userProcessInfo.get(KeyConstant.SIGNUP_MIDDLE_NAMES_MSG.getKey());
+			if (Objects.equals(message.getReplyToMessage().getMessageId(), enteredPassword.getMessageId())) {
+				String middle_names = message.getText().strip().trim();
 				communicator.deleteMessage(telegramId, message.getReplyToMessage().getMessageId());
 				communicator.deleteMessage(telegramId, message.getMessageId());
-				inProgressInformation.put(telegramId, userProcessInfo); // save the email
 
-				Message msg = communicator.sendForceReply(telegramId, "Enter Password\\:");
-				userProcessInfo.put(KeyConstant.SIGNIN_PASSWORD_MSG.getKey(), msg);
-				inProgressInformation.put(telegramId, userProcessInfo);
+				if (middle_names.equals("0")) middle_names = "";
+				String email = (String) userProcessInfo.get(KeyConstant.SIGNUP_EMAIL_TXT.getKey());
+				String password = (String) userProcessInfo.get(KeyConstant.SIGNUP_PASSWORD_TXT.getKey());
+				String id = (String) userProcessInfo.get(KeyConstant.SIGNUP_ID_TXT.getKey());
+				String first_name = (String) userProcessInfo.get(KeyConstant.SIGNUP_FIRST_NAME_TXT.getKey());
+				String last_name = (String) userProcessInfo.get(KeyConstant.SIGNUP_LAST_NAME_TXT.getKey());
+
+				signUpHandler(telegramId, email.toLowerCase(), password, id, first_name, last_name, middle_names);
 			}
 		}
 
@@ -129,7 +177,7 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 			Message msg = communicator.sendForceReply(telegramId, "Enter Email\\:");
 
 			HashMap<String, Object> signIn = new HashMap<>();
-			signIn.put(KeyConstant.SIGNIN_EMAIL_MSG.getKey(), msg);
+			signIn.put(KeyConstant.SIGNING_EMAIL_MSG.getKey(), msg);
 			inProgressInformation.put(telegramId, signIn);
 		} else if (cbqData.equals(CBQData.SIGN_UP_MENU.getData())) {
 			Message msg = communicator.sendForceReply(telegramId, "Enter University Email\\:");
@@ -142,7 +190,7 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 
 	private void viewDashboard(Long telegramId) {
 		if (userSessions.get(telegramId) == null) {
-			SignInHandler(telegramId, null, null, CBQData.SIGNING_MENU.getData());
+			signInHandler(telegramId, null, null, CBQData.SIGNING_MENU.getData());
 			return;
 		}
 
@@ -150,27 +198,41 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 		// login page
 	}
 
-	private void SignInHandler(Long telegramId, String email, String password, String flag) {
-		if (flag.equals(CBQData.SIGNING_MENU)) {
+	private void signInHandler(Long telegramId, String email, String password, String flag) {
+		if (flag.equals(CBQData.SIGNING_MENU.getData())) {
 			String msg = "   *_Login_*\n" +
 					"Please enter your university email address and your chosen password\\.\n\n" +
-					"If you don't have an account\\, please sign up first \ud83d\ude01";
+					"If you don\\'t have an account\\, please sign up first \ud83d\ude01";
 
 			communicator.sendButtonKeyboard(telegramId, msg, (InlineKeyboardMarkup) keyboards.get(KeyboardType.LOGIN));
 			return;
 		}
+		System.out.println(!Account.isValidEmail(email));
+		System.out.println(Account.isAccountExist(email));
+		System.out.println(userSessions.get(telegramId) != null);
 
-		if (!Account.isValidEmail(email) || Account.isAccountExist(email) || userSessions.get(telegramId) == null) {
-			communicator.sendText(telegramId, "Sign in process failed \ud83d\ude1e");
+		if (!Account.isValidEmail(email) || !Account.isAccountExist(email) || userSessions.get(telegramId) != null) {
+			communicator.sendText(telegramId, "Sign in process failed \ud83d\ude1e\\; incorrect email or you are already logged in");
 			return;
 		}
 		Account userAccount = Account.authenticate(telegramId, email, password);
 		if (userAccount == null) {
-			communicator.sendText(telegramId, "Sign in process failed \ud83d\ude1e");
+			communicator.sendText(telegramId, "Sign in process failed \ud83d\ude1e\\; incorrect credentials");
 		} else {
 			userSessions.put(telegramId, userAccount);
 			communicator.sendText(telegramId, "Welcome\\! \u2728");
 		}
+	}
+
+	private void signUpHandler(Long telegramId, String email, String password, String id, String first_name, String last_name, String middle_names) {
+		if (!Account.isValidEmail(email) || userSessions.get(telegramId) != null) {
+			communicator.sendText(telegramId, "Sign up process failed\\; incorrect email \ud83d\ude1e");
+			return;
+		}
+		Account userAccount = Account.signUp(email, password, telegramId, first_name, last_name, middle_names);
+
+		userSessions.put(telegramId, userAccount);
+		communicator.sendText(telegramId, "Welcome\\! \u2728");
 	}
 
 	private void logOutHandler(Long telegramId) {
@@ -184,8 +246,8 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 		assert userAccount.isAuthenticated(telegramId);
 		userAccount.logOut(telegramId);
 		userSessions.remove(telegramId);
-		sessionState.get(telegramId).clear();
-		String msg = "\u2705 *_You have log out successfully. See you soon\\! \ud83d\udc4b_*";
+		if (sessionState.get(telegramId) != null) sessionState.get(telegramId).clear();
+		String msg = "\u2705 *_You have log out successfully\\. See you soon\\! \ud83d\udc4b_*";
 		communicator.sendText(telegramId, msg);
 	}
 

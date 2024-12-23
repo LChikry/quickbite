@@ -14,10 +14,10 @@ public class Account implements Serializable {
 	private HashMap<Long, Boolean> isAuthenticated = new HashMap<>(); // TelegramId (device) to isAuthentication
 	static public HashMap<String, Account> usersAccount = new HashMap<>(); // EMAIL to Account
 
-	public Account(String EMAIL, String password, String ACCOUNT_ID, User USER, Long telegramId) {
+	public Account(String EMAIL, String password, User USER, Long telegramId) {
 		this.ACCOUNT_SIGN_UP_DATE = Instant.now();
 		this.EMAIL = EMAIL;
-		this.ACCOUNT_ID = ACCOUNT_ID;
+		this.ACCOUNT_ID = ""; // db command
 		this.USER = USER;
 		this.USER_ID = USER.getUserId();
 		this.password = password;
@@ -34,6 +34,14 @@ public class Account implements Serializable {
 		if (!password.equals(userAccount.password)) return null;
 
 		userAccount.isAuthenticated.put(telegramId, true);
+		return userAccount;
+	}
+
+	static public Account signUp(String email, String password, Long telegramId, String first_name, String last_name, String middle_names) {
+		Customer customer = new Customer(first_name, last_name, middle_names);
+		Account userAccount = new Account(email, password, customer, telegramId);
+
+		usersAccount.put(email, userAccount);
 		return userAccount;
 	}
 
