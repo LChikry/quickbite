@@ -7,19 +7,26 @@ public abstract class User {
 	protected String middleNames = "";
 	protected final String userType;
 
-	public User(String firstName, String lastName, String middleNames, String userType) {
-		this.USER_ID = "sdkjfdskfj"; // db command
+
+	public User(String firstName, String lastName, String middleNames, String userType, String userId) {
+		this.USER_ID = userId;
 		this.firstName = firstName;
 		this.lastName = lastName;
 		this.middleNames = middleNames;
 		this.userType = userType;
 	}
 
-	public User(String firstName, String lastName, String userType) {
-		this.USER_ID = "fsdkflsdkf"; // db command
+	public User(String firstName, String lastName, String middleNames, String userType, Integer restaurantId) {
 		this.firstName = firstName;
 		this.lastName = lastName;
+		this.middleNames = middleNames;
 		this.userType = userType;
+
+		if (userType.equals(UserType.CUSTOMER.getText())) {
+			this.USER_ID = Customer.insertCustomer(firstName, lastName, 0.0);
+		} else {
+			this.USER_ID = Employee.insertEmployee(firstName, lastName, restaurantId);
+		}
 	}
 
 	public String getUserFullName() {
