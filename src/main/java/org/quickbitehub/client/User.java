@@ -23,7 +23,7 @@ public abstract class User {
 		this.userType = userType;
 
 		if (userType.equals(UserType.CUSTOMER.getText())) {
-			this.USER_ID = Customer.insertCustomer(firstName, lastName, 0.0);
+			this.USER_ID = Customer.insertCustomer(firstName, lastName, 5000.00);
 		} else {
 			this.USER_ID = Employee.insertEmployee(firstName, lastName, restaurantId);
 		}

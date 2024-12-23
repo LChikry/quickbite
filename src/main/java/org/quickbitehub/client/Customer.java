@@ -38,6 +38,12 @@ public class Customer extends User {
 		String query = "SELECT * FROM Customer";
 		HashMap<String, Customer> customers = new HashMap<>();  // HashMap to store customer data by customer_id
 
+		try {
+			Class.forName("org.postgresql.Driver");
+		} catch (ClassNotFoundException e) {
+			throw new RuntimeException(e);
+		}
+
 		try (Connection connection = DriverManager.getConnection(url, dbUser, dbPassword);
 		     PreparedStatement statement = connection.prepareStatement(query);
 		     ResultSet resultSet = statement.executeQuery()) {
@@ -68,8 +74,15 @@ public class Customer extends User {
 
 		// Insert query for the Customer table
 		String insertSQL = "INSERT INTO Customer (user_id, user_first_name, user_last_name, customer_balance, user_type) VALUES (?, ?, ?, ?, ?)";
-
 		int userId = 0;
+
+
+		try {
+			Class.forName("org.postgresql.Driver");
+		} catch (ClassNotFoundException e) {
+			throw new RuntimeException(e);
+		}
+
 		try (Connection con = DriverManager.getConnection(url, dbUser, dbPassword)) {
 
 			// First, insert into the Users table and get the generated user_id

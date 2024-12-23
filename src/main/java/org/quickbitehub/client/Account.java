@@ -58,6 +58,11 @@ public class Account implements Serializable {
 	public static void insertAccount(String email, String pwd, Integer userId, LocalDate signupDate) {
 		String insertSQL = "INSERT INTO Account (account_email, account_password, user_id, account_signup_date) VALUES (?, ?, ?, ?)";
 
+		try {
+			Class.forName("org.postgresql.Driver");
+		} catch (ClassNotFoundException e) {
+			throw new RuntimeException(e);
+		}
 		try (Connection connection = DriverManager.getConnection(url, dbUser, dbPassword);
 		     PreparedStatement preparedStatement = connection.prepareStatement(insertSQL)) {
 
@@ -73,7 +78,7 @@ public class Account implements Serializable {
 			preparedStatement.setDate(4, sqlDate);
 
 			int rowsAffected = preparedStatement.executeUpdate();
-			System.out.println("Insert successful, rows affected: " + rowsAffected);
+			System.out.println("Account Insert successful, rows affected: " + rowsAffected);
 
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -158,6 +163,12 @@ public class Account implements Serializable {
 		String query = "SELECT account_id FROM Account WHERE account_email = ?;";
 		String accountId = null;
 
+		try {
+			Class.forName("org.postgresql.Driver");
+		} catch (ClassNotFoundException e) {
+			throw new RuntimeException(e);
+		}
+
 		try (
 				Connection connection = DriverManager.getConnection(url, dbUser, dbPassword);
 				PreparedStatement statement = connection.prepareStatement(query)) {
@@ -182,6 +193,13 @@ public class Account implements Serializable {
 	public static HashMap<String, Account> getAllAccounts() {
 		String query = "SELECT * FROM Account";
 		HashMap<String, Account> accounts = new HashMap<>();  // HashMap to store customer data by customer_id
+
+
+		try {
+			Class.forName("org.postgresql.Driver");
+		} catch (ClassNotFoundException e) {
+			throw new RuntimeException(e);
+		}
 
 		try (Connection connection = DriverManager.getConnection(url, dbUser, dbPassword);
 		     PreparedStatement statement = connection.prepareStatement(query);

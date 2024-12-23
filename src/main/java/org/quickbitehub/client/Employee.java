@@ -34,6 +34,11 @@ public class Employee extends User {
 	public static HashMap<String, Employee> getAllEmployees() {
 		String query = "SELECT * FROM Employee";
 		HashMap<String, Employee> employees = new HashMap<>();  // HashMap to store customer data by customer_id
+		try {
+			Class.forName("org.postgresql.Driver");
+		} catch (ClassNotFoundException e) {
+			throw new RuntimeException(e);
+		}
 
 		try (Connection connection = DriverManager.getConnection(url, dbUser, dbPassword);
 		     PreparedStatement statement = connection.prepareStatement(query);
@@ -68,6 +73,13 @@ public class Employee extends User {
 		// Insert query for the Customer table
 		String insertSQL = "INSERT INTO Employee (user_id, user_first_name, user_last_name, restaurant_id, user_type) VALUES (?, ?, ?, ?, ?)";
 		int userId = 0;
+
+		try {
+			Class.forName("org.postgresql.Driver");
+		} catch (ClassNotFoundException e) {
+			throw new RuntimeException(e);
+		}
+
 		try (Connection con = DriverManager.getConnection(url, dbUser, dbPassword)) {
 
 			// First, insert into the Users table and get the generated user_id

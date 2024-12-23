@@ -151,6 +151,13 @@ public class Main {
 		String query = "SELECT customer_balance FROM Customer WHERE user_id = ?";
 		double balance = -1.00; // Default value if customer is not found
 
+
+		try {
+			Class.forName("org.postgresql.Driver");
+		} catch (ClassNotFoundException e) {
+			throw new RuntimeException(e);
+		}
+
 		try (
 				Connection connection = DriverManager.getConnection(url, user, password);
 				PreparedStatement statement = connection.prepareStatement(query)
@@ -185,6 +192,13 @@ public class Main {
 
 		String query = "SELECT * FROM Customer";
 		HashMap<Integer, HashMap<String, Object>> customers = new HashMap<>();  // HashMap to store customer data by customer_id
+
+
+		try {
+			Class.forName("org.postgresql.Driver");
+		} catch (ClassNotFoundException e) {
+			throw new RuntimeException(e);
+		}
 
 		try (Connection connection = DriverManager.getConnection(url, user, password);
 		     PreparedStatement statement = connection.prepareStatement(query);
@@ -225,6 +239,12 @@ public class Main {
 		String query = "SELECT * FROM Employee";
 		HashMap<Integer, HashMap<String, Object>> employees = new HashMap<>();  // HashMap to store customer data by customer_id
 
+		try {
+			Class.forName("org.postgresql.Driver");
+		} catch (ClassNotFoundException e) {
+			throw new RuntimeException(e);
+		}
+
 		try (Connection connection = DriverManager.getConnection(url, user, password);
 		     PreparedStatement statement = connection.prepareStatement(query);
 		     ResultSet resultSet = statement.executeQuery()) {
@@ -261,6 +281,12 @@ public class Main {
 
 		String query = "SELECT * FROM Account";
 		HashMap<Integer, HashMap<String, Object>> accounts = new HashMap<>();  // HashMap to store customer data by customer_id
+
+		try {
+			Class.forName("org.postgresql.Driver");
+		} catch (ClassNotFoundException e) {
+			throw new RuntimeException(e);
+		}
 
 		try (Connection connection = DriverManager.getConnection(url, user, password);
 		     PreparedStatement statement = connection.prepareStatement(query);
@@ -299,6 +325,13 @@ public class Main {
 		if(res_id==1) {
 			query = "SELECT * FROM vwRes1Menu";
 
+
+			try {
+				Class.forName("org.postgresql.Driver");
+			} catch (ClassNotFoundException e) {
+				throw new RuntimeException(e);
+			}
+
 			try (Connection connection = DriverManager.getConnection(url, user, password);
 			     PreparedStatement statement = connection.prepareStatement(query);
 			     ResultSet resultSet = statement.executeQuery()) {
@@ -327,6 +360,13 @@ public class Main {
 		} else if (res_id==2) {
 			query = "SELECT * FROM vwRes2Menu";
 
+
+			try {
+				Class.forName("org.postgresql.Driver");
+			} catch (ClassNotFoundException e) {
+				throw new RuntimeException(e);
+			}
+
 			try (Connection connection = DriverManager.getConnection(url, user, password);
 			     PreparedStatement statement = connection.prepareStatement(query);
 			     ResultSet resultSet = statement.executeQuery()) {
@@ -354,6 +394,14 @@ public class Main {
 			}
 		} else if (res_id==3) {
 			query = "SELECT * FROM vwRes3Menu";
+
+
+			try {
+				Class.forName("org.postgresql.Driver");
+			} catch (ClassNotFoundException e) {
+				throw new RuntimeException(e);
+			}
+
 
 			try (Connection connection = DriverManager.getConnection(url, user, password);
 			     PreparedStatement statement = connection.prepareStatement(query);
@@ -385,12 +433,19 @@ public class Main {
 		return menu;
 	}
 
+
 	//Method to insert into the account table
 	public static void insertAccount(String email, String pwd, Integer userId, String signupDate) throws SQLException {
 		String url = "jdbc:postgresql://localhost:5432/test2"; // Your DB details
 		String user = "postgres"; // Your DB username
 		String password = "#Barakamon12";
 		String insertSQL = "INSERT INTO Account (account_email, account_password, user_id, account_signup_date) VALUES (?, ?, ?, ?)";
+
+		try {
+			Class.forName("org.postgresql.Driver");
+		} catch (ClassNotFoundException e) {
+			throw new RuntimeException(e);
+		}
 
 		try (Connection connection = DriverManager.getConnection(url, user, password);
 		     PreparedStatement preparedStatement = connection.prepareStatement(insertSQL)) {
