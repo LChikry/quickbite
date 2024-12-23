@@ -61,12 +61,12 @@ public class Main {
 			throw new RuntimeException(e);
 		}
 
-		/*
+
 		try {
-			insertOrderItem(4, 5, 1, 200.00);
+			insertOrderItem(4, 5, 2, 200.00);
 		} catch (SQLException e) {
 			throw new RuntimeException(e);
-		}*/
+		}
 
 
 		//Returning All Employees
@@ -145,7 +145,7 @@ public class Main {
 		// Database connection details
 		String url = "jdbc:postgresql://localhost:5432/test2"; // Update with your database name
 		String user = "postgres"; // Update with your username
-		String password = ""; // Update with your password
+		String password = "#Barakamon12"; // Update with your password
 
 		// SQL query
 		String query = "SELECT customer_balance FROM Customer WHERE user_id = ?";
@@ -181,7 +181,7 @@ public class Main {
 	public static HashMap<Integer, HashMap<String, Object>> getAllCustomers() {
 		String url = "jdbc:postgresql://localhost:5432/test2"; // Your DB details
 		String user = "postgres"; // Your DB username
-		String password = ""; // Your DB password
+		String password = "#Barakamon12"; // Your DB password
 
 		String query = "SELECT * FROM Customer";
 		HashMap<Integer, HashMap<String, Object>> customers = new HashMap<>();  // HashMap to store customer data by customer_id
@@ -218,7 +218,7 @@ public class Main {
 	public static HashMap<Integer, HashMap<String, Object>> getAllEmployees() {
 		String url = "jdbc:postgresql://localhost:5432/test2"; // Your DB details
 		String user = "postgres"; // Your DB username
-		String password = ""; // Your DB password
+		String password = "#Barakamon12"; // Your DB password
 
 		String query = "SELECT * FROM Employee";
 		HashMap<Integer, HashMap<String, Object>> employees = new HashMap<>();  // HashMap to store customer data by customer_id
@@ -255,7 +255,7 @@ public class Main {
 	public static HashMap<Integer, HashMap<String, Object>> getAllAccounts() {
 		String url = "jdbc:postgresql://localhost:5432/test2"; // Your DB details
 		String user = "postgres"; // Your DB username
-		String password = ""; // Your DB password
+		String password = "#Barakamon12"; // Your DB password
 
 		String query = "SELECT * FROM Account";
 		HashMap<Integer, HashMap<String, Object>> accounts = new HashMap<>();  // HashMap to store customer data by customer_id
@@ -292,7 +292,7 @@ public class Main {
 	public static void insertAccount(String email, String pwd, Integer userId, String signupDate) throws SQLException {
 		String url = "jdbc:postgresql://localhost:5432/test2"; // Your DB details
 		String user = "postgres"; // Your DB username
-		String password = "";
+		String password = "#Barakamon12";
 		String insertSQL = "INSERT INTO Account (account_email, account_password, user_id, account_signup_date) VALUES (?, ?, ?, ?)";
 
 		try (Connection connection = DriverManager.getConnection(url, user, password);
@@ -319,7 +319,7 @@ public class Main {
 	public static void insertCustomer(String cus_fname, String cus_lname, double balance) throws SQLException {
 		String url = "jdbc:postgresql://localhost:5432/test2"; // Your DB details
 		String user = "postgres"; // Your DB username
-		String password = "";
+		String password = "#Barakamon12";
 
 		// Insert query for the Users table
 		String userSQL = "INSERT INTO Users (user_first_name, user_last_name, user_type) VALUES (?, ?, ?) RETURNING user_id";
@@ -361,7 +361,7 @@ public class Main {
 	public static void insertEmployee(String emp_fname, String emp_lname, Integer res_id) throws SQLException {
 		String url = "jdbc:postgresql://localhost:5432/test2"; // Your DB details
 		String user = "postgres"; // Your DB username
-		String password = "";
+		String password = "#Barakamon12";
 
 		// Insert query for the Users table
 		String userSQL = "INSERT INTO Users (user_first_name, user_last_name, user_type) VALUES (?, ?, ?) RETURNING user_id";
@@ -403,7 +403,7 @@ public class Main {
 	public static int insertOrder(String order_timestamp, String order_type, Integer res_id, Integer cus_id) throws SQLException {
 		String url = "jdbc:postgresql://localhost:5432/test2"; // Your DB details
 		String user = "postgres"; // Your DB username
-		String password = "";
+		String password = "#Barakamon12";
 
 		// Insert query for the Users table
 		String insertSQL = "INSERT INTO Orders (order_timestamp, order_type, restaurant_id, customer_id) VALUES (?, ?, ?, ?) RETURNING order_id";
@@ -439,7 +439,7 @@ public class Main {
 	}
 
 	//Method to insert Order_item
-	/*public static void insertOrderItem(Integer order_id, Integer product_id, Integer quantity, Double unit_price) throws SQLException {
+	public static void insertOrderItem(Integer order_id, Integer product_id, Integer quantity, Double unit_price) throws SQLException {
 		String url = "jdbc:postgresql://localhost:5432/test2"; // Your DB details
 		String user = "postgres"; // Your DB username
 		String password = "#Barakamon12";
@@ -456,12 +456,12 @@ public class Main {
 			int rowsAffected = preparedStatement.executeUpdate();
 			System.out.println("Insert successful, rows affected: " + rowsAffected);
 		}
-	}*/
+	}
 
 	public static void updateOrderStatus(Integer order_id, String order_status) throws SQLException {
 		String url = "jdbc:postgresql://localhost:5432/test2"; // Your DB details
 		String user = "postgres"; // Your DB username
-		String password = "";
+		String password = "#Barakamon12";
 
 		// Update query for the Orders table
 		String updateSQL = "UPDATE Orders SET order_status = ? WHERE order_id = ?";

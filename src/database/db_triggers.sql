@@ -33,7 +33,8 @@ END;
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER tr_updateAvailableQuantity AFTER INSERT ON Order_item
-FOR EACH ROW EXECUTE Function updateAvailableQuantity();
+FOR EACH ROW
+EXECUTE Function updateAvailableQuantity();
 
 --Update Customer Balance
 CREATE OR REPLACE FUNCTION updateCustomerBalance() RETURNS TRIGGER
@@ -56,7 +57,7 @@ AS
 $$
 BEGIN
 UPDATE Orders
-SET Order_total_value = Order_total_value + NEW.total_item_value
+SET Order_total_value = Order_total_value + NEW.quantity_ordered * NEW.product_unit_price
 WHERE order_id = NEW.order_id;
 RETURN NEW;
 END;

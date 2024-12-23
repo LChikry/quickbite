@@ -1,3 +1,4 @@
+
 INSERT INTO Users (user_first_name, user_last_name, user_middle_names, user_type)
 VALUES
 ('John', 'Doe', 'Michael', 'Customer'),
@@ -61,17 +62,17 @@ VALUES
 (3, 2, 'Pasta Carbonara', 120.00, 30, 5),     -- Main Dishes
 (3, 3, 'Tiramisu', 55.00, 15, 2);             -- Desserts
 
-INSERT INTO Orders (order_timestamp, order_type, order_total_value, currency, order_status, restaurant_id, employee_id, customer_id)
+INSERT INTO Orders (order_timestamp, order_type, currency, order_status, restaurant_id, employee_id, customer_id)
 VALUES
-('2024-12-15 18:30:00+00', 'Pick-up', 60.00, 'MAD', 'Pending', 1, 2, 1),
-('2024-12-15 19:00:00+00', 'On-site', 260.00, 'MAD', 'In Preparation', 2, 5, 3),
-('2024-12-15 20:00:00+00', 'Pick-up', 370.00, 'MAD', 'Ready', 3, 6, 4);
+('2024-12-15 18:30:00+00', 'Pick-up', 'MAD', 'Pending', 1, 2, 1),
+('2024-12-15 19:00:00+00', 'On-site', 'MAD', 'In Preparation', 2, 5, 3),
+('2024-12-15 20:00:00+00', 'Pick-up', 'MAD', 'Ready', 3, 6, 4);
 
-INSERT INTO Order_Item (order_id, product_id, quantity_ordered, product_unit_price, total_item_value, currency)
+INSERT INTO Order_Item (order_id, product_id, quantity_ordered, product_unit_price, currency)
 VALUES
-(1, 1, 2, 30.00, 60.00, 'MAD'),
-(2, 5, 1, 200.00, 200.00, 'MAD'),
-(2, 6, 1, 60.00, 60.00, 'MAD'),
-(3, 7, 3, 25.00, 75.00, 'MAD'),
-(3, 8, 2, 120.00, 240.00, 'MAD'),
-(3, 9, 1, 55.00, 55.00, 'MAD');
+(1, 1, 2, 30.00, 'MAD'),
+(2, 5, 1, 200.00,'MAD'),
+(2, 6, 1, 60.00, 'MAD'),
+(3, 7, 3, 25.00, 'MAD'),
+(3, 8, 2, 120.00, 'MAD'),
+(3, 9, 1, 55.00, 'MAD');
