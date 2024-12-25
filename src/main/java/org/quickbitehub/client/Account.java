@@ -1,10 +1,10 @@
 package org.quickbitehub.client;
 
 import io.github.cdimascio.dotenv.Dotenv;
+import org.quickbitehub.DBCredentials;
 
 import java.io.Serializable;
 import java.sql.*;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Objects;
@@ -18,11 +18,6 @@ public class Account implements Serializable {
 	private String password;
 	private HashMap<Long, Boolean> isAuthenticated = new HashMap<>(); // TelegramId (device) to isAuthentication
 	static public HashMap<String, Account> usersAccount = getAllAccounts(); // EMAIL to Account
-
-	static private String dbUser = Dotenv.load().get("DB_USER");
-	static private String dbPassword = Dotenv.load().get("DB_PASSWORD");
-	static private String url = "jdbc:postgresql://localhost:5432/qbtest"; // Your DB details
-
 
 	public Account(String EMAIL, String password, User USER, Long telegramId) {
 		this.ACCOUNT_SIGN_UP_DATE = LocalDate.now();
@@ -53,6 +48,10 @@ public class Account implements Serializable {
 		this.USER = emp;
 	}
 
+	public static void fetchAllAccounts() {
+		Account.usersAccount = getAllAccounts();
+	}
+
 
 	//Method to insert into the account table
 	public static void insertAccount(String email, String pwd, Integer userId, LocalDate signupDate) {
@@ -63,7 +62,9 @@ public class Account implements Serializable {
 		} catch (ClassNotFoundException e) {
 			throw new RuntimeException(e);
 		}
-		try (Connection connection = DriverManager.getConnection(url, dbUser, dbPassword);
+		try (Connection connection = DriverManager.getConnection(DBCredentials.DB_URL.getDBInfo(),
+				DBCredentials.DB_USER.getDBInfo(),
+				DBCredentials.DB_PASSWORD.getDBInfo());
 		     PreparedStatement preparedStatement = connection.prepareStatement(insertSQL)) {
 
 			// Parse the signupDate String to java.sql.Date (for DATE column)
@@ -158,6 +159,10 @@ public class Account implements Serializable {
 		return USER_ID;
 	}
 
+	public static String getUserId(String userEmail) {
+		return usersAccount.get(userEmail.trim().strip().toLowerCase()).getUserId();
+	}
+
 
 	public static String getAccountIdFromDB(String email) {
 		String query = "SELECT account_id FROM Account WHERE account_email = ?;";
@@ -170,7 +175,9 @@ public class Account implements Serializable {
 		}
 
 		try (
-				Connection connection = DriverManager.getConnection(url, dbUser, dbPassword);
+				Connection connection = DriverManager.getConnection(DBCredentials.DB_URL.getDBInfo(),
+						DBCredentials.DB_USER.getDBInfo(),
+						DBCredentials.DB_PASSWORD.getDBInfo());
 				PreparedStatement statement = connection.prepareStatement(query)) {
 			// Set the customer_id parameter in the query
 			statement.setString(1, email);
@@ -201,7 +208,8 @@ public class Account implements Serializable {
 			throw new RuntimeException(e);
 		}
 
-		try (Connection connection = DriverManager.getConnection(url, dbUser, dbPassword);
+		try (Connection connection = DriverManager.getConnection(DBCredentials.DB_URL.getDBInfo(),
+				DBCredentials.DB_USER.getDBInfo(), DBCredentials.DB_PASSWORD.getDBInfo());
 		     PreparedStatement statement = connection.prepareStatement(query);
 		     ResultSet resultSet = statement.executeQuery()) {
 

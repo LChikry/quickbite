@@ -1,6 +1,7 @@
 package org.quickbitehub.client;
 
 import io.github.cdimascio.dotenv.Dotenv;
+import org.quickbitehub.DBCredentials;
 
 import java.sql.*;
 import java.util.HashMap;
@@ -8,10 +9,6 @@ import java.util.HashMap;
 public class Employee extends User {
 	private String restaurantId;
 	public static HashMap<String, Employee> allEmployees = getAllEmployees(); // User_id -> Employee
-
-	static private String dbUser = Dotenv.load().get("DB_USER");
-	static private String dbPassword = Dotenv.load().get("DB_PASSWORD");
-	static private String url = "jdbc:postgresql://localhost:5432/qbtest"; // Your DB details
 
 	public Employee(String firstName, String lastName, String middleNames, String userId, String restaurantId) {
 		super(firstName, lastName, middleNames, UserType.EMPLOYEE.getText(), userId);
@@ -24,6 +21,10 @@ public class Employee extends User {
 		this.restaurantId = restaurantId;
 
 		allEmployees.put(this.USER_ID, this);
+	}
+
+	public static void fetchAllEmployees() {
+		Employee.allEmployees = getAllEmployees();
 	}
 
 	public static Employee getEmployee(String employeeId) {
@@ -40,23 +41,26 @@ public class Employee extends User {
 			throw new RuntimeException(e);
 		}
 
-		try (Connection connection = DriverManager.getConnection(url, dbUser, dbPassword);
-		     PreparedStatement statement = connection.prepareStatement(query);
-		     ResultSet resultSet = statement.executeQuery()) {
+		try {
+			assert DBCredentials.DB_URL.getDBInfo() != null;
+			try (Connection connection = DriverManager.getConnection(DBCredentials.DB_URL.getDBInfo(), DBCredentials.DB_USER.getDBInfo(), DBCredentials.DB_PASSWORD.getDBInfo());
+			     PreparedStatement statement = connection.prepareStatement(query);
+			     ResultSet resultSet = statement.executeQuery()) {
 
-			// Loop through the result set and add rows to the HashMap
-			while (resultSet.next()) {
-				String employee_id = resultSet.getString("user_id");
-				String firstName = resultSet.getString("user_first_name");
-				String lastName = resultSet.getString("user_last_name");
-				String middleNames = resultSet.getString("user_middle_names");
-				String restaurantId = resultSet.getString("restaurant_id");
+				// Loop through the result set and add rows to the HashMap
+				while (resultSet.next()) {
+					String employee_id = resultSet.getString("user_id");
+					String firstName = resultSet.getString("user_first_name");
+					String lastName = resultSet.getString("user_last_name");
+					String middleNames = resultSet.getString("user_middle_names");
+					String restaurantId = resultSet.getString("restaurant_id");
 
-				Employee emp = new Employee(firstName, lastName, middleNames, employee_id, restaurantId);
-				// Add this HashMap to the customers map using customer_id as the key
-				employees.put(employee_id, emp);
+					Employee emp = new Employee(firstName, lastName, middleNames, employee_id, restaurantId);
+					// Add this HashMap to the customers map using customer_id as the key
+					employees.put(employee_id, emp);
+				}
+
 			}
-
 		} catch (SQLException e) {
 			System.err.println("Database error: " + e.getMessage());
 		}
@@ -80,7 +84,7 @@ public class Employee extends User {
 			throw new RuntimeException(e);
 		}
 
-		try (Connection con = DriverManager.getConnection(url, dbUser, dbPassword)) {
+		try (Connection con = DriverManager.getConnection(DBCredentials.DB_URL.getDBInfo(), DBCredentials.DB_USER.getDBInfo(), DBCredentials.DB_PASSWORD.getDBInfo())) {
 
 			// First, insert into the Users table and get the generated user_id
 			try (PreparedStatement preparedStatement = con.prepareStatement(userSQL)) {

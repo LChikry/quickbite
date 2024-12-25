@@ -1,7 +1,6 @@
 package org.quickbitehub;
 
 import org.quickbitehub.client.Account;
-import org.quickbitehub.client.Customer;
 import org.quickbitehub.client.NavigationState;
 
 import io.github.cdimascio.dotenv.Dotenv;
@@ -205,7 +204,7 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 					"Please enter your university email address and your chosen password\\.\n\n" +
 					"If you don\\'t have an account\\, please sign up first \ud83d\ude01";
 
-			communicator.sendButtonKeyboard(telegramId, msg, (InlineKeyboardMarkup) keyboards.get(KeyboardType.LOGIN));
+			communicator.sendButtonKeyboard(telegramId, msg, (InlineKeyboardMarkup) keyboards.get(KeyboardType.SIGNING));
 			return;
 		}
 		if (!Account.isValidEmail(email) || !Account.isAccountExist(email) || userSessions.get(telegramId) != null) {

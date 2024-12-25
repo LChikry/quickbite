@@ -11,7 +11,7 @@ import java.util.HashMap;
 public class KeyboardFactory {
 	static public HashMap<KeyboardType, ReplyKeyboard> getKeyboardList() {
 		HashMap<KeyboardType, ReplyKeyboard> keyboards = new HashMap<>();
-		keyboards.put(KeyboardType.LOGIN, getLogInKeyboard());
+		keyboards.put(KeyboardType.SIGNING, getLogInKeyboard());
 		keyboards.put(KeyboardType.FORCE_REPLY, getForceReplyKeyboard());
 		return keyboards;
 	}

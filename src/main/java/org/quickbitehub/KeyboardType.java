@@ -2,7 +2,7 @@ package org.quickbitehub;
 
 public enum KeyboardType {
 	FORCE_REPLY,
-	LOGIN,
+	SIGNING,
 	SIGNUP,
 	RESTAURANTS,
 	PROXI_FOOD_MENU,

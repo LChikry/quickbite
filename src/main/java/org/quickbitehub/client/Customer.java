@@ -1,6 +1,7 @@
 package org.quickbitehub.client;
 
 import io.github.cdimascio.dotenv.Dotenv;
+import org.quickbitehub.DBCredentials;
 
 import java.sql.*;
 import java.util.HashMap;
@@ -8,12 +9,7 @@ import java.util.HashMap;
 public class Customer extends User {
 	private Double customerBalance;
 	private String currency = "MAD";
-	private static HashMap<String, Customer> allCustomers = getAllCustomers();
-
-	static private String dbUser = Dotenv.load().get("DB_USER");
-	static private String dbPassword = Dotenv.load().get("DB_PASSWORD");
-	static private String url = "jdbc:postgresql://localhost:5432/qbtest"; // Your DB details
-
+	private static HashMap<String, Customer> allCustomers = getAllCustomers(); // UserId -> Customer
 
 	public Customer(String firstName, String lastName, String middleNames, String userId, String currency, Double customerBalance) {
 		super(firstName, lastName, middleNames, UserType.CUSTOMER.getText(), userId);
@@ -27,6 +23,10 @@ public class Customer extends User {
 		this.customerBalance = 5000.00;
 
 		allCustomers.put(this.USER_ID, this);
+	}
+
+	public static void fetchAllCustomers() {
+		Customer.allCustomers = getAllCustomers();
 	}
 
 	public static Customer getCustomer(String customerId) {
@@ -44,7 +44,7 @@ public class Customer extends User {
 			throw new RuntimeException(e);
 		}
 
-		try (Connection connection = DriverManager.getConnection(url, dbUser, dbPassword);
+		try (Connection connection = DriverManager.getConnection(DBCredentials.DB_URL.getDBInfo(), DBCredentials.DB_USER.getDBInfo(), DBCredentials.DB_PASSWORD.getDBInfo());
 		     PreparedStatement statement = connection.prepareStatement(query);
 		     ResultSet resultSet = statement.executeQuery()) {
 
@@ -83,7 +83,7 @@ public class Customer extends User {
 			throw new RuntimeException(e);
 		}
 
-		try (Connection con = DriverManager.getConnection(url, dbUser, dbPassword)) {
+		try (Connection con = DriverManager.getConnection(DBCredentials.DB_URL.getDBInfo(), DBCredentials.DB_USER.getDBInfo(), DBCredentials.DB_PASSWORD.getDBInfo())) {
 
 			// First, insert into the Users table and get the generated user_id
 			try (PreparedStatement preparedStatement = con.prepareStatement(userSQL)) {
@@ -113,6 +113,46 @@ public class Customer extends User {
 		}
 
 		return String.valueOf(userId);
+	}
+
+
+
+	// Function to get the balance of a customer by ID
+	public static double getCustomerBalance(String customerId) {
+		// SQL query
+		String query = "SELECT customer_balance FROM Customer WHERE user_id = ?";
+		double balance = -1.00; // Default value if customer is not found
+
+
+		try {
+			Class.forName("org.postgresql.Driver");
+		} catch (ClassNotFoundException e) {
+			throw new RuntimeException(e);
+		}
+
+		try (
+				Connection connection = DriverManager.getConnection(DBCredentials.DB_URL.getDBInfo(), DBCredentials.DB_USER.getDBInfo(), DBCredentials.DB_PASSWORD.getDBInfo());
+				PreparedStatement statement = connection.prepareStatement(query)
+		) {
+			// Set the customer_id parameter in the query
+			statement.setInt(1, Integer.valueOf(customerId));
+
+			// Execute the query
+			try (ResultSet rs = statement.executeQuery()) {
+
+				if (rs.next()) {
+					// Retrieve the balance from the result set
+					balance = rs.getDouble("customer_balance");
+				}
+
+			}
+		} catch (SQLException e) {
+			// Handle SQL exception
+			System.err.println("Database error in getCustomerBalance: " + e.getMessage());
+		}
+
+
+		return balance;
 	}
 
 }
