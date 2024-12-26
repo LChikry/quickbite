@@ -23,38 +23,40 @@ public class Authentication {
 	public static final HashMap<Long, Account> userSessions = new HashMap<>(); // TelegramId -> Account
 
 	public static void authenticate(Long telegramId) {
-		String msg = "    *_Authenticate_*\n" +
-					"Welcome to QuickBite, where you can Skip the Line, Save the Time for What Matters Most\\.\n\n" +
-					"Here, you can streamline your food ordering process for greater life quality\\.\n" +
-					"Authenticate yourself to start benefiting from our services \ud83d\ude01";
+		String msg = "    *_Authenticate_*\n\n" +
+					"Welcome to QuickBite, where you can Skip the Line, Save the Time for What Matters Most\\.\n" +
+					"Sign in or Sing up, so you can benefit from our services that will streamline your food ordering process for greater life quality \ud83d\ude01";
 
-		Message signingMenu = communicator.sendButtonKeyboard(telegramId, msg, (InlineKeyboardMarkup) keyboards.get(KeyboardType.SIGN_ING_UP));
+		Message signingMenu = communicator.sendButtonKeyboard(telegramId, msg, (InlineKeyboardMarkup) keyboards.get(KeyboardType.SIGN_IN_UP));
 		HashMap<String, Object> menuStep = new HashMap<>();
-		menuStep.put(AuthSteps.SIGN_ING_UP_MENU.getStep(), signingMenu);
+		menuStep.put(AuthSteps.SIGN_IN_UP_MENU.getStep(), signingMenu);
 		authProcesses.put(telegramId, menuStep);
 	}
 
-	private static void getReplySendNextPrompt(Message message, Long telegramId, HashMap<String, Object> userProcessInfo, String msg, String txt, String nextMsgKey, String nextMsgPrompt) {
-		if (userProcessInfo.get(msg) == null) return;
-		Message enteredEmail = (Message) userProcessInfo.get(msg);
+	private static void getReplySendNextPrompt(Message message, Long telegramId, HashMap<String, Object> userAuthSteps, String msg, String txt, String nextMsgKey, String nextMsgPrompt) {
+		if (userAuthSteps == null) return;
+		if (userAuthSteps.get(msg) == null) return;
+		Message enteredEmail = (Message) userAuthSteps.get(msg);
 		if (!Objects.equals(message.getReplyToMessage().getMessageId(), enteredEmail.getMessageId())) return;
 
-		userProcessInfo.put(txt, message.getText().trim().strip());
+		userAuthSteps.put(txt, message.getText().trim().strip());
+		userAuthSteps.remove(msg);
 		communicator.deleteMessage(telegramId, message.getReplyToMessage().getMessageId());
 		communicator.deleteMessage(telegramId, message.getMessageId());
 
 		Message nextMessage = communicator.sendForceReply(telegramId, nextMsgPrompt);
-		userProcessInfo.put(nextMsgKey, nextMessage);
-		authProcesses.put(telegramId, userProcessInfo);
+		userAuthSteps.put(nextMsgKey, nextMessage);
+		authProcesses.put(telegramId, userAuthSteps);
 	}
 
 	public static void signIn(Message message, Long telegramId) {
 		if (message == null) {
 			Message msg = communicator.sendForceReply(telegramId, "Enter Email\\:");
 
-			HashMap<String, Object> signIn = new HashMap<>();
-			signIn.put(AuthSteps.SIGNING_EMAIL_MSG.getStep(), msg);
-			authProcesses.put(telegramId, signIn);
+			HashMap<String, Object> existingProcess = authProcesses.getOrDefault(telegramId, new HashMap<>());
+			existingProcess.put(AuthSteps.SIGNING_EMAIL_MSG.getStep(), msg);
+			authProcesses.put(telegramId, existingProcess);
+
 			return;
 		}
 
@@ -73,7 +75,6 @@ public class Authentication {
 		String password = message.getText();
 		communicator.deleteMessage(telegramId, message.getReplyToMessage().getMessageId());
 		communicator.deleteMessage(telegramId, message.getMessageId());
-		authProcesses.remove(telegramId); // clear the process
 		String email = ((String) userAuthSteps.get(AuthSteps.SIGNING_EMAIL_TXT.getStep())).strip().trim().toLowerCase();
 
 		signInHandler(telegramId, email, password);
@@ -84,6 +85,13 @@ public class Authentication {
 			deleteRecentAuthFeedbackMessage(telegramId);
 			String textMsg = SignEmoji.RED_CIRCLE.getCode() + " *Sign In Failed*\nInvalid Email or You are Logged In \ud83d\ude1e";
 			putRecentAuthFeedbackMessage(telegramId, textMsg);
+			deleteRecentAuthFeedbackMessage(telegramId);
+
+			var menuMsg = (Message) authProcesses.get(telegramId).get(AuthSteps.SIGN_IN_UP_MENU.getStep());
+			HashMap<String, Object> temp = new HashMap<>();
+			temp.put(AuthSteps.SIGN_IN_UP_MENU.getStep(), menuMsg);
+			authProcesses.remove(telegramId); // the process is finished
+			authProcesses.put(telegramId, temp);
 			return;
 		}
 
@@ -92,18 +100,25 @@ public class Authentication {
 			deleteRecentAuthFeedbackMessage(telegramId);
 			String textMsg = SignEmoji.RED_CIRCLE.getCode() + " *Sign In Failed*\nIncorrect Email or Password \ud83d\ude1e";
 			putRecentAuthFeedbackMessage(telegramId, textMsg);
+			deleteRecentAuthFeedbackMessage(telegramId);
+
+			var menuMsg = (Message) authProcesses.get(telegramId).get(AuthSteps.SIGN_IN_UP_MENU.getStep());
+			HashMap<String, Object> temp = new HashMap<>();
+			temp.put(AuthSteps.SIGN_IN_UP_MENU.getStep(), menuMsg);
+			authProcesses.remove(telegramId); // the process is finished
+			authProcesses.put(telegramId, temp);
 			return;
 		}
 
 		userSessions.put(telegramId, userAccount);
 		deleteRecentAuthFeedbackMessage(telegramId);
+		Integer msgId = ((Message) authProcesses.get(telegramId).get(AuthSteps.SIGN_IN_UP_MENU.getStep())).getMessageId();
+		communicator.deleteMessage(telegramId, msgId);
+
 		String feedbackMsg = SignEmoji.GREEN_CIRCLE.getCode() + " You Signed In Successfully \ud83d\udc4b";
 		putRecentAuthFeedbackMessage(telegramId, feedbackMsg);
-		try { Thread.sleep(2000);} catch (InterruptedException e) { throw new RuntimeException(e);}
 		deleteRecentAuthFeedbackMessage(telegramId);
-
-		Integer msgId = ((Message) authProcesses.get(telegramId).get(AuthSteps.SIGN_ING_UP_MENU.getStep())).getMessageId();
-		communicator.deleteMessage(telegramId, msgId);
+		authProcesses.remove(telegramId); // the process is finished
 		// task: show dashboard
 	}
 
@@ -111,9 +126,9 @@ public class Authentication {
 		if (message == null) {
 			Message msg = communicator.sendForceReply(telegramId, "Enter Email\\:");
 
-			HashMap<String, Object> signUpStep = new HashMap<>();
-			signUpStep.put(AuthSteps.SIGNUP_EMAIL_MSG.getStep(), msg);
-			authProcesses.put(telegramId, signUpStep);
+			HashMap<String, Object> existingProcess = authProcesses.getOrDefault(telegramId, new HashMap<>());
+			existingProcess.put(AuthSteps.SIGNUP_EMAIL_MSG.getStep(), msg);
+			authProcesses.put(telegramId, existingProcess);
 			return;
 		}
 
@@ -153,6 +168,7 @@ public class Authentication {
 		);
 
 		var userAuthSteps = authProcesses.get(telegramId);
+		if (userAuthSteps == null) return;
 		if (userAuthSteps.get(AuthSteps.SIGNUP_MIDDLE_NAMES_MSG.getStep()) == null) return;
 		Message enteredPassword = (Message) userAuthSteps.get(AuthSteps.SIGNUP_MIDDLE_NAMES_MSG.getStep());
 		if (!Objects.equals(message.getReplyToMessage().getMessageId(), enteredPassword.getMessageId())) return;
@@ -160,7 +176,6 @@ public class Authentication {
 		String middle_names = message.getText().strip().trim();
 		communicator.deleteMessage(telegramId, message.getReplyToMessage().getMessageId());
 		communicator.deleteMessage(telegramId, message.getMessageId());
-		authProcesses.remove(telegramId); // the process is finished
 		if (middle_names.equals("0")) middle_names = "";
 
 		String email = (String) userAuthSteps.get(AuthSteps.SIGNUP_EMAIL_TXT.getStep());
@@ -177,21 +192,26 @@ public class Authentication {
 			deleteRecentAuthFeedbackMessage(telegramId);
 			String textMsg = SignEmoji.RED_CIRCLE.getCode() + " *Sign Up Failed*\nInvalid Email or You are Logged In\ud83d\ude1e";
 			putRecentAuthFeedbackMessage(telegramId, textMsg);
-			try { Thread.sleep(2000);} catch (InterruptedException e) { throw new RuntimeException(e);}
 			deleteRecentAuthFeedbackMessage(telegramId);
+
+			var menuMsg = (Message) authProcesses.get(telegramId).get(AuthSteps.SIGN_IN_UP_MENU.getStep());
+			HashMap<String, Object> temp = new HashMap<>();
+			temp.put(AuthSteps.SIGN_IN_UP_MENU.getStep(), menuMsg);
+			authProcesses.remove(telegramId); // the process is finished
+			authProcesses.put(telegramId, temp);
 			return;
 		}
 
 		Account userAccount = Account.signUp(email, password, telegramId, first_name, last_name, middle_names, UserType.CUSTOMER.getText(), null);
 		userSessions.put(telegramId, userAccount);
 		deleteRecentAuthFeedbackMessage(telegramId);
+		Integer msgId = ((Message) authProcesses.get(telegramId).get(AuthSteps.SIGN_IN_UP_MENU.getStep())).getMessageId();
+		communicator.deleteMessage(telegramId, msgId);
+
 		String feedbackMsg = SignEmoji.GREEN_CIRCLE.getCode() + " You've Created Your Account Successfully \ud83d\udc4b";
 		putRecentAuthFeedbackMessage(telegramId, feedbackMsg);
-		try { Thread.sleep(2000);} catch (InterruptedException e) { throw new RuntimeException(e);}
 		deleteRecentAuthFeedbackMessage(telegramId);
-
-		Integer msgId = ((Message) authProcesses.get(telegramId).get(AuthSteps.SIGN_ING_UP_MENU.getStep())).getMessageId();
-		communicator.deleteMessage(telegramId, msgId);
+		authProcesses.remove(telegramId); // the process is finished
 		// task: show the dashboard
 	}
 
@@ -200,7 +220,6 @@ public class Authentication {
 		if (userAccount == null) {
 			String msg = SignEmoji.ORANGE_CIRCLE.getCode() + " You are not logged in\\!";
 			putRecentAuthFeedbackMessage(telegramId, msg);
-			try { Thread.sleep(2000);} catch (InterruptedException e) { throw new RuntimeException(e);}
 			deleteRecentAuthFeedbackMessage(telegramId);
 			return;
 		}
@@ -211,20 +230,21 @@ public class Authentication {
 		if (QuickBite.sessionState.get(telegramId) != null) QuickBite.sessionState.get(telegramId).clear();
 		String msg = SignEmoji.GREEN_CIRCLE.getCode() + " *_You have log out successfully\\. See you soon\\! \ud83d\udc4b_*";
 		putRecentAuthFeedbackMessage(telegramId, msg);
-		try { Thread.sleep(2000);} catch (InterruptedException e) { throw new RuntimeException(e);}
 		deleteRecentAuthFeedbackMessage(telegramId);
 	}
 
 	private static void putRecentAuthFeedbackMessage(Long telegramId, String textMessage) {
 		Message fm = communicator.sendText(telegramId, textMessage);
-		HashMap<String, Object> fmStep = new HashMap<>();
-		fmStep.put(AuthSteps.SIGN_ING_UP_FEEDBACK_MSG.getStep(), fm);
-		authProcesses.put(telegramId, fmStep);
+		HashMap<String, Object> existingSteps = authProcesses.getOrDefault(telegramId, new HashMap<>());
+		existingSteps.put(AuthSteps.SIGN_IN_UP_FEEDBACK_MSG.getStep(), fm);
+		authProcesses.put(telegramId, existingSteps);
+		try { Thread.sleep(3000); } catch (InterruptedException e) { throw new RuntimeException(e); }
 	}
 
 	private static void deleteRecentAuthFeedbackMessage(Long telegramId) {
-		if (Authentication.authProcesses.get(telegramId).get(AuthSteps.SIGN_ING_UP_FEEDBACK_MSG.getStep()) == null) return;
-		Message msg = (Message) Authentication.authProcesses.get(telegramId).get(AuthSteps.SIGN_ING_UP_FEEDBACK_MSG.getStep());
+		assert Authentication.authProcesses.get(telegramId) != null;
+		if (Authentication.authProcesses.get(telegramId).get(AuthSteps.SIGN_IN_UP_FEEDBACK_MSG.getStep()) == null) return;
+		Message msg = (Message) Authentication.authProcesses.get(telegramId).get(AuthSteps.SIGN_IN_UP_FEEDBACK_MSG.getStep());
 		communicator.deleteMessage(telegramId, msg.getMessageId());
 	}
 }

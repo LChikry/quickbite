@@ -1,8 +1,8 @@
 package org.quickbitehub.authentication;
 
 public enum AuthSteps {
-	SIGN_ING_UP_MENU("___sign_in_up_menu"),
-	SIGN_ING_UP_FEEDBACK_MSG("___sign_in_up_feedback_msg"),
+	SIGN_IN_UP_MENU("___sign_in_up_menu"),
+	SIGN_IN_UP_FEEDBACK_MSG("___sign_in_up_feedback_msg"),
 	SIGNING_EMAIL_MSG("___signing_email_msg"),
 	SIGNING_EMAIL_TXT("___signing_email_txt"),
 	SIGNING_PASSWORD_MSG("___signing_password_msg"),

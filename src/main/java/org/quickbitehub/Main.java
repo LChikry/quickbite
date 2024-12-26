@@ -1,6 +1,7 @@
 package org.quickbitehub;
 import org.quickbitehub.client.Account;
 import org.quickbitehub.client.Customer;
+import org.quickbitehub.client.Employee;
 import org.telegram.telegrambots.longpolling.TelegramBotsLongPollingApplication;
 import java.sql.*;
 import java.util.HashMap;
@@ -14,150 +15,16 @@ public class Main {
 		// Using try-with-resources to allow autoclose to run upon finishing
 		try (TelegramBotsLongPollingApplication botsApplication = new TelegramBotsLongPollingApplication()) {
 			QuickBite quickBiteBot = new QuickBite();
-			botsApplication.registerBot(quickBiteBot.getBotToken(), quickBiteBot);
-
 			Account.fetchAllAccounts();
 			Customer.fetchAllCustomers();
-			Customer cus = Customer.getCustomer(Account.getUserId("l.chikry@aui.ma"));
-			System.out.println(Customer.getCustomerBalance(cus.getUserId()));
-
+			Employee.fetchAllEmployees();
+			botsApplication.registerBot(quickBiteBot.getBotToken(), quickBiteBot);
 
 			System.out.println("The Bot is successfully started!");
 			Thread.currentThread().join();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-	}
-
-	// Method to get all customers and store them in a HashMap
-	public static HashMap<Integer, HashMap<String, Object>> getAllCustomers() {
-		String url = "jdbc:postgresql://localhost:5432/test2"; // Your DB details
-		String user = "postgres"; // Your DB username
-		String password = "#Barakamon12"; // Your DB password
-
-		String query = "SELECT * FROM Customer";
-		HashMap<Integer, HashMap<String, Object>> customers = new HashMap<>();  // HashMap to store customer data by customer_id
-
-
-		try {
-			Class.forName("org.postgresql.Driver");
-		} catch (ClassNotFoundException e) {
-			throw new RuntimeException(e);
-		}
-
-		try (Connection connection = DriverManager.getConnection(url, user, password);
-		     PreparedStatement statement = connection.prepareStatement(query);
-		     ResultSet resultSet = statement.executeQuery()) {
-
-			// Loop through the result set and add rows to the HashMap
-			while (resultSet.next()) {
-				int customerId = resultSet.getInt("user_id");
-
-				// Create a HashMap for each row
-				HashMap<String, Object> customerData = new HashMap<>();
-				customerData.put("cus_fname", resultSet.getString("user_first_name"));
-				customerData.put("cus_lname", resultSet.getString("user_last_name"));
-				customerData.put("cus_middlename", resultSet.getString("user_middle_names"));
-				customerData.put("customer_balance", resultSet.getDouble("customer_balance"));
-				customerData.put("currency", resultSet.getString("currency"));
-
-				// Add this HashMap to the customers map using customer_id as the key
-				customers.put(customerId, customerData);
-
-			}
-
-		} catch (SQLException e) {
-			System.err.println("Database error: " + e.getMessage());
-		}
-
-		return customers;
-	}
-
-
-
-	//Method to get all employees
-	public static HashMap<Integer, HashMap<String, Object>> getAllEmployees() {
-		String url = "jdbc:postgresql://localhost:5432/test2"; // Your DB details
-		String user = "postgres"; // Your DB username
-		String password = "#Barakamon12"; // Your DB password
-
-		String query = "SELECT * FROM Employee";
-		HashMap<Integer, HashMap<String, Object>> employees = new HashMap<>();  // HashMap to store customer data by customer_id
-
-		try {
-			Class.forName("org.postgresql.Driver");
-		} catch (ClassNotFoundException e) {
-			throw new RuntimeException(e);
-		}
-
-		try (Connection connection = DriverManager.getConnection(url, user, password);
-		     PreparedStatement statement = connection.prepareStatement(query);
-		     ResultSet resultSet = statement.executeQuery()) {
-
-			// Loop through the result set and add rows to the HashMap
-			while (resultSet.next()) {
-				int employee_id = resultSet.getInt("user_id");
-
-				// Create a HashMap for each row
-				HashMap<String, Object> employeeData = new HashMap<>();
-				employeeData.put("emp_fname", resultSet.getString("user_first_name"));
-				employeeData.put("emp_lname", resultSet.getString("user_last_name"));
-				employeeData.put("emp_middlename", resultSet.getString("user_middle_names"));
-				employeeData.put("res_id", resultSet.getInt("restaurant_id"));
-				employeeData.put("user_type", resultSet.getString("user_type"));
-
-
-				// Add this HashMap to the customers map using customer_id as the key
-				employees.put(employee_id, employeeData);
-			}
-
-		} catch (SQLException e) {
-			System.err.println("Database error: " + e.getMessage());
-		}
-
-		return employees;
-	}
-
-	//Method to get all accounts
-	public static HashMap<Integer, HashMap<String, Object>> getAllAccounts() {
-		String url = "jdbc:postgresql://localhost:5432/test2"; // Your DB details
-		String user = "postgres"; // Your DB username
-		String password = "#Barakamon12"; // Your DB password
-
-		String query = "SELECT * FROM Account";
-		HashMap<Integer, HashMap<String, Object>> accounts = new HashMap<>();  // HashMap to store customer data by customer_id
-
-		try {
-			Class.forName("org.postgresql.Driver");
-		} catch (ClassNotFoundException e) {
-			throw new RuntimeException(e);
-		}
-
-		try (Connection connection = DriverManager.getConnection(url, user, password);
-		     PreparedStatement statement = connection.prepareStatement(query);
-		     ResultSet resultSet = statement.executeQuery()) {
-
-			// Loop through the result set and add rows to the HashMap
-			while (resultSet.next()) {
-				int account_id = resultSet.getInt("account_id");
-
-				// Create a HashMap for each row
-				HashMap<String, Object> accountData = new HashMap<>();
-				accountData.put("email", resultSet.getString("account_email"));
-				accountData.put("password", resultSet.getString("account_password"));
-				accountData.put("user_id", resultSet.getInt("user_id"));
-				accountData.put("signup_date", resultSet.getString("account_signup_date"));
-
-
-				// Add this HashMap to the customers map using customer_id as the key
-				accounts.put(account_id, accountData);
-			}
-
-		} catch (SQLException e) {
-			System.err.println("Database error: " + e.getMessage());
-		}
-
-		return accounts;
 	}
 
 	public static HashMap<Integer, HashMap<String, Object>> getRestaurantMenu(Integer res_id) {
