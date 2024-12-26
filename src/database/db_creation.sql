@@ -77,7 +77,7 @@ CREATE TABLE Product (
 
 CREATE TABLE Orders (
 	order_id            SERIAL PRIMARY KEY,
-	order_timestamp     DATE NOT NULL,
+	order_timestamp     TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
 	order_type          CHAR(8) NOT NULL,
 	order_total_value   NUMERIC(12, 2) DEFAULT 0 NOT NULL,
 	currency            CHAR(3) DEFAULT 'MAD' NOT NULL,

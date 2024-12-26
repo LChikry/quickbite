@@ -1,7 +1,7 @@
 package org.quickbitehub;
 
 import org.quickbitehub.authentication.Authentication;
-import org.quickbitehub.client.Account;
+import org.quickbitehub.authentication.Account;
 import org.quickbitehub.client.NavigationState;
 
 import io.github.cdimascio.dotenv.Dotenv;
@@ -85,13 +85,16 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 		}
 	}
 
-	private void viewDashboard(Long telegramId) {
+	public static void viewDashboard(Long telegramId) {
 		if (Authentication.userSessions.get(telegramId) == null) {
 			Authentication.authenticate(telegramId);
 			return;
 		}
 
 		// show dashboard menu
+		// it will show the balance
+		// it will show full name
+		// it will show in progress orders
 	}
 
 

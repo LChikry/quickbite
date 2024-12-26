@@ -62,11 +62,11 @@ VALUES
 (3, 2, 'Pasta Carbonara', 120.00, 30, 5),     -- Main Dishes
 (3, 3, 'Tiramisu', 55.00, 15, 2);             -- Desserts
 
-INSERT INTO Orders (order_timestamp, order_type, currency, order_status, restaurant_id, employee_id, customer_id)
+INSERT INTO Orders (order_type, currency, order_status, restaurant_id, employee_id, customer_id)
 VALUES
-('2024-12-15 18:30:00+00', 'Pick-up', 'MAD', 'Pending', 1, 2, 1),
-('2024-12-15 19:00:00+00', 'On-site', 'MAD', 'In Preparation', 2, 5, 3),
-('2024-12-15 20:00:00+00', 'Pick-up', 'MAD', 'Ready', 3, 6, 4);
+('Pick-up', 'MAD', 'Pending', 1, 2, 1),
+('On-site', 'MAD', 'In Preparation', 2, 5, 3),
+('Pick-up', 'MAD', 'Ready', 3, 6, 4);
 
 INSERT INTO Order_Item (order_id, product_id, quantity_ordered, product_unit_price, currency)
 VALUES

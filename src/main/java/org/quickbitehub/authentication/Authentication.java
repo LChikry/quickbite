@@ -5,7 +5,6 @@ import org.quickbitehub.utils.KeyboardType;
 import org.quickbitehub.utils.MessageHandler;
 import org.quickbitehub.QuickBite;
 import org.quickbitehub.utils.SignEmoji;
-import org.quickbitehub.client.Account;
 import org.quickbitehub.client.UserType;
 import org.telegram.telegrambots.client.okhttp.OkHttpTelegramClient;
 import org.telegram.telegrambots.meta.api.objects.message.Message;
@@ -119,7 +118,7 @@ public class Authentication {
 		putRecentAuthFeedbackMessage(telegramId, feedbackMsg);
 		deleteRecentAuthFeedbackMessage(telegramId);
 		authProcesses.remove(telegramId); // the process is finished
-		// task: show dashboard
+		QuickBite.viewDashboard(telegramId);
 	}
 
 	public static void signUp(Message message, Long telegramId) {
@@ -212,7 +211,7 @@ public class Authentication {
 		putRecentAuthFeedbackMessage(telegramId, feedbackMsg);
 		deleteRecentAuthFeedbackMessage(telegramId);
 		authProcesses.remove(telegramId); // the process is finished
-		// task: show the dashboard
+		QuickBite.viewDashboard(telegramId);
 	}
 
 	public static void signOut(Long telegramId) {

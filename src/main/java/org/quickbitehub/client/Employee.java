@@ -30,7 +30,6 @@ public class Employee extends User {
 		return allEmployees.get(employeeId);
 	}
 
-	//Method to get all employees
 	public static HashMap<String, Employee> getAllEmployees() {
 		String query = "SELECT * FROM Employee";
 		HashMap<String, Employee> employees = new HashMap<>();  // HashMap to store customer data by customer_id
@@ -68,12 +67,9 @@ public class Employee extends User {
 	}
 
 
-	//Method to insert into the employee table
 	public static String insertEmployee(String emp_fname, String emp_lname, Integer res_id) {
-		// Insert query for the Users table
 		String userSQL = "INSERT INTO Users (user_first_name, user_last_name, user_type) VALUES (?, ?, ?) RETURNING user_id";
 
-		// Insert query for the Customer table
 		String insertSQL = "INSERT INTO Employee (user_id, user_first_name, user_last_name, restaurant_id, user_type) VALUES (?, ?, ?, ?, ?)";
 		int userId = 0;
 

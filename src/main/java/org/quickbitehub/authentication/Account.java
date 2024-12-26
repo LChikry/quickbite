@@ -1,6 +1,9 @@
-package org.quickbitehub.client;
+package org.quickbitehub.authentication;
 
-import org.quickbitehub.authentication.DBCredentials;
+import org.quickbitehub.client.Customer;
+import org.quickbitehub.client.Employee;
+import org.quickbitehub.client.User;
+import org.quickbitehub.client.UserType;
 
 import java.io.Serializable;
 import java.sql.*;
