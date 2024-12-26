@@ -1,10 +1,10 @@
 package org.quickbitehub.authentication;
 
 import io.github.cdimascio.dotenv.Dotenv;
-import org.quickbitehub.KeyboardType;
-import org.quickbitehub.MessageHandler;
+import org.quickbitehub.utils.KeyboardType;
+import org.quickbitehub.utils.MessageHandler;
 import org.quickbitehub.QuickBite;
-import org.quickbitehub.SignEmoji;
+import org.quickbitehub.utils.SignEmoji;
 import org.quickbitehub.client.Account;
 import org.quickbitehub.client.UserType;
 import org.telegram.telegrambots.client.okhttp.OkHttpTelegramClient;
@@ -14,7 +14,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMa
 import java.util.HashMap;
 import java.util.Objects;
 
-import static org.quickbitehub.MessageHandler.keyboards;
+import static org.quickbitehub.utils.MessageHandler.keyboards;
 
 public class Authentication {
 	private static final OkHttpTelegramClient telegramClient = new OkHttpTelegramClient(Dotenv.load().get("BOT_TOKEN"));

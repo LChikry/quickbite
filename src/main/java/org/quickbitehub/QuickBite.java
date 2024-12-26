@@ -1,11 +1,11 @@
 package org.quickbitehub;
 
-import org.quickbitehub.authentication.AuthSteps;
 import org.quickbitehub.authentication.Authentication;
 import org.quickbitehub.client.Account;
 import org.quickbitehub.client.NavigationState;
 
 import io.github.cdimascio.dotenv.Dotenv;
+import org.quickbitehub.utils.MessageHandler;
 import org.telegram.telegrambots.client.okhttp.OkHttpTelegramClient;
 import org.telegram.telegrambots.longpolling.util.LongPollingSingleThreadUpdateConsumer;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;

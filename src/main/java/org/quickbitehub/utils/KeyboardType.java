@@ -1,4 +1,4 @@
-package org.quickbitehub;
+package org.quickbitehub.utils;
 
 public enum KeyboardType {
 	FORCE_REPLY,

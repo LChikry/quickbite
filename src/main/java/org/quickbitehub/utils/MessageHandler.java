@@ -1,4 +1,4 @@
-package org.quickbitehub;
+package org.quickbitehub.utils;
 
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
@@ -10,7 +10,6 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 
 
-import javax.swing.plaf.TableHeaderUI;
 import java.util.HashMap;
 
 public class MessageHandler {
