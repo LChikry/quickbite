@@ -1,7 +1,6 @@
 package org.quickbitehub.client;
 
-import io.github.cdimascio.dotenv.Dotenv;
-import org.quickbitehub.DBCredentials;
+import org.quickbitehub.authentication.DBCredentials;
 
 import java.io.Serializable;
 import java.sql.*;

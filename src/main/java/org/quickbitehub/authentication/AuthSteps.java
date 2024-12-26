@@ -1,10 +1,11 @@
-package org.quickbitehub;
+package org.quickbitehub.authentication;
 
-public enum KeyConstant {
+public enum AuthSteps {
+	SIGN_ING_UP_MENU("___sign_in_up_menu"),
+	SIGN_ING_UP_FEEDBACK_MSG("___sign_in_up_feedback_msg"),
 	SIGNING_EMAIL_MSG("___signing_email_msg"),
 	SIGNING_EMAIL_TXT("___signing_email_txt"),
 	SIGNING_PASSWORD_MSG("___signing_password_msg"),
-	SIGNING_PASSWORD_TXT("___signing_password_txt"),
 	SIGNUP_EMAIL_MSG("___signup_email_msg"),
 	SIGNUP_EMAIL_TXT("___signup_email_txt"),
 	SIGNUP_PASSWORD_MSG("___signup_password_msg"),
@@ -15,16 +16,15 @@ public enum KeyConstant {
 	SIGNUP_FIRST_NAME_TXT("___signup_first_name_txt"),
 	SIGNUP_LAST_NAME_MSG("___signup_last_name_msg"),
 	SIGNUP_LAST_NAME_TXT("___signup_last_name_txt"),
-	SIGNUP_MIDDLE_NAMES_MSG("___signup_middle_name_msg"),
-	SIGNUP_MIDDLE_NAMES_TXT("___signup_middle_name_txt");
+	SIGNUP_MIDDLE_NAMES_MSG("___signup_middle_name_msg");
 
 	private final String key;
 
-	KeyConstant(String key) {
+	AuthSteps(String key) {
 		this.key = key;
 	}
 
-	public String getKey() {
+	public String getStep() {
 		return this.key;
 	}
 }

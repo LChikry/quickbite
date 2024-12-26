@@ -11,38 +11,34 @@ import java.util.HashMap;
 public class KeyboardFactory {
 	static public HashMap<KeyboardType, ReplyKeyboard> getKeyboardList() {
 		HashMap<KeyboardType, ReplyKeyboard> keyboards = new HashMap<>();
-		keyboards.put(KeyboardType.SIGNING, getLogInKeyboard());
+		keyboards.put(KeyboardType.SIGN_ING_UP, getSignInUpKeyboard());
 		keyboards.put(KeyboardType.FORCE_REPLY, getForceReplyKeyboard());
 		return keyboards;
 	}
 
-	static private InlineKeyboardMarkup getLogInKeyboard() {
+	static private InlineKeyboardMarkup getSignInUpKeyboard() {
 		var logInButton = InlineKeyboardButton
 				.builder()
 				.text("Sign In")
-				.callbackData(CBQData.SIGNING_MENU.getData())
+				.callbackData(CBQData.SIGNING_PROCESS.getData())
 				.build();
 
 		var signUpButton = InlineKeyboardButton
 				.builder()
 				.text("Sign Up")
-				.callbackData(CBQData.SIGN_UP_MENU.getData())
+				.callbackData(CBQData.SIGNUP_PROCESS.getData())
 				.build();
 
-		InlineKeyboardMarkup keyboard = InlineKeyboardMarkup
+		return InlineKeyboardMarkup
 				.builder()
 				.keyboardRow(new InlineKeyboardRow(logInButton))
 				.keyboardRow(new InlineKeyboardRow(signUpButton))
 				.build();
-
-		return keyboard;
 	}
 
 	static private ForceReplyKeyboard getForceReplyKeyboard() {
-		ForceReplyKeyboard kb = ForceReplyKeyboard.builder()
+		return ForceReplyKeyboard.builder()
 				.forceReply(true)
 				.build();
-
-		return kb;
 	}
 }

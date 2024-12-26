@@ -1,6 +1,5 @@
 package org.quickbitehub;
 
-import org.telegram.telegrambots.meta.api.methods.send.SendChatAction;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.objects.message.Message;
@@ -16,22 +15,10 @@ import java.util.HashMap;
 
 public class MessageHandler {
 	private TelegramClient telegramClient;
-	private long interval;
 	public static HashMap<KeyboardType, ReplyKeyboard> keyboards = KeyboardFactory.getKeyboardList();
 
 	public MessageHandler(TelegramClient client) {
 		telegramClient = client;
-		interval = 0L;
-	}
-
-	public String logInMenu(Long telegramId) {
-
-		// show a login or signup menu
-		// based on the choice show the corresponding menu
-
-		// show the log in keyboard
-		//switch_inline_query_current_chat
-		return "";
 	}
 
 	public Message sendForceReply(Long telegramId, String message){
@@ -52,7 +39,7 @@ public class MessageHandler {
 		return null;
 	}
 
-	public void sendButtonKeyboard(Long telegramId, String message, InlineKeyboardMarkup kb){
+	public Message sendButtonKeyboard(Long telegramId, String message, InlineKeyboardMarkup kb){
 		SendMessage sm = SendMessage
 				.builder()
 				.chatId(telegramId)
@@ -62,11 +49,12 @@ public class MessageHandler {
 				.build();
 
 		try {
-			telegramClient.execute(sm);
+			return telegramClient.execute(sm);
 		} catch (TelegramApiException e) {
 			System.out.println("MessageHandler: sendButtonKeyboard");
 			e.printStackTrace();
 		}
+		return null;
 	}
 
 	public void deleteMessage(Long telegramId, Integer messageId) {
@@ -84,7 +72,7 @@ public class MessageHandler {
 		}
 	}
 
-	public boolean sendText(Long user, String textMessage) {
+	public Message sendText(Long user, String textMessage) {
 		SendMessage msg = SendMessage
 				.builder()
 				.chatId(user)
@@ -93,31 +81,12 @@ public class MessageHandler {
 				.build();
 
 		try {
-			telegramClient.execute(msg);
-			return true;
+			return telegramClient.execute(msg);
 		} catch (TelegramApiException e) {
 			e.printStackTrace();
 			System.out.println("MessageHandler: sendText");
-			interval = (long) Math.pow(2, interval);
-			return textMessageRegression(user, textMessage);
 		}
+		return null;
 	}
 
-	private boolean textMessageRegression(long user, String textMessage) {
-		if (interval >= 4) return false; // try sending text 2 more times
-
-		try {
-			Thread.sleep(1000 * interval);
-		} catch (InterruptedException e) {
-			System.out.println("MessageHandler: textMessageRegression()");
-			e.printStackTrace();
-		}
-
-		if (sendText(user, textMessage)) {
-			interval = 0L;
-			return true;
-		}
-		interval = 0L;
-		return false;
-	}
 }

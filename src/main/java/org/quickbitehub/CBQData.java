@@ -2,9 +2,8 @@ package org.quickbitehub;
 
 // Call Back Query Data
 public enum CBQData {
-	SIGNING_MENU("---signing_menu"),
-	SIGNING_VERIFICATION("---signing_verification"),
-	SIGN_UP_MENU("---signup_menu");
+	SIGNING_PROCESS("---signing_process"),
+	SIGNUP_PROCESS("---signup_process");
 
 	private final String data;
 	CBQData(String cbqData) {

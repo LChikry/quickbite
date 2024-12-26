@@ -29,10 +29,6 @@ public class Main {
 		}
 	}
 
-
-
-
-
 	// Method to get all customers and store them in a HashMap
 	public static HashMap<Integer, HashMap<String, Object>> getAllCustomers() {
 		String url = "jdbc:postgresql://localhost:5432/test2"; // Your DB details
