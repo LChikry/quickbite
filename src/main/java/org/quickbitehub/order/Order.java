@@ -162,7 +162,7 @@ public class Order {
 	}
 
 	private static HashMap<String, Order> getCurrentOrders() {
-		String query = "SELECT * FROM Order WHERE order_timestamp >= CURRENT_DATE AND order_timestamp < CURRENT_DATE + INTERVAL '1 day' OR order_status IN (?, ?)";
+		String query = "SELECT * FROM Orders WHERE order_timestamp >= CURRENT_DATE AND order_timestamp < CURRENT_DATE + INTERVAL '1 day' OR order_status IN (?, ?)";
 		HashMap<String, Order> orders = new HashMap<>();  // HashMap to store customer data by customer_id
 		try {
 			Class.forName("org.postgresql.Driver");
@@ -211,7 +211,7 @@ public class Order {
 	}
 
 	private static HashMap<String, Order> getPast30DayOrders() {
-		String query = "SELECT * FROM Order WHERE (order_timestamp >= CURRENT_DATE - INTERVAL '30 days' AND order_timestamp < CURRENT_DATE + INTERVAL '1 day')";
+		String query = "SELECT * FROM Orders WHERE (order_timestamp >= CURRENT_DATE - INTERVAL '30 days' AND order_timestamp < CURRENT_DATE + INTERVAL '1 day')";
 		HashMap<String, Order> orders = new HashMap<>();  // HashMap to store orders by order_id
 
 		try {
