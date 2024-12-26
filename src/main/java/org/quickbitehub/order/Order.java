@@ -34,8 +34,13 @@ public class Order {
 		this.employeeId = employeeId;
 		this.CUSTOMER_ID = customerId;
 	}
+
 	public MonetaryAmount getOrderTotalValue() {
-		return getOrderTotalValue(Integer.valueOf(this.ORDER_ID));
+		return this.orderTotalValue;
+	}
+
+	public void fetchOrderTotalValue() {
+		this.orderTotalValue = getOrderTotalValue(Integer.valueOf(this.ORDER_ID));
 	}
 
 	public static void fetchAllCurrentOrders() {
