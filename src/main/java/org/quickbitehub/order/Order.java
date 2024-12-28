@@ -35,6 +35,18 @@ public class Order {
 		this.CUSTOMER_ID = customerId;
 	}
 
+	public static void issueOrder(Long telegramId) {
+
+		// tasks
+		/*
+			- choose restaurant
+			- choose product
+			- choose quantity
+			- choose next product
+			- confirm
+		 */
+	}
+
 	public MonetaryAmount getOrderTotalValue() {
 		return this.orderTotalValue;
 	}

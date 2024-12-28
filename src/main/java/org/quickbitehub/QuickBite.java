@@ -59,7 +59,7 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 
 		switch (command) {
 			case "/start" -> viewDashboard(telegramId);
-//			case "/order" -> issueOrder();
+			case "/order" -> issueOrder(telegramId);
 //			case "/cancel" -> cancelPendingOrder();
 //			case "/manage_orders" -> viewManageOrdersMenu();
 //			case "/settings" -> viewSettingsMenu();
@@ -82,6 +82,8 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 			Authentication.signIn(null, telegramId);
 		} else if (cbqData.equals(CBQData.SIGNUP_PROCESS.getData())) {
 			Authentication.signUp(null, telegramId);
+		} else if (cbqData.equals(CBQData.ISSUE_ORDER.getData())) {
+			issueOrder(telegramId);
 		}
 	}
 
@@ -95,6 +97,17 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 		// it will show the balance
 		// it will show full name
 		// it will show in progress orders
+	}
+
+	public static void issueOrder(Long telegramId) {
+		// tasks
+		/*
+			- choose restaurant
+			- choose product
+			- choose quantity
+			- choose next product
+			- confirm
+		 */
 	}
 
 
