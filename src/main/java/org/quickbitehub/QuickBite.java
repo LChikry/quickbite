@@ -22,7 +22,6 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 	private final String botToken;
 	private final String botUsername = "QuickBiteHub_bot";
 	private final TelegramClient telegramClient;
-	private final MessageHandler communicator;
 
 	public static final HashMap<Long, Stack<NavigationState>> sessionState = new HashMap<>(); // TelegramId -> State
 
@@ -30,7 +29,6 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 		Dotenv dotenv = Dotenv.load();
 		this.botToken = dotenv.get("BOT_TOKEN");
 		this.telegramClient = new OkHttpTelegramClient(this.botToken);
-		this.communicator = new MessageHandler(this.telegramClient);
 	}
 
 	public String getBotUsername() {

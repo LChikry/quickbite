@@ -1,5 +1,7 @@
 package org.quickbitehub.utils;
 
+import io.github.cdimascio.dotenv.Dotenv;
+import org.telegram.telegrambots.client.okhttp.OkHttpTelegramClient;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.objects.message.Message;
@@ -9,13 +11,9 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMar
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 
 public class MessageHandler {
-	private TelegramClient telegramClient;
+	private static final TelegramClient telegramClient = new OkHttpTelegramClient(Dotenv.load().get("BOT_TOKEN"));
 
-	public MessageHandler(TelegramClient client) {
-		telegramClient = client;
-	}
-
-	public Message sendForceReply(Long telegramId, String message){
+	public static Message sendForceReply(Long telegramId, String message){
 		SendMessage sm = SendMessage
 				.builder()
 				.chatId(telegramId)
@@ -33,7 +31,7 @@ public class MessageHandler {
 		return null;
 	}
 
-	public Message sendInlineKeyboard(Long telegramId, String message, InlineKeyboardMarkup kb){
+	public static Message sendInlineKeyboard(Long telegramId, String message, InlineKeyboardMarkup kb){
 		SendMessage sm = SendMessage
 				.builder()
 				.chatId(telegramId)
@@ -51,7 +49,7 @@ public class MessageHandler {
 		return null;
 	}
 
-	public Message sendReplyKeyboard(Long telegramId, String message, ReplyKeyboardMarkup kb) {
+	public static Message sendReplyKeyboard(Long telegramId, String message, ReplyKeyboardMarkup kb) {
 		SendMessage sm = SendMessage
 				.builder()
 				.chatId(telegramId)
@@ -69,7 +67,7 @@ public class MessageHandler {
 		return null;
 	}
 
-	public void deleteMessage(Long telegramId, Integer messageId) {
+	public static void deleteMessage(Long telegramId, Integer messageId) {
 		DeleteMessage dm = DeleteMessage
 				.builder()
 				.chatId(telegramId)
@@ -84,7 +82,7 @@ public class MessageHandler {
 		}
 	}
 
-	public Message sendText(Long user, String textMessage) {
+	public static Message sendText(Long user, String textMessage) {
 		SendMessage msg = SendMessage
 				.builder()
 				.chatId(user)

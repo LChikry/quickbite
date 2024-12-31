@@ -14,7 +14,6 @@ import java.util.Objects;
 
 public class Authentication {
 	private static final OkHttpTelegramClient telegramClient = new OkHttpTelegramClient(Dotenv.load().get("BOT_TOKEN"));
-	private static final MessageHandler communicator = new MessageHandler(telegramClient);
 	private static final HashMap<Long, HashMap<String, Object>> authProcesses = new HashMap<>(); // device(Telegram Account Id) -> Current Step
 	public static final HashMap<Long, Account> userSessions = new HashMap<>(); // TelegramId -> Account
 
@@ -23,7 +22,7 @@ public class Authentication {
 					"Welcome to QuickBite, where you can Skip the Line, Save the Time for What Matters Most\\.\n" +
 					"Sign in or Sing up, so you can benefit from our services that will streamline your food ordering process for greater life quality \ud83d\ude01";
 
-		Message signingMenu = communicator.sendInlineKeyboard(telegramId, msg, KeyboardFactory.getSignInUpKeyboard());
+		Message signingMenu = MessageHandler.sendInlineKeyboard(telegramId, msg, KeyboardFactory.getSignInUpKeyboard());
 		HashMap<String, Object> menuStep = new HashMap<>();
 		menuStep.put(AuthSteps.SIGN_IN_UP_MENU.getStep(), signingMenu);
 		authProcesses.put(telegramId, menuStep);
@@ -37,17 +36,17 @@ public class Authentication {
 
 		userAuthSteps.put(txt, message.getText().trim().strip());
 		userAuthSteps.remove(msg);
-		communicator.deleteMessage(telegramId, message.getReplyToMessage().getMessageId());
-		communicator.deleteMessage(telegramId, message.getMessageId());
+		MessageHandler.deleteMessage(telegramId, message.getReplyToMessage().getMessageId());
+		MessageHandler.deleteMessage(telegramId, message.getMessageId());
 
-		Message nextMessage = communicator.sendForceReply(telegramId, nextMsgPrompt);
+		Message nextMessage = MessageHandler.sendForceReply(telegramId, nextMsgPrompt);
 		userAuthSteps.put(nextMsgKey, nextMessage);
 		authProcesses.put(telegramId, userAuthSteps);
 	}
 
 	public static void signIn(Message message, Long telegramId) {
 		if (message == null) {
-			Message msg = communicator.sendForceReply(telegramId, "Enter Email\\:");
+			Message msg = MessageHandler.sendForceReply(telegramId, "Enter Email\\:");
 
 			HashMap<String, Object> existingProcess = authProcesses.getOrDefault(telegramId, new HashMap<>());
 			existingProcess.put(AuthSteps.SIGNING_EMAIL_MSG.getStep(), msg);
@@ -69,8 +68,8 @@ public class Authentication {
 		if (!Objects.equals(message.getReplyToMessage().getMessageId(), enteredPassword.getMessageId())) return;
 
 		String password = message.getText();
-		communicator.deleteMessage(telegramId, message.getReplyToMessage().getMessageId());
-		communicator.deleteMessage(telegramId, message.getMessageId());
+		MessageHandler.deleteMessage(telegramId, message.getReplyToMessage().getMessageId());
+		MessageHandler.deleteMessage(telegramId, message.getMessageId());
 		String email = ((String) userAuthSteps.get(AuthSteps.SIGNING_EMAIL_TXT.getStep())).strip().trim().toLowerCase();
 
 		signInHandler(telegramId, email, password);
@@ -109,7 +108,7 @@ public class Authentication {
 		userSessions.put(telegramId, userAccount);
 		deleteRecentAuthFeedbackMessage(telegramId);
 		Integer msgId = ((Message) authProcesses.get(telegramId).get(AuthSteps.SIGN_IN_UP_MENU.getStep())).getMessageId();
-		communicator.deleteMessage(telegramId, msgId);
+		MessageHandler.deleteMessage(telegramId, msgId);
 
 		String feedbackMsg = SignEmoji.GREEN_CIRCLE.getCode() + " You Signed In Successfully \ud83d\udc4b";
 		putRecentAuthFeedbackMessage(telegramId, feedbackMsg);
@@ -120,7 +119,7 @@ public class Authentication {
 
 	public static void signUp(Message message, Long telegramId) {
 		if (message == null) {
-			Message msg = communicator.sendForceReply(telegramId, "Enter Email\\:");
+			Message msg = MessageHandler.sendForceReply(telegramId, "Enter Email\\:");
 
 			HashMap<String, Object> existingProcess = authProcesses.getOrDefault(telegramId, new HashMap<>());
 			existingProcess.put(AuthSteps.SIGNUP_EMAIL_MSG.getStep(), msg);
@@ -170,8 +169,8 @@ public class Authentication {
 		if (!Objects.equals(message.getReplyToMessage().getMessageId(), enteredPassword.getMessageId())) return;
 
 		String middle_names = message.getText().strip().trim();
-		communicator.deleteMessage(telegramId, message.getReplyToMessage().getMessageId());
-		communicator.deleteMessage(telegramId, message.getMessageId());
+		MessageHandler.deleteMessage(telegramId, message.getReplyToMessage().getMessageId());
+		MessageHandler.deleteMessage(telegramId, message.getMessageId());
 		if (middle_names.equals("0")) middle_names = "";
 
 		String email = (String) userAuthSteps.get(AuthSteps.SIGNUP_EMAIL_TXT.getStep());
@@ -202,7 +201,7 @@ public class Authentication {
 		userSessions.put(telegramId, userAccount);
 		deleteRecentAuthFeedbackMessage(telegramId);
 		Integer msgId = ((Message) authProcesses.get(telegramId).get(AuthSteps.SIGN_IN_UP_MENU.getStep())).getMessageId();
-		communicator.deleteMessage(telegramId, msgId);
+		MessageHandler.deleteMessage(telegramId, msgId);
 
 		String feedbackMsg = SignEmoji.GREEN_CIRCLE.getCode() + " You've Created Your Account Successfully \ud83d\udc4b";
 		putRecentAuthFeedbackMessage(telegramId, feedbackMsg);
@@ -230,7 +229,7 @@ public class Authentication {
 	}
 
 	private static void putRecentAuthFeedbackMessage(Long telegramId, String textMessage) {
-		Message fm = communicator.sendText(telegramId, textMessage);
+		Message fm = MessageHandler.sendText(telegramId, textMessage);
 		HashMap<String, Object> existingSteps = authProcesses.getOrDefault(telegramId, new HashMap<>());
 		existingSteps.put(AuthSteps.SIGN_IN_UP_FEEDBACK_MSG.getStep(), fm);
 		authProcesses.put(telegramId, existingSteps);
@@ -241,6 +240,6 @@ public class Authentication {
 		assert Authentication.authProcesses.get(telegramId) != null;
 		if (Authentication.authProcesses.get(telegramId).get(AuthSteps.SIGN_IN_UP_FEEDBACK_MSG.getStep()) == null) return;
 		Message msg = (Message) Authentication.authProcesses.get(telegramId).get(AuthSteps.SIGN_IN_UP_FEEDBACK_MSG.getStep());
-		communicator.deleteMessage(telegramId, msg.getMessageId());
+		MessageHandler.deleteMessage(telegramId, msg.getMessageId());
 	}
 }
