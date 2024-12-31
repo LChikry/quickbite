@@ -11,6 +11,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.Keyboard
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class KeyboardFactory {
@@ -55,5 +56,4 @@ public class KeyboardFactory {
 		replyKb.setKeyboard(kbRow);
 		return replyKb;
 	}
-
 }
