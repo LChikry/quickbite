@@ -5,13 +5,17 @@ import org.quickbitehub.authentication.Authentication;
 import org.quickbitehub.authentication.DBCredentials;
 import org.quickbitehub.utils.KeyboardFactory;
 import org.quickbitehub.utils.MessageHandler;
+import org.quickbitehub.utils.Emoji;
 
+import javax.swing.text.html.StyleSheet;
+import java.security.Key;
 import java.sql.*;
 import java.time.DayOfWeek;
 import java.time.OffsetDateTime;
 import java.time.OffsetTime;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 
 public class Restaurant {
 	private final String RESTAURANT_ID;
@@ -32,19 +36,25 @@ public class Restaurant {
 	}
 
 	public static void viewRestaurants(Long telegramId, String query) {
+		if (allRestaurants.isEmpty()) {
+			String msg = Emoji.ORANGE_CIRCLE.getCode() + " Sorry, there is no restaurant currently operating in our bot\\.";
+			MessageHandler.sendText(telegramId, msg);
+			return;
+		}
+
 		if (query == null) {
 			Account account = Authentication.userSessions.get(telegramId);
 			assert (account != null);
-
-			String[] restaurantIds = account.getRecentUsedRestaurant();
+			if (account.getRecentUsedRestaurant().isEmpty()) {
+				for (String id : Restaurant.allRestaurants.keySet()) {
+					account.addRecentUsedRestaurant(id);
+					if (account.getRecentUsedRestaurant().size() >= Account.MAX_RECENT_USED_RESTAURANT_LENGTH) break;
+				}
+			}
 			String message = "Which restaurant you want to order from\\?";
-			MessageHandler.sendReplyKeyboard(telegramId, message, KeyboardFactory.getRestaurantChoicesKeyboard(restaurantIds));
+			MessageHandler.sendReplyKeyboard(telegramId, message, KeyboardFactory.getRestaurantChoicesKeyboard(account.getRecentUsedRestaurant()));
 		}
-		// task:
-		/*
-			2. view the search option
-			3. prepare the inline query search option to be shown
-		 */
+		// task: view the inline query results
 	}
 
 	public static void viewRestaurantProducts(Long telegramId, String query) {
