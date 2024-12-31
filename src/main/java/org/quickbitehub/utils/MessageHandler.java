@@ -5,10 +5,8 @@ import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage
 import org.telegram.telegrambots.meta.api.objects.message.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
-
-
-import java.util.HashMap;
 
 public class MessageHandler {
 	private TelegramClient telegramClient;
@@ -48,6 +46,24 @@ public class MessageHandler {
 			return telegramClient.execute(sm);
 		} catch (TelegramApiException e) {
 			System.out.println("MessageHandler: sendInlineKeyboard");
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	public Message sendReplyKeyboard(Long telegramId, String message, ReplyKeyboardMarkup kb) {
+		SendMessage sm = SendMessage
+				.builder()
+				.chatId(telegramId)
+				.parseMode("MarkdownV2")
+				.text(message)
+				.replyMarkup(kb)
+				.build();
+
+		try {
+			return telegramClient.execute(sm);
+		} catch (TelegramApiException e) {
+			System.out.println("MessageHandler: sendReplyKeyboard");
 			e.printStackTrace();
 		}
 		return null;
