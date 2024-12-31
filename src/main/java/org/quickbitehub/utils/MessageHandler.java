@@ -82,10 +82,10 @@ public class MessageHandler {
 		}
 	}
 
-	public static Message sendText(Long user, String textMessage) {
+	public static Message sendText(Long telegramId, String textMessage) {
 		SendMessage msg = SendMessage
 				.builder()
-				.chatId(user)
+				.chatId(telegramId)
 				.text(textMessage)
 				.parseMode("MarkdownV2")
 				.build();
