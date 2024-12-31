@@ -5,11 +5,13 @@ import org.quickbitehub.authentication.Account;
 import org.quickbitehub.client.NavigationState;
 
 import io.github.cdimascio.dotenv.Dotenv;
+import org.quickbitehub.client.Restaurant;
 import org.quickbitehub.utils.MessageHandler;
 import org.telegram.telegrambots.client.okhttp.OkHttpTelegramClient;
 import org.telegram.telegrambots.longpolling.util.LongPollingSingleThreadUpdateConsumer;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.inlinequery.InlineQuery;
 import org.telegram.telegrambots.meta.api.objects.message.Message;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 
@@ -48,15 +50,14 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 		if (update.hasMessage()) {
 			Message msg = update.getMessage();
 			if (msg.isCommand()) botCommandsHandler(msg);
-//			if (msgText.contains("@"+botUsername.toLowerCase())) botRepliesHandler(update.getMessage());
 			if (msg.isReply()) botRepliesHandler(msg);
 		} else if (update.hasCallbackQuery()) botQueryHandler(update.getCallbackQuery());
+		else if (update.hasInlineQuery()) botInlineQueryHandler(update.getInlineQuery());
 	}
 
 	private void botCommandsHandler(Message message) {
 		String command = message.getText();
 		Long telegramId = message.getFrom().getId();
-
 		switch (command) {
 			case "/start" -> viewDashboard(telegramId);
 			case "/order" -> issueOrder(telegramId);
@@ -64,10 +65,9 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 //			case "/manage_orders" -> viewManageOrdersMenu();
 //			case "/settings" -> viewSettingsMenu();
 			case "/logout" -> Authentication.signOut(telegramId);
-			case "/help" -> viewHelpPage();
+//			case "/help" -> viewHelpPage();
 		}
 	}
-
 
 	private void botRepliesHandler(Message message) {
 		Authentication.signIn(message, message.getChat().getId());
@@ -84,6 +84,22 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 			Authentication.signUp(null, telegramId);
 		} else if (cbqData.equals(CBQData.ISSUE_ORDER.getData())) {
 			issueOrder(telegramId);
+		}
+	}
+
+	private void botInlineQueryHandler(InlineQuery inlineQuery) {
+		Long telegramId = inlineQuery.getFrom().getId();
+		String query = inlineQuery.getQuery().strip().trim().toLowerCase();
+		if (query.contains("restaurant")) {
+			query = query.substring(query.indexOf(":")+2);
+			Restaurant.viewRestaurants(telegramId, query);
+			return;
+		}
+
+		if (query.contains("items")) {
+			query = query.substring(query.indexOf(":")+2);
+			Restaurant.viewRestaurantProducts(telegramId, query);
+			return;
 		}
 	}
 
@@ -109,7 +125,6 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 			- confirm
 		 */
 	}
-
 
 	private void viewHelpPage() {
 
