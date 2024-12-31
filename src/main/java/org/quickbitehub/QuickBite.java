@@ -56,6 +56,12 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 	private void botCommandsHandler(Message message) {
 		String command = message.getText();
 		Long telegramId = message.getFrom().getId();
+
+		if (Authentication.userSessions.get(telegramId) == null) {
+			Authentication.authenticate(telegramId);
+			return;
+		}
+
 		switch (command) {
 			case "/start" -> viewDashboard(telegramId);
 			case "/order" -> issueOrder(telegramId);
@@ -102,11 +108,6 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 	}
 
 	public static void viewDashboard(Long telegramId) {
-		if (Authentication.userSessions.get(telegramId) == null) {
-			Authentication.authenticate(telegramId);
-			return;
-		}
-
 		// show dashboard menu
 		// it will show the balance
 		// it will show full name
@@ -114,9 +115,9 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 	}
 
 	public static void issueOrder(Long telegramId) {
+		Restaurant.viewRestaurants(telegramId, null);
 		// tasks
 		/*
-			- choose restaurant
 			- choose product
 			- choose quantity
 			- choose next product
