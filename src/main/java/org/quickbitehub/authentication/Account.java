@@ -1,9 +1,6 @@
 package org.quickbitehub.authentication;
 
-import org.quickbitehub.client.Customer;
-import org.quickbitehub.client.Employee;
-import org.quickbitehub.client.User;
-import org.quickbitehub.client.UserType;
+import org.quickbitehub.client.*;
 
 import java.io.Serializable;
 import java.sql.*;
@@ -19,7 +16,8 @@ public class Account implements Serializable {
 	private final LocalDate ACCOUNT_SIGN_UP_DATE;
 	private String password;
 	private HashMap<Long, Boolean> isAuthenticated = new HashMap<>(); // TelegramId (device) to isAuthentication
-	static public HashMap<String, Account> usersAccount = getAllAccounts(); // EMAIL to Account
+	private String[] recentUsedRestaurant = new String[8]; // recent used restaurantId in index 0
+	public static HashMap<String, Account> usersAccount = getAllAccounts(); // EMAIL to Account
 
 	public Account(String EMAIL, String password, User USER, Long telegramId) {
 		this.ACCOUNT_SIGN_UP_DATE = LocalDate.now();
