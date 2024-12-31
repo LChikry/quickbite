@@ -1,10 +1,11 @@
 package org.quickbitehub.authentication;
 
 import io.github.cdimascio.dotenv.Dotenv;
+import org.quickbitehub.CBQData;
 import org.quickbitehub.utils.KeyboardFactory;
 import org.quickbitehub.utils.MessageHandler;
 import org.quickbitehub.QuickBite;
-import org.quickbitehub.utils.SignEmoji;
+import org.quickbitehub.utils.Emoji;
 import org.quickbitehub.client.UserType;
 import org.telegram.telegrambots.client.okhttp.OkHttpTelegramClient;
 import org.telegram.telegrambots.meta.api.objects.message.Message;
@@ -76,24 +77,11 @@ public class Authentication {
 	}
 
 	private static void signInHandler(Long telegramId, String email, String password) {
-		if (!Account.isValidEmail(email) || !Account.isAccountExist(email) || userSessions.get(telegramId) != null) {
-			deleteRecentAuthFeedbackMessage(telegramId);
-			String textMsg = SignEmoji.RED_CIRCLE.getCode() + " *Sign In Failed*\nInvalid Email or You are Logged In \ud83d\ude1e";
-			putRecentAuthFeedbackMessage(telegramId, textMsg);
-			deleteRecentAuthFeedbackMessage(telegramId);
-
-			var menuMsg = (Message) authProcesses.get(telegramId).get(AuthSteps.SIGN_IN_UP_MENU.getStep());
-			HashMap<String, Object> temp = new HashMap<>();
-			temp.put(AuthSteps.SIGN_IN_UP_MENU.getStep(), menuMsg);
-			authProcesses.remove(telegramId); // the process is finished
-			authProcesses.put(telegramId, temp);
-			return;
-		}
-
+		if (!isAuthenticationInformationValid(telegramId, email, password, CBQData.SIGNING_PROCESS)) return;
 		Account userAccount = Account.authenticate(telegramId, email, password);
 		if (userAccount == null) {
 			deleteRecentAuthFeedbackMessage(telegramId);
-			String textMsg = SignEmoji.RED_CIRCLE.getCode() + " *Sign In Failed*\nIncorrect Email or Password \ud83d\ude1e";
+			String textMsg = Emoji.RED_CIRCLE.getCode() + " *Sign In Failed*\nIncorrect Email or Password " + Emoji.SAD_FACE.getCode();
 			putRecentAuthFeedbackMessage(telegramId, textMsg);
 			deleteRecentAuthFeedbackMessage(telegramId);
 
@@ -110,7 +98,7 @@ public class Authentication {
 		Integer msgId = ((Message) authProcesses.get(telegramId).get(AuthSteps.SIGN_IN_UP_MENU.getStep())).getMessageId();
 		MessageHandler.deleteMessage(telegramId, msgId);
 
-		String feedbackMsg = SignEmoji.GREEN_CIRCLE.getCode() + " You Signed In Successfully \ud83d\udc4b";
+		String feedbackMsg = Emoji.GREEN_CIRCLE.getCode() + " You Signed In Successfully " + Emoji.HAND_WAVING.getCode();
 		putRecentAuthFeedbackMessage(telegramId, feedbackMsg);
 		deleteRecentAuthFeedbackMessage(telegramId);
 		authProcesses.remove(telegramId); // the process is finished
@@ -183,45 +171,57 @@ public class Authentication {
 	}
 
 	private static void signUpHandler(Long telegramId, String email, String password, String id, String first_name, String last_name, String middle_names) {
-		String textMsg = "";
-		if (userSessions.get(telegramId) != null) {
-			textMsg = SignEmoji.ORANGE_CIRCLE.getCode() + " *Sign Up Failed*\nYou are Already Logged In\ud83d\ude1e";
-		} else if (!Account.isValidEmail(email)) {
-			textMsg = SignEmoji.RED_CIRCLE.getCode() + " *Sign Up Failed*\nInvalid Email\ud83d\ude1e";
-		} else if (Account.isAccountExist(email)) {
-			textMsg = SignEmoji.ORANGE_CIRCLE.getCode() + " *Sign Up Failed*\nYou Already Have an Account; Just Sign In \ud83d\ude01";
-		}
-
-		if (!Account.isValidEmail(email) || Account.isAccountExist(email) || userSessions.get(telegramId) != null) {
-			deleteRecentAuthFeedbackMessage(telegramId);
-			putRecentAuthFeedbackMessage(telegramId, textMsg);
-			deleteRecentAuthFeedbackMessage(telegramId);
-
-			var menuMsg = (Message) authProcesses.get(telegramId).get(AuthSteps.SIGN_IN_UP_MENU.getStep());
-			HashMap<String, Object> temp = new HashMap<>();
-			temp.put(AuthSteps.SIGN_IN_UP_MENU.getStep(), menuMsg);
-			authProcesses.remove(telegramId); // the process is finished
-			authProcesses.put(telegramId, temp);
-			return;
-		}
-
+		if (!isAuthenticationInformationValid(telegramId, email, password, CBQData.SIGNUP_PROCESS)) return;
 		Account userAccount = Account.signUp(email, password, telegramId, first_name, last_name, middle_names, UserType.CUSTOMER.getText(), null);
 		userSessions.put(telegramId, userAccount);
 		deleteRecentAuthFeedbackMessage(telegramId);
 		Message msg = (Message) authProcesses.get(telegramId).get(AuthSteps.SIGN_IN_UP_MENU.getStep());
 		MessageHandler.deleteMessage(telegramId, msg.getMessageId());
 
-		String feedbackMsg = SignEmoji.GREEN_CIRCLE.getCode() + " You've Created Your Account Successfully \ud83d\udc4b";
+		String feedbackMsg = Emoji.GREEN_CIRCLE.getCode() + " You've Created Your Account Successfully " + Emoji.HAND_WAVING.getCode();
 		putRecentAuthFeedbackMessage(telegramId, feedbackMsg);
 		deleteRecentAuthFeedbackMessage(telegramId);
 		authProcesses.remove(telegramId); // the process is finished
 		QuickBite.viewDashboard(telegramId);
 	}
 
+	private static boolean isAuthenticationInformationValid(Long telegramId, String email, String password, CBQData processType) {
+		if (processType == CBQData.SIGNING_PROCESS) {
+			if (Account.isValidEmail(email) || Account.isAccountExist(email) || userSessions.get(telegramId) == null) {
+				Account userAccount = Account.authenticate(telegramId, email, password);
+				return userAccount != null;
+			}
+		} else {
+			if (Account.isValidEmail(email) || !Account.isAccountExist(email) || userSessions.get(telegramId) == null) return true;
+		}
+
+		String textMsg = "";
+		if (Account.authenticate(telegramId, email, password) == null) {
+			textMsg = Emoji.RED_CIRCLE.getCode() + " *Sign In Failed*\nIncorrect Email or Password " + Emoji.SAD_FACE.getCode();
+		} else if (userSessions.get(telegramId) != null) {
+			textMsg = Emoji.ORANGE_CIRCLE.getCode() + " *Sign Up Failed*\nYou are Already Logged In " + Emoji.SAD_FACE.getCode();
+		} else if (!Account.isValidEmail(email)) {
+			textMsg = Emoji.RED_CIRCLE.getCode() + " *Sign Up Failed*\nInvalid Email " + Emoji.SAD_FACE.getCode();
+		} else if (Account.isAccountExist(email)) {
+			textMsg = Emoji.ORANGE_CIRCLE.getCode() + " *Sign Up Failed*\nYou Already Have an Account; Just Sign In " + Emoji.SMILING_FACE.getCode();
+		}
+
+		deleteRecentAuthFeedbackMessage(telegramId);
+		putRecentAuthFeedbackMessage(telegramId, textMsg);
+		deleteRecentAuthFeedbackMessage(telegramId);
+
+		var menuMsg = (Message) authProcesses.get(telegramId).get(AuthSteps.SIGN_IN_UP_MENU.getStep());
+		HashMap<String, Object> temp = new HashMap<>();
+		temp.put(AuthSteps.SIGN_IN_UP_MENU.getStep(), menuMsg);
+		authProcesses.remove(telegramId); // the process is finished
+		authProcesses.put(telegramId, temp);
+		return false;
+	}
+
 	public static void signOut(Long telegramId) {
 		Account userAccount = userSessions.get(telegramId);
 		if (userAccount == null) {
-			String msg = SignEmoji.ORANGE_CIRCLE.getCode() + " You are not logged in\\!";
+			String msg = Emoji.ORANGE_CIRCLE.getCode() + " You are not logged in\\!";
 			putRecentAuthFeedbackMessage(telegramId, msg);
 			deleteRecentAuthFeedbackMessage(telegramId);
 			return;
@@ -231,7 +231,7 @@ public class Authentication {
 		userAccount.logOut(telegramId);
 		userSessions.remove(telegramId);
 		if (QuickBite.sessionState.get(telegramId) != null) QuickBite.sessionState.get(telegramId).clear();
-		String msg = SignEmoji.GREEN_CIRCLE.getCode() + " *_You have log out successfully\\. See you soon\\! \ud83d\udc4b_*";
+		String msg = Emoji.GREEN_CIRCLE.getCode() + " *_You have log out successfully\\. See you soon\\! \ud83d\udc4b_*";
 		putRecentAuthFeedbackMessage(telegramId, msg);
 		deleteRecentAuthFeedbackMessage(telegramId);
 	}
