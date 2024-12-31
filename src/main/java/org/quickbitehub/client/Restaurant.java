@@ -3,17 +3,53 @@ package org.quickbitehub.client;
 import org.quickbitehub.authentication.DBCredentials;
 
 import java.sql.*;
+import java.time.DayOfWeek;
+import java.time.OffsetDateTime;
 import java.time.OffsetTime;
 import java.util.HashMap;
 
 public class Restaurant {
 	private final String RESTAURANT_ID;
 	private String restaurantName;
-	private HashMap<DaysOfWeek, OffsetTime> restaurantOpeningTime;
-	private HashMap<DaysOfWeek, OffsetTime> restaurantClosingTime;
+	private HashMap<DaysOfWeek, OffsetTime> restaurantOpeningTime = new HashMap<>();
+	private HashMap<DaysOfWeek, OffsetTime> restaurantClosingTime = new HashMap<>();
 
-	public Restaurant(String restaurantId) {
-		RESTAURANT_ID = restaurantId;
+	public static HashMap<String, Restaurant> allRestaurants = getAllRestaurantsFromDB();
+
+	public Restaurant(String restaurantId, String restaurantName) {
+		this.RESTAURANT_ID = restaurantId;
+		this.restaurantName = restaurantName;
+	}
+
+	public static void insertRestaurant(Restaurant restaurant) {
+		allRestaurants.put(restaurant.getRestaurantId(), restaurant);
+		//task: insert into db
+	}
+
+	public static void viewRestaurants(Long telegramId, String query) {
+
+	}
+
+	public static void viewRestaurantProducts(Long telegramId, String query) {
+
+	}
+
+	public boolean isOpen() {
+		if (restaurantOpeningTime == null || restaurantClosingTime == null ||
+			restaurantOpeningTime.isEmpty() || restaurantClosingTime.isEmpty()) {
+			return false;
+		}
+
+		OffsetDateTime now = OffsetDateTime.now(restaurantOpeningTime.values().iterator().next().getOffset());
+		DayOfWeek currentDay = now.getDayOfWeek();
+		if (restaurantOpeningTime.get(currentDay.name()) == null &&
+			restaurantClosingTime.get(currentDay.name()) == null) {
+			return false;
+		}
+
+		OffsetTime currentTime = now.toOffsetTime();
+		return (!currentTime.isBefore(restaurantOpeningTime.get(currentDay.name())) &&
+				!currentTime.isAfter(restaurantClosingTime.get(currentDay.name())));
 	}
 
 	public String getRestaurantId() {
@@ -29,118 +65,46 @@ public class Restaurant {
 		this.restaurantName = restaurantName;
 	}
 
-	public static HashMap<Integer, HashMap<String, Object>> getRestaurantMenu(Integer res_id) {
-		String query;
-		HashMap<Integer, HashMap<String, Object>> menu = new HashMap<>();
+	public static void fetchAllRestaurants() {
+		Restaurant.allRestaurants = getAllRestaurantsFromDB();
+	}
 
-		if(res_id==1) {
-			query = "SELECT * FROM vwRes1Menu";
-
-			try {
-				Class.forName("org.postgresql.Driver");
-			} catch (ClassNotFoundException e) {
-				throw new RuntimeException(e);
-			}
-
-			try (Connection connection = DriverManager.getConnection(DBCredentials.DB_URL.getDBInfo(),
-					DBCredentials.DB_USER.getDBInfo(), DBCredentials.DB_PASSWORD.getDBInfo());
-			     PreparedStatement statement = connection.prepareStatement(query);
-			     ResultSet resultSet = statement.executeQuery()) {
-
-				// Loop through the result set and add rows to the HashMap
-				while (resultSet.next()) {
-					int product_id = resultSet.getInt("product_id");
-
-					// Create a HashMap for each row
-					HashMap<String, Object> menuData = new HashMap<>();
-					menuData.put("restaurant_id", resultSet.getInt("restaurant_id"));
-					menuData.put("category_id", resultSet.getInt("category_id"));
-					menuData.put("product_name", resultSet.getString("product_name"));
-					menuData.put("product_price", resultSet.getDouble("product_price"));
-					menuData.put("currency", resultSet.getString("currency"));
-					menuData.put("available_quantity", resultSet.getInt("available_quantity"));
-					menuData.put("min_quantity_allowed", resultSet.getInt("min_quantity_allowed"));
-
-					// Add this HashMap to the customers map using customer_id as the key
-					menu.put(product_id, menuData);
-				}
-
-			} catch (SQLException e) {
-				System.err.println("Database error: " + e.getMessage());
-			}
-		} else if (res_id==2) {
-			query = "SELECT * FROM vwRes2Menu";
-
-
-			try {
-				Class.forName("org.postgresql.Driver");
-			} catch (ClassNotFoundException e) {
-				throw new RuntimeException(e);
-			}
-
-			try (Connection connection = DriverManager.getConnection(url, user, password);
-			     PreparedStatement statement = connection.prepareStatement(query);
-			     ResultSet resultSet = statement.executeQuery()) {
-
-				// Loop through the result set and add rows to the HashMap
-				while (resultSet.next()) {
-					int product_id = resultSet.getInt("product_id");
-
-					// Create a HashMap for each row
-					HashMap<String, Object> menuData = new HashMap<>();
-					menuData.put("restaurant_id", resultSet.getInt("restaurant_id"));
-					menuData.put("category_id", resultSet.getInt("category_id"));
-					menuData.put("product_name", resultSet.getString("product_name"));
-					menuData.put("product_price", resultSet.getDouble("product_price"));
-					menuData.put("currency", resultSet.getString("currency"));
-					menuData.put("available_quantity", resultSet.getInt("available_quantity"));
-					menuData.put("min_quantity_allowed", resultSet.getInt("min_quantity_allowed"));
-
-					// Add this HashMap to the customers map using customer_id as the key
-					menu.put(product_id, menuData);
-				}
-
-			} catch (SQLException e) {
-				System.err.println("Database error: " + e.getMessage());
-			}
-		} else if (res_id==3) {
-			query = "SELECT * FROM vwRes3Menu";
-
-
-			try {
-				Class.forName("org.postgresql.Driver");
-			} catch (ClassNotFoundException e) {
-				throw new RuntimeException(e);
-			}
-
-
-			try (Connection connection = DriverManager.getConnection(url, user, password);
-			     PreparedStatement statement = connection.prepareStatement(query);
-			     ResultSet resultSet = statement.executeQuery()) {
-
-				// Loop through the result set and add rows to the HashMap
-				while (resultSet.next()) {
-					int product_id = resultSet.getInt("product_id");
-
-					// Create a HashMap for each row
-					HashMap<String, Object> menuData = new HashMap<>();
-					menuData.put("restaurant_id", resultSet.getInt("restaurant_id"));
-					menuData.put("category_id", resultSet.getInt("category_id"));
-					menuData.put("product_name", resultSet.getString("product_name"));
-					menuData.put("product_price", resultSet.getDouble("product_price"));
-					menuData.put("currency", resultSet.getString("currency"));
-					menuData.put("available_quantity", resultSet.getInt("available_quantity"));
-					menuData.put("min_quantity_allowed", resultSet.getInt("min_quantity_allowed"));
-
-					// Add this HashMap to the customers map using customer_id as the key
-					menu.put(product_id, menuData);
-				}
-
-			} catch (SQLException e) {
-				System.err.println("Database error: " + e.getMessage());
-			}
+	private static HashMap<String, Restaurant> getAllRestaurantsFromDB() {
+		String query = "SELECT * FROM Restaurant";
+		HashMap<String, Restaurant> restaurants = new HashMap<>();
+		try {
+			Class.forName("org.postgresql.Driver");
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
 		}
 
-		return menu;
+		try (Connection connection = DriverManager.getConnection(DBCredentials.DB_URL.getDBInfo(),
+				DBCredentials.DB_USER.getDBInfo(), DBCredentials.DB_PASSWORD.getDBInfo())) {
+			PreparedStatement statement = connection.prepareStatement(query);
+			ResultSet resultSet = statement.executeQuery();
+			while (resultSet.next()) {
+				String restaurantId = resultSet.getString("restaurant_id");
+				String name = resultSet.getString("restaurant_name");
+
+				restaurants.put(restaurantId, new Restaurant(restaurantId, name));
+			}
+
+			query = "SELECT * FROM RestaurantAvailability";
+			statement = connection.prepareStatement(query);
+			resultSet = statement.executeQuery();
+			while (resultSet.next()) {
+				String restaurantId = resultSet.getString("restaurant_id");
+				Restaurant rest = restaurants.get(restaurantId);
+				DaysOfWeek day = DaysOfWeek.valueOf(resultSet.getString("day_of_week"));
+				OffsetTime open = resultSet.getObject("restaurant_opening_time", OffsetTime.class);
+				OffsetTime close = resultSet.getObject("restaurant_closing_time", OffsetTime.class);
+				rest.restaurantOpeningTime.put(day, open);
+				rest.restaurantClosingTime.put(day, close);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+
+		return restaurants;
 	}
 }
