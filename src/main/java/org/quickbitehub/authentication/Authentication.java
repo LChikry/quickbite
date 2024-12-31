@@ -208,8 +208,8 @@ public class Authentication {
 		Account userAccount = Account.signUp(email, password, telegramId, first_name, last_name, middle_names, UserType.CUSTOMER.getText(), null);
 		userSessions.put(telegramId, userAccount);
 		deleteRecentAuthFeedbackMessage(telegramId);
-		Integer msgId = ((Message) authProcesses.get(telegramId).get(AuthSteps.SIGN_IN_UP_MENU.getStep())).getMessageId();
-		MessageHandler.deleteMessage(telegramId, msgId);
+		Message msg = (Message) authProcesses.get(telegramId).get(AuthSteps.SIGN_IN_UP_MENU.getStep());
+		MessageHandler.deleteMessage(telegramId, msg.getMessageId());
 
 		String feedbackMsg = SignEmoji.GREEN_CIRCLE.getCode() + " You've Created Your Account Successfully \ud83d\udc4b";
 		putRecentAuthFeedbackMessage(telegramId, feedbackMsg);
