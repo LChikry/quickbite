@@ -2,9 +2,11 @@ package org.quickbitehub.authentication;
 
 import org.quickbitehub.client.*;
 
+import java.awt.image.AreaAveragingScaleFilter;
 import java.io.Serializable;
 import java.sql.*;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Objects;
 
@@ -16,7 +18,8 @@ public class Account implements Serializable {
 	private final LocalDate ACCOUNT_SIGN_UP_DATE;
 	private String password;
 	private HashMap<Long, Boolean> isAuthenticated = new HashMap<>(); // TelegramId (device) to isAuthentication
-	private String[] recentUsedRestaurant = new String[8]; // recent used restaurantId in index 0
+	public static final int MAX_RECENT_USED_RESTAURANT_LENGTH = 8;
+	private ArrayList<String> recentUsedRestaurant = new ArrayList<>(MAX_RECENT_USED_RESTAURANT_LENGTH); // recent used restaurantId in index 0
 	public static HashMap<String, Account> usersAccount = getAllAccounts(); // EMAIL to Account
 
 	public Account(String EMAIL, String password, User USER, Long telegramId) {
@@ -237,18 +240,15 @@ public class Account implements Serializable {
 		return accounts;
 	}
 
-	public String[] getRecentUsedRestaurant() {
+	public ArrayList<String> getRecentUsedRestaurant() {
 		return recentUsedRestaurant;
 	}
 
 	public void addRecentUsedRestaurant(String restaurantId) {
-		if (this.recentUsedRestaurant[0].equals(restaurantId)) return;
-		String[] updatedRecentRestaurants = new String[8];
-		updatedRecentRestaurants[0] = restaurantId;
-
-		for (int i = 1; i < updatedRecentRestaurants.length; ++i) {
-			updatedRecentRestaurants[i] = this.recentUsedRestaurant[i-1];
+		if (recentUsedRestaurant.getFirst().equals(restaurantId)) return;
+		recentUsedRestaurant.addFirst(restaurantId);
+		while (recentUsedRestaurant.size() > MAX_RECENT_USED_RESTAURANT_LENGTH) {
+			recentUsedRestaurant.removeLast();
 		}
-		this.recentUsedRestaurant = updatedRecentRestaurants;
 	}
 }
