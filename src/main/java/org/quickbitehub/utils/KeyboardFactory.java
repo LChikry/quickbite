@@ -1,6 +1,7 @@
 package org.quickbitehub.utils;
 
 import org.quickbitehub.CBQData;
+import org.quickbitehub.authentication.Account;
 import org.quickbitehub.client.Restaurant;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ForceReplyKeyboard;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
@@ -47,9 +48,13 @@ public class KeyboardFactory {
 			var restButton = KeyboardButton.builder()
 					.text(Restaurant.allRestaurants.get(id).getRestaurantName())
 					.build();
-
 			kbRow.add(new KeyboardRow(restButton));
 		}
+		String text = Emoji.LEFT_MAGNIFIER.getCode().repeat(2) + " Didn\\'t Find a Restaurant? Click to Search\\.\\.\\. " + Emoji.RIGHT_MAGNIFIER.getCode().repeat(2);
+		var restButton = KeyboardButton.builder()
+				.text(text)
+				.build();
+		kbRow.add(new KeyboardRow(restButton));
 
 		replyKb.setOneTimeKeyboard(true);
 		replyKb.setKeyboard(kbRow);
