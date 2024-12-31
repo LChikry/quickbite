@@ -1,19 +1,16 @@
 package org.quickbitehub.authentication;
 
 import io.github.cdimascio.dotenv.Dotenv;
-import org.quickbitehub.utils.KeyboardType;
+import org.quickbitehub.utils.KeyboardFactory;
 import org.quickbitehub.utils.MessageHandler;
 import org.quickbitehub.QuickBite;
 import org.quickbitehub.utils.SignEmoji;
 import org.quickbitehub.client.UserType;
 import org.telegram.telegrambots.client.okhttp.OkHttpTelegramClient;
 import org.telegram.telegrambots.meta.api.objects.message.Message;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 
 import java.util.HashMap;
 import java.util.Objects;
-
-import static org.quickbitehub.utils.MessageHandler.keyboards;
 
 public class Authentication {
 	private static final OkHttpTelegramClient telegramClient = new OkHttpTelegramClient(Dotenv.load().get("BOT_TOKEN"));
@@ -26,7 +23,7 @@ public class Authentication {
 					"Welcome to QuickBite, where you can Skip the Line, Save the Time for What Matters Most\\.\n" +
 					"Sign in or Sing up, so you can benefit from our services that will streamline your food ordering process for greater life quality \ud83d\ude01";
 
-		Message signingMenu = communicator.sendButtonKeyboard(telegramId, msg, (InlineKeyboardMarkup) keyboards.get(KeyboardType.SIGN_IN_UP));
+		Message signingMenu = communicator.sendInlineKeyboard(telegramId, msg, KeyboardFactory.getSignInUpKeyboard());
 		HashMap<String, Object> menuStep = new HashMap<>();
 		menuStep.put(AuthSteps.SIGN_IN_UP_MENU.getStep(), signingMenu);
 		authProcesses.put(telegramId, menuStep);
