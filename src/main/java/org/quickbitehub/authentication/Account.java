@@ -245,7 +245,11 @@ public class Account implements Serializable {
 	}
 
 	public void addRecentUsedRestaurant(String restaurantId) {
-		if (recentUsedRestaurant.getFirst().equals(restaurantId)) return;
+		if (recentUsedRestaurant.isEmpty()) {
+			recentUsedRestaurant.add(restaurantId);
+			return;
+		} else if (recentUsedRestaurant.getFirst().equals(restaurantId)) return;
+
 		recentUsedRestaurant.addFirst(restaurantId);
 		while (recentUsedRestaurant.size() > MAX_RECENT_USED_RESTAURANT_LENGTH) {
 			recentUsedRestaurant.removeLast();
