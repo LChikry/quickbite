@@ -1,11 +1,16 @@
 package org.quickbitehub.client;
 
+import org.quickbitehub.authentication.Account;
+import org.quickbitehub.authentication.Authentication;
 import org.quickbitehub.authentication.DBCredentials;
+import org.quickbitehub.utils.KeyboardFactory;
+import org.quickbitehub.utils.MessageHandler;
 
 import java.sql.*;
 import java.time.DayOfWeek;
 import java.time.OffsetDateTime;
 import java.time.OffsetTime;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class Restaurant {
@@ -27,7 +32,19 @@ public class Restaurant {
 	}
 
 	public static void viewRestaurants(Long telegramId, String query) {
+		if (query == null) {
+			Account account = Authentication.userSessions.get(telegramId);
+			assert (account != null);
 
+			String[] restaurantIds = account.getRecentUsedRestaurant();
+			String message = "Which restaurant you want to order from\\?";
+			MessageHandler.sendReplyKeyboard(telegramId, message, KeyboardFactory.getRestaurantChoicesKeyboard(restaurantIds));
+		}
+		// task:
+		/*
+			2. view the search option
+			3. prepare the inline query search option to be shown
+		 */
 	}
 
 	public static void viewRestaurantProducts(Long telegramId, String query) {
