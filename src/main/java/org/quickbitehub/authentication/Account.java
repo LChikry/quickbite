@@ -236,4 +236,19 @@ public class Account implements Serializable {
 
 		return accounts;
 	}
+
+	public String[] getRecentUsedRestaurant() {
+		return recentUsedRestaurant;
+	}
+
+	public void addRecentUsedRestaurant(String restaurantId) {
+		if (this.recentUsedRestaurant[0].equals(restaurantId)) return;
+		String[] updatedRecentRestaurants = new String[8];
+		updatedRecentRestaurants[0] = restaurantId;
+
+		for (int i = 1; i < updatedRecentRestaurants.length; ++i) {
+			updatedRecentRestaurants[i] = this.recentUsedRestaurant[i-1];
+		}
+		this.recentUsedRestaurant = updatedRecentRestaurants;
+	}
 }
