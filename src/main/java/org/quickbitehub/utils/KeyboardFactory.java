@@ -40,7 +40,7 @@ public class KeyboardFactory {
 				.build();
 	}
 
-	public static ReplyKeyboardMarkup getRestaurantChoicesKeyboard(String[] recentUsedRestaurantsId) {
+	public static ReplyKeyboardMarkup getRestaurantChoicesKeyboard(ArrayList<String> recentUsedRestaurantsId) {
 		List<KeyboardRow> kbRow = new ArrayList<>();
 		ReplyKeyboardMarkup replyKb = new ReplyKeyboardMarkup(kbRow);
 		for (String id : recentUsedRestaurantsId) {
