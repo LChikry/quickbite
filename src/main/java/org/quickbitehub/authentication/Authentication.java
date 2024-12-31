@@ -159,7 +159,7 @@ public class Authentication {
 				AuthSteps.SIGNUP_LAST_NAME_MSG.getStep(),
 				AuthSteps.SIGNUP_LAST_NAME_TXT.getStep(),
 				AuthSteps.SIGNUP_MIDDLE_NAMES_MSG.getStep(),
-				"Enter Middle Name\\(s\\) \\(or 0)\\)"
+				"Enter Middle Name\\(s\\) \\(or 0\\)"
 		);
 
 		var userAuthSteps = authProcesses.get(telegramId);
@@ -183,9 +183,17 @@ public class Authentication {
 	}
 
 	private static void signUpHandler(Long telegramId, String email, String password, String id, String first_name, String last_name, String middle_names) {
+		String textMsg = "";
+		if (userSessions.get(telegramId) != null) {
+			textMsg = SignEmoji.ORANGE_CIRCLE.getCode() + " *Sign Up Failed*\nYou are Already Logged In\ud83d\ude1e";
+		} else if (!Account.isValidEmail(email)) {
+			textMsg = SignEmoji.RED_CIRCLE.getCode() + " *Sign Up Failed*\nInvalid Email\ud83d\ude1e";
+		} else if (Account.isAccountExist(email)) {
+			textMsg = SignEmoji.ORANGE_CIRCLE.getCode() + " *Sign Up Failed*\nYou Already Have an Account; Just Sign In \ud83d\ude01";
+		}
+
 		if (!Account.isValidEmail(email) || Account.isAccountExist(email) || userSessions.get(telegramId) != null) {
 			deleteRecentAuthFeedbackMessage(telegramId);
-			String textMsg = SignEmoji.RED_CIRCLE.getCode() + " *Sign Up Failed*\nInvalid Email or You are Logged In\ud83d\ude1e";
 			putRecentAuthFeedbackMessage(telegramId, textMsg);
 			deleteRecentAuthFeedbackMessage(telegramId);
 
