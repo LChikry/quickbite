@@ -32,9 +32,7 @@ CREATE TABLE Account (
 
 CREATE TABLE Restaurant (
 	restaurant_id                   SERIAL PRIMARY KEY,
-	restaurant_name                 VARCHAR(50) NOT NULL,
-
-	CONSTRAINT ck_restaurant_time CHECK (restaurant_opening_time != restaurant_closing_time)
+	restaurant_name                 VARCHAR(50) NOT NULL
 );
 
 CREATE TABLE RestaurantAvailability (
@@ -46,6 +44,7 @@ CREATE TABLE RestaurantAvailability (
 	PRIMARY KEY (restaurant_id, day_of_week),
     CONSTRAINT uq_restaurant_availability_primarykey UNIQUE (restaurant_id, day_of_week),
     CONSTRAINT ck_day_of_week CHECK (day_of_week IN ('MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY', 'SUNDAY')),
+	CONSTRAINT ck_restaurant_time CHECK (restaurant_opening_time != restaurant_closing_time)
 );
 
 CREATE TABLE Customer (
