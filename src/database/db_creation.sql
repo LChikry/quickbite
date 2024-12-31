@@ -5,6 +5,7 @@ DROP TABLE IF EXISTS Orders CASCADE;
 DROP TABLE IF EXISTS Product CASCADE;
 DROP TABLE IF EXISTS Category CASCADE;
 DROP TABLE IF EXISTS Employee CASCADE;
+DROP TABLE IF EXISTS RestaurantAvailability CASCADE;
 DROP TABLE IF EXISTS Restaurant CASCADE;
 DROP TABLE IF EXISTS Customer CASCADE;
 DROP TABLE IF EXISTS Users CASCADE;
@@ -52,14 +53,14 @@ CREATE TABLE Customer (
 	currency CHAR(3)        DEFAULT 'MAD' NOT NULL,
 
 	CONSTRAINT uq_customer_primary_key UNIQUE (user_id),
-	CONSTRAINT ck_user_type CHECK (user_type IN ('Customer', 'Employee'))
+	CONSTRAINT ck_cus_user_type CHECK (user_type = 'Customer')
 ) INHERITS (Users);
 
 CREATE TABLE Employee (
 	restaurant_id       INT NOT NULL,
 
 	CONSTRAINT uq_employee_primary_key UNIQUE (user_id),
-	CONSTRAINT ck_user_type CHECK (user_type IN ('Customer', 'Employee')),
+	CONSTRAINT ck_emp_user_type CHECK (user_type = 'Employee'),
 	CONSTRAINT fk_employs FOREIGN KEY (restaurant_id) REFERENCES Restaurant(restaurant_id) ON UPDATE CASCADE
 ) INHERITS (Users);
 
