@@ -155,6 +155,18 @@ public class Account implements Serializable {
 		return emailIdentifier + formattedEmail.substring(formattedEmail.indexOf("@"));
 	}
 
+	static public String formatName(String name) {
+		assert (name != null && !name.isBlank());
+		String formattedName = name.strip().trim().toLowerCase();
+		formattedName = formattedName.replaceAll("\\s{2,}", " ").trim();
+		String[] words = formattedName.split(" ");
+		StringBuilder formattedNameBuilder = new StringBuilder();
+		for (String word : words) {
+			formattedNameBuilder.append(word.substring(0, 1).toUpperCase()).append(word.substring(1)).append(' ');
+		}
+		return formattedNameBuilder.toString();
+	}
+
 	public String getAccountId() {
 		return ACCOUNT_ID;
 	}
