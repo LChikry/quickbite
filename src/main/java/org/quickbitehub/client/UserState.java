@@ -1,5 +1,17 @@
 package org.quickbitehub.client;
 
+/* commands creation message to BotFather
+start - Dashboard
+cancel - Cancel Current Operation
+order - Issue an Order
+cancel_pending_order - Cancel a Pending Order
+manage_orders - Manage Your Orders
+settings - Configure Your Settings
+logout - Logout
+help - FAQ and Support
+ */
+
+
 public enum UserState {
 	AUTHENTICATION_PROCESS(""),
 	DASHBOARD_PAGE("/start"),
