@@ -66,14 +66,15 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 			Authentication.authenticate(telegramId);
 			return;
 		}
-		switch (command) {
-			case "/start" -> viewDashboard(telegramId);
-			case "/order" -> issueOrder(telegramId);
-//			case "/cancel" -> cancelPendingOrder();
-//			case "/manage_orders" -> viewManageOrdersPage();
-//			case "/settings" -> viewSettingsPage();
-			case "/logout" -> Authentication.signOut(telegramId);
-//			case "/help" -> viewHelpPage();
+		switch (UserState.getValueOf(command)) {
+			case UserState.DASHBOARD_PAGE -> viewDashboard(telegramId);
+//			case "/cancel" -> cancelCurrentOperation(telegramId);
+			case UserState.ISSUING_ORDER_PROCESS -> issueOrder(telegramId);
+//			case UserState.CANCEL_PENDING_ORDER -> cancelPendingOrder();
+//			case UserState.MANAGE_ORDERS_PAGE -> viewManageOrdersPage();
+//			case UserState.SETTINGS_PAGE -> viewSettingsPage();
+			case UserState.LOGOUT -> Authentication.signOut(telegramId);
+//			case UserState.HELP_PAGE -> viewHelpPage();
 		}
 	}
 
@@ -124,8 +125,17 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 	}
 
 	private void botMessageHandler(Message message) {
+		Long telegramId = message.getFrom().getId();
 		Restaurant restaurant = Restaurant.allRestaurants.get(message.getText());
-		if (restaurant == null) return;
+		if (restaurant == null ||
+				sessionState.get(telegramId) == null ||
+				sessionState.get(telegramId).isEmpty() ||
+				sessionState.get(telegramId).peek() != UserState.ISSUING_ORDER_PROCESS) {
+			return;
+		}
+		sessionState.get(telegramId).push(UserState.CHOOSING_PRODUCTS);
+
+		System.out.println("we detected a restaurant");
 	}
 
 	public static void viewDashboard(Long telegramId) {
