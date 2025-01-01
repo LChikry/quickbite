@@ -35,7 +35,7 @@ public class Restaurant {
 	public static boolean viewRestaurants(Long telegramId, String query) {
 		if (allRestaurants.isEmpty()) {
 			String msg = Emoji.ORANGE_CIRCLE.getCode() + " Sorry, there is no restaurant currently operating in our bot\\.";
-			MessageHandler.sendText(telegramId, msg);
+			MessageHandler.sendText(telegramId, msg, QuickBite.SHORT_DELAY_TIME_SEC);
 			return false;
 		}
 
@@ -49,7 +49,9 @@ public class Restaurant {
 				}
 			}
 			String message = "Which restaurant you want to order from\\?";
-			MessageHandler.sendReplyKeyboard(telegramId, message, KeyboardFactory.getRestaurantChoicesKeyboard(account.getRecentUsedRestaurants()));
+			MessageHandler.sendReplyKeyboard(telegramId, message,
+					KeyboardFactory.getRestaurantChoicesKeyboard(account.getRecentUsedRestaurants()),
+					QuickBite.LONG_DELAY_TIME_SEC);
 			return true;
 		}
 		// task: view the inline query results

@@ -25,6 +25,9 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 	private final TelegramClient telegramClient;
 	public static final HashMap<Long, Stack<UserState>> userState = new HashMap<>(); // TelegramId -> State
 	public static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+	public static final long STANDARD_DELAY_TIME_SEC = 30; // in seconds
+	public static final long LONG_DELAY_TIME_SEC = 90; // in seconds
+	public static final long SHORT_DELAY_TIME_SEC = 8; // in seconds
 
 	public QuickBite() {
 		Dotenv dotenv = Dotenv.load();

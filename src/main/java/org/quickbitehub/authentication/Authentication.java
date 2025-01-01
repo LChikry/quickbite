@@ -28,7 +28,8 @@ public class Authentication {
 					"Welcome to QuickBite, where you can Skip the Line, Save the Time for What Matters Most\\.\n" +
 					"Sign in or Sing up, so you can benefit from our services that will streamline your food ordering process for greater life quality \ud83d\ude01";
 
-		Message signingMenu = MessageHandler.sendInlineKeyboard(telegramId, msg, KeyboardFactory.getSignInUpKeyboard());
+		Message signingMenu = MessageHandler.sendInlineKeyboard(telegramId, msg, KeyboardFactory.getSignInUpKeyboard(),
+				QuickBite.STANDARD_DELAY_TIME_SEC*2);
 		HashMap<String, Object> menuStep = new HashMap<>();
 		menuStep.put(AuthSteps.SIGN_IN_UP_MENU.getStep(), signingMenu);
 		authProcesses.put(telegramId, menuStep);
@@ -45,14 +46,14 @@ public class Authentication {
 		MessageHandler.deleteMessage(telegramId, message.getReplyToMessage().getMessageId());
 		MessageHandler.deleteMessage(telegramId, message.getMessageId());
 
-		Message nextMessage = MessageHandler.sendForceReply(telegramId, nextMsgPrompt);
+		Message nextMessage = MessageHandler.sendForceReply(telegramId, nextMsgPrompt, QuickBite.STANDARD_DELAY_TIME_SEC);
 		userAuthSteps.put(nextMsgKey, nextMessage);
 		authProcesses.put(telegramId, userAuthSteps);
 	}
 
 	public static void signIn(Message message, Long telegramId) {
 		if (message == null) {
-			Message msg = MessageHandler.sendForceReply(telegramId, "Enter Email\\:");
+			Message msg = MessageHandler.sendForceReply(telegramId, "Enter Email\\:", QuickBite.STANDARD_DELAY_TIME_SEC);
 
 			HashMap<String, Object> existingProcess = authProcesses.getOrDefault(telegramId, new HashMap<>());
 			existingProcess.put(AuthSteps.SIGNING_EMAIL_MSG.getStep(), msg);
@@ -110,7 +111,7 @@ public class Authentication {
 
 	public static void signUp(Message message, Long telegramId) {
 		if (message == null) {
-			Message msg = MessageHandler.sendForceReply(telegramId, "Enter Email\\:");
+			Message msg = MessageHandler.sendForceReply(telegramId, "Enter Email\\:", QuickBite.STANDARD_DELAY_TIME_SEC);
 
 			HashMap<String, Object> existingProcess = authProcesses.getOrDefault(telegramId, new HashMap<>());
 			existingProcess.put(AuthSteps.SIGNUP_EMAIL_MSG.getStep(), msg);
@@ -246,7 +247,6 @@ public class Authentication {
 	}
 
 	static void putAndDeleteAuthFeedbackMessage(Long telegramId, String textMessage) {
-		Message fm = MessageHandler.sendText(telegramId, textMessage);
-		QuickBite.scheduler.schedule(() -> MessageHandler.deleteMessage(telegramId, fm.getMessageId()), 4, TimeUnit.SECONDS);
+		Message fm = MessageHandler.sendText(telegramId, textMessage, QuickBite.SHORT_DELAY_TIME_SEC);
 	}
 }
