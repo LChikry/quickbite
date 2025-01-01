@@ -132,11 +132,24 @@ public class Account implements Serializable {
 	}
 
 	static public boolean isValidEmail(String email) {
+		email = email.strip().trim().toLowerCase();
+		if (email.endsWith(".") || email.startsWith(".")) return false;
+		int index = email.indexOf('@');
+		if (email.charAt(index-1) == '.' || email.charAt(index+1) == '.' || 0 == index) return false;
+		if (-1 == email.indexOf('@', index+1)) return false;
+		if (-1 == email.indexOf('.', index+1)) return false;
 		return email.endsWith("@aui.ma");
 	}
 
 	static public boolean isAccountExist(String email) {
-		return usersAccount.get(email.strip().trim().toLowerCase()) != null;
+		return usersAccount.get(formatEmail(email)) != null;
+	}
+
+	static public String formatEmail(String email) {
+		String formattedEmail = email.strip().trim().toLowerCase();
+		String emailIdentifier = formattedEmail.substring(0, formattedEmail.indexOf("@"));
+		emailIdentifier = emailIdentifier.replace(".", "");
+		return emailIdentifier + formattedEmail.substring(formattedEmail.indexOf("@"));
 	}
 
 	public String getAccountId() {
