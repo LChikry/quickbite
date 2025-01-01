@@ -7,15 +7,11 @@ import org.quickbitehub.utils.KeyboardFactory;
 import org.quickbitehub.utils.MessageHandler;
 import org.quickbitehub.utils.Emoji;
 
-import javax.swing.text.html.StyleSheet;
-import java.security.Key;
 import java.sql.*;
 import java.time.DayOfWeek;
 import java.time.OffsetDateTime;
 import java.time.OffsetTime;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 
 public class Restaurant {
 	private final String RESTAURANT_ID;
@@ -23,7 +19,7 @@ public class Restaurant {
 	private HashMap<DaysOfWeek, OffsetTime> restaurantOpeningTime = new HashMap<>();
 	private HashMap<DaysOfWeek, OffsetTime> restaurantClosingTime = new HashMap<>();
 
-	public static HashMap<String, Restaurant> allRestaurants = getAllRestaurantsFromDB();
+	public static HashMap<String, Restaurant> allRestaurants = getAllRestaurantsFromDB(); // RestaurantName -> Restaurant
 
 	public Restaurant(String restaurantId, String restaurantName) {
 		this.RESTAURANT_ID = restaurantId;
@@ -31,7 +27,7 @@ public class Restaurant {
 	}
 
 	public static void insertRestaurant(Restaurant restaurant) {
-		allRestaurants.put(restaurant.getRestaurantId(), restaurant);
+		allRestaurants.put(restaurant.getRestaurantName(), restaurant);
 		//task: insert into db
 	}
 
@@ -45,14 +41,14 @@ public class Restaurant {
 		if (query == null) {
 			Account account = Authentication.userSessions.get(telegramId);
 			assert (account != null);
-			if (account.getRecentUsedRestaurant().isEmpty()) {
-				for (String id : Restaurant.allRestaurants.keySet()) {
-					account.addRecentUsedRestaurant(id);
-					if (account.getRecentUsedRestaurant().size() >= Account.MAX_RECENT_USED_RESTAURANT_LENGTH) break;
+			if (account.getRecentUsedRestaurants().isEmpty()) {
+				for (String restaurantName : Restaurant.allRestaurants.keySet()) {
+					account.addRecentUsedRestaurant(restaurantName);
+					if (account.getRecentUsedRestaurants().size() >= Account.MAX_RECENT_USED_RESTAURANT_LENGTH) break;
 				}
 			}
 			String message = "Which restaurant you want to order from\\?";
-			MessageHandler.sendReplyKeyboard(telegramId, message, KeyboardFactory.getRestaurantChoicesKeyboard(account.getRecentUsedRestaurant()));
+			MessageHandler.sendReplyKeyboard(telegramId, message, KeyboardFactory.getRestaurantChoicesKeyboard(account.getRecentUsedRestaurants()));
 		}
 		// task: view the inline query results
 	}
@@ -111,17 +107,17 @@ public class Restaurant {
 			ResultSet resultSet = statement.executeQuery();
 			while (resultSet.next()) {
 				String restaurantId = resultSet.getString("restaurant_id");
-				String name = resultSet.getString("restaurant_name");
+				String restaurantName = resultSet.getString("restaurant_name");
 
-				restaurants.put(restaurantId, new Restaurant(restaurantId, name));
+				restaurants.put(restaurantName, new Restaurant(restaurantId, restaurantName));
 			}
 
 			query = "SELECT * FROM RestaurantAvailability";
 			statement = connection.prepareStatement(query);
 			resultSet = statement.executeQuery();
 			while (resultSet.next()) {
-				String restaurantId = resultSet.getString("restaurant_id");
-				Restaurant rest = restaurants.get(restaurantId);
+				String restaurantName = resultSet.getString("restaurant_name");
+				Restaurant rest = restaurants.get(restaurantName);
 				DaysOfWeek day = DaysOfWeek.valueOf(resultSet.getString("day_of_week"));
 				OffsetTime open = resultSet.getObject("restaurant_opening_time", OffsetTime.class);
 				OffsetTime close = resultSet.getObject("restaurant_closing_time", OffsetTime.class);

@@ -40,12 +40,12 @@ public class KeyboardFactory {
 				.build();
 	}
 
-	public static ReplyKeyboardMarkup getRestaurantChoicesKeyboard(ArrayList<String> recentUsedRestaurantsId) {
+	public static ReplyKeyboardMarkup getRestaurantChoicesKeyboard(ArrayList<String> recentUsedRestaurantNames) {
 		List<KeyboardRow> kbRow = new ArrayList<>();
 		ReplyKeyboardMarkup replyKb = new ReplyKeyboardMarkup(kbRow);
-		for (String id : recentUsedRestaurantsId) {
+		for (String restaurantName : recentUsedRestaurantNames) {
 			var restButton = KeyboardButton.builder()
-					.text(Restaurant.allRestaurants.get(id).getRestaurantName())
+					.text(restaurantName)
 					.build();
 			kbRow.add(new KeyboardRow(restButton));
 		}

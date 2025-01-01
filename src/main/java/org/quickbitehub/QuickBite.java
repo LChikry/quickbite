@@ -47,7 +47,8 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 		if (update.hasMessage()) {
 			Message msg = update.getMessage();
 			if (msg.isCommand()) botCommandsHandler(msg);
-			if (msg.isReply()) botRepliesHandler(msg);
+			else if (msg.isReply()) botRepliesHandler(msg);
+			else if (msg.hasText()) botMessageHandler(msg);
 		} else if (update.hasCallbackQuery()) botCallBackQueryHandler(update.getCallbackQuery());
 		else if (update.hasInlineQuery()) botInlineQueryHandler(update.getInlineQuery());
 	}
@@ -109,6 +110,10 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 			Restaurant.viewRestaurantProducts(telegramId, query);
 			return;
 		}
+	}
+
+	private void botMessageHandler(Message message) {
+		Restaurant restaurant = Restaurant.allRestaurants.get(message.getText());
 	}
 
 	public static void viewDashboard(Long telegramId) {
