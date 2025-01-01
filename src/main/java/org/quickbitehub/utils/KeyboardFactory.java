@@ -50,7 +50,7 @@ public class KeyboardFactory {
 					.build();
 			kbRow.add(new KeyboardRow(restButton));
 		}
-		String text = Emoji.LEFT_MAGNIFIER.getCode().repeat(2) + " Didn\\'t Find a Restaurant? Click to Search\\.\\.\\. " + Emoji.RIGHT_MAGNIFIER.getCode().repeat(2);
+		String text = Emoji.LEFT_MAGNIFIER.getCode().repeat(2) + " Click to Search For Others... " + Emoji.RIGHT_MAGNIFIER.getCode().repeat(2);
 		var restButton = KeyboardButton.builder()
 				.text(text)
 				.build();
