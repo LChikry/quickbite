@@ -12,11 +12,17 @@ import org.telegram.telegrambots.meta.api.objects.message.Message;
 
 import java.util.HashMap;
 import java.util.Objects;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
+
 
 public class Authentication {
 	private static final OkHttpTelegramClient telegramClient = new OkHttpTelegramClient(Dotenv.load().get("BOT_TOKEN"));
 	static final HashMap<Long, HashMap<String, Object>> authProcesses = new HashMap<>(); // device(Telegram Account Id) -> Current Step
 	public static final HashMap<Long, Account> userSessions = new HashMap<>(); // TelegramId -> Account
+	private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
 	public static void authenticate(Long telegramId) {
 		String msg = "    *_Authenticate_*\n\n" +
@@ -81,10 +87,8 @@ public class Authentication {
 		email = Account.formatEmail(email);
 		Account userAccount = Account.authenticate(telegramId, email, password);
 		if (userAccount == null) {
-			deleteRecentAuthFeedbackMessage(telegramId);
 			String textMsg = Emoji.RED_CIRCLE.getCode() + " *Sign In Failed*\nIncorrect Email or Password " + Emoji.SAD_FACE.getCode();
-			putRecentAuthFeedbackMessage(telegramId, textMsg);
-			deleteRecentAuthFeedbackMessage(telegramId);
+			putAndDeleteAuthFeedbackMessage(telegramId, textMsg);
 
 			var menuMsg = (Message) authProcesses.get(telegramId).get(AuthSteps.SIGN_IN_UP_MENU.getStep());
 			HashMap<String, Object> temp = new HashMap<>();
@@ -95,13 +99,11 @@ public class Authentication {
 		}
 
 		userSessions.put(telegramId, userAccount);
-		deleteRecentAuthFeedbackMessage(telegramId);
 		Integer msgId = ((Message) authProcesses.get(telegramId).get(AuthSteps.SIGN_IN_UP_MENU.getStep())).getMessageId();
 		MessageHandler.deleteMessage(telegramId, msgId);
 
 		String feedbackMsg = Emoji.GREEN_CIRCLE.getCode() + " You Signed In Successfully " + Emoji.HAND_WAVING.getCode();
-		putRecentAuthFeedbackMessage(telegramId, feedbackMsg);
-		deleteRecentAuthFeedbackMessage(telegramId);
+		putAndDeleteAuthFeedbackMessage(telegramId, feedbackMsg);
 		authProcesses.remove(telegramId); // the process is finished
 		QuickBite.userState.get(telegramId).pop();
 		QuickBite.navigateToProperState(telegramId);
@@ -149,7 +151,7 @@ public class Authentication {
 				AuthSteps.SIGNUP_LAST_NAME_MSG.getStep(),
 				AuthSteps.SIGNUP_LAST_NAME_TXT.getStep(),
 				AuthSteps.SIGNUP_MIDDLE_NAMES_MSG.getStep(),
-				"Enter Middle Name\\(s\\) \\(or 0\\)"
+				"Enter Middle Name\\(s\\) \\(otherwise 0\\)"
 		);
 
 		var userAuthSteps = authProcesses.get(telegramId);
@@ -182,13 +184,11 @@ public class Authentication {
 
 		Account userAccount = Account.signUp(email, password, telegramId, firstName, lastName, middleNames, UserType.CUSTOMER.getText(), null);
 		userSessions.put(telegramId, userAccount);
-		deleteRecentAuthFeedbackMessage(telegramId);
 		Message msg = (Message) authProcesses.get(telegramId).get(AuthSteps.SIGN_IN_UP_MENU.getStep());
 		MessageHandler.deleteMessage(telegramId, msg.getMessageId());
 
 		String feedbackMsg = Emoji.GREEN_CIRCLE.getCode() + " You've Created Your Account Successfully " + Emoji.HAND_WAVING.getCode();
-		putRecentAuthFeedbackMessage(telegramId, feedbackMsg);
-		deleteRecentAuthFeedbackMessage(telegramId);
+		putAndDeleteAuthFeedbackMessage(telegramId, feedbackMsg);
 		authProcesses.remove(telegramId); // the process is finished
 		QuickBite.userState.get(telegramId).pop();
 		QuickBite.navigateToProperState(telegramId);
@@ -220,10 +220,7 @@ public class Authentication {
 		} else if (Account.authenticate(telegramId, Account.formatEmail(email), password) == null) {
 			textMsg = Emoji.RED_CIRCLE.getCode() + " *Sign In Failed*\nIncorrect Email or Password " + Emoji.SAD_FACE.getCode();
 		}
-
-		deleteRecentAuthFeedbackMessage(telegramId);
-		putRecentAuthFeedbackMessage(telegramId, textMsg);
-		deleteRecentAuthFeedbackMessage(telegramId);
+		putAndDeleteAuthFeedbackMessage(telegramId, textMsg);
 
 		var menuMsg = (Message) authProcesses.get(telegramId).get(AuthSteps.SIGN_IN_UP_MENU.getStep());
 		HashMap<String, Object> temp = new HashMap<>();
@@ -237,8 +234,7 @@ public class Authentication {
 		Account userAccount = userSessions.get(telegramId);
 		if (userAccount == null) {
 			String msg = Emoji.ORANGE_CIRCLE.getCode() + " You are not logged in\\!";
-			putRecentAuthFeedbackMessage(telegramId, msg);
-			deleteRecentAuthFeedbackMessage(telegramId);
+			putAndDeleteAuthFeedbackMessage(telegramId, msg);
 			return;
 		}
 
@@ -247,22 +243,11 @@ public class Authentication {
 		userSessions.remove(telegramId);
 		if (QuickBite.userState.get(telegramId) != null) QuickBite.userState.get(telegramId).clear();
 		String msg = Emoji.GREEN_CIRCLE.getCode() + " *_You have log out successfully\\. See you soon\\! \ud83d\udc4b_*";
-		putRecentAuthFeedbackMessage(telegramId, msg);
-		deleteRecentAuthFeedbackMessage(telegramId);
+		putAndDeleteAuthFeedbackMessage(telegramId, msg);
 	}
 
-	static void putRecentAuthFeedbackMessage(Long telegramId, String textMessage) {
+	static void putAndDeleteAuthFeedbackMessage(Long telegramId, String textMessage) {
 		Message fm = MessageHandler.sendText(telegramId, textMessage);
-		HashMap<String, Object> existingSteps = authProcesses.getOrDefault(telegramId, new HashMap<>());
-		existingSteps.put(AuthSteps.SIGN_IN_UP_FEEDBACK_MSG.getStep(), fm);
-		authProcesses.put(telegramId, existingSteps);
-		try { Thread.sleep(1750); } catch (InterruptedException e) { throw new RuntimeException(e); }
-	}
-
-	 static void deleteRecentAuthFeedbackMessage(Long telegramId) {
-		assert Authentication.authProcesses.get(telegramId) != null;
-		if (Authentication.authProcesses.get(telegramId).get(AuthSteps.SIGN_IN_UP_FEEDBACK_MSG.getStep()) == null) return;
-		Message msg = (Message) Authentication.authProcesses.get(telegramId).get(AuthSteps.SIGN_IN_UP_FEEDBACK_MSG.getStep());
-		MessageHandler.deleteMessage(telegramId, msg.getMessageId());
+		scheduler.schedule(() -> MessageHandler.deleteMessage(telegramId, fm.getMessageId()), 4, TimeUnit.SECONDS);
 	}
 }

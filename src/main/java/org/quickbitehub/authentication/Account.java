@@ -1,6 +1,5 @@
 package org.quickbitehub.authentication;
 
-import org.quickbitehub.QuickBite;
 import org.quickbitehub.client.*;
 import org.quickbitehub.utils.Emoji;
 import org.telegram.telegrambots.meta.api.objects.message.Message;
@@ -155,9 +154,7 @@ public class Account implements Serializable {
 		if (-1 == firstName.indexOf(' ') && -1 == lastName.indexOf(' ') && fullName.matches("^[\\p{L} ]+$")) return true;
 
 		String textMsg = Emoji.RED_CIRCLE.getCode() + " *Sign Up Failed*\nInvalid First/Last/Middle Name\\(s\\) " + Emoji.SAD_FACE.getCode();
-		Authentication.deleteRecentAuthFeedbackMessage(telegramId);
-		Authentication.putRecentAuthFeedbackMessage(telegramId, textMsg);
-		Authentication.deleteRecentAuthFeedbackMessage(telegramId);
+		Authentication.putAndDeleteAuthFeedbackMessage(telegramId, textMsg);
 
 		var menuMsg = (Message) Authentication.authProcesses.get(telegramId).get(AuthSteps.SIGN_IN_UP_MENU.getStep());
 		HashMap<String, Object> temp = new HashMap<>();
