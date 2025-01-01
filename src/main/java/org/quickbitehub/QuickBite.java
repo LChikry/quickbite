@@ -6,7 +6,6 @@ import org.quickbitehub.client.NavigationState;
 
 import io.github.cdimascio.dotenv.Dotenv;
 import org.quickbitehub.client.Restaurant;
-import org.quickbitehub.utils.MessageHandler;
 import org.telegram.telegrambots.client.okhttp.OkHttpTelegramClient;
 import org.telegram.telegrambots.longpolling.util.LongPollingSingleThreadUpdateConsumer;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
@@ -22,7 +21,6 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 	private final String botToken;
 	private final String botUsername = "QuickBiteHub_bot";
 	private final TelegramClient telegramClient;
-	
 
 	public static final HashMap<Long, Stack<NavigationState>> sessionState = new HashMap<>(); // TelegramId -> State
 
@@ -50,14 +48,14 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 			Message msg = update.getMessage();
 			if (msg.isCommand()) botCommandsHandler(msg);
 			if (msg.isReply()) botRepliesHandler(msg);
-		} else if (update.hasCallbackQuery()) botQueryHandler(update.getCallbackQuery());
+		} else if (update.hasCallbackQuery()) botCallBackQueryHandler(update.getCallbackQuery());
 		else if (update.hasInlineQuery()) botInlineQueryHandler(update.getInlineQuery());
 	}
 
 	private void botCommandsHandler(Message message) {
 		String command = message.getText();
 		Long telegramId = message.getFrom().getId();
-		if (Authentication.userSessions.get(telegramId) == null) {
+		if (!command.equals("/logout") && !command.equals("/help") && Authentication.userSessions.get(telegramId) == null) {
 			Authentication.authenticate(telegramId);
 			return;
 		}
@@ -77,7 +75,7 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 		Authentication.signUp(message, message.getChat().getId());
 	}
 
-	private void botQueryHandler(CallbackQuery cbq) {
+	private void botCallBackQueryHandler(CallbackQuery cbq) {
 		String cbqData = cbq.getData();
 		Long telegramId = cbq.getFrom().getId();
 		if (!cbqData.equals(CBQData.SIGNING_PROCESS.getData()) &&
