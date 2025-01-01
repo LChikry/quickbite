@@ -10,6 +10,9 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+
 public class MessageHandler {
 	private static final TelegramClient telegramClient = new OkHttpTelegramClient(Dotenv.load().get("BOT_TOKEN"));
 
@@ -59,7 +62,8 @@ public class MessageHandler {
 				.build();
 
 		try {
-			return telegramClient.execute(sm);
+			Message sentMsg = telegramClient.execute(sm);
+
 		} catch (TelegramApiException e) {
 			System.out.println("MessageHandler: sendReplyKeyboard");
 			e.printStackTrace();

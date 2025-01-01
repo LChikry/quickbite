@@ -1,6 +1,9 @@
 package org.quickbitehub;
 
+import org.quickbitehub.utils.MessageHandler;
 import org.telegram.telegrambots.longpolling.TelegramBotsLongPollingApplication;
+
+import static org.quickbitehub.utils.MessageHandler;
 
 public class Main {
 	public static void main(String[] args) {
@@ -14,5 +17,7 @@ public class Main {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+
+		Runtime.getRuntime().addShutdownHook(new Thread(() -> QuickBite.scheduler.shutdown()));
 	}
 }

@@ -22,7 +22,6 @@ public class Authentication {
 	private static final OkHttpTelegramClient telegramClient = new OkHttpTelegramClient(Dotenv.load().get("BOT_TOKEN"));
 	static final HashMap<Long, HashMap<String, Object>> authProcesses = new HashMap<>(); // device(Telegram Account Id) -> Current Step
 	public static final HashMap<Long, Account> userSessions = new HashMap<>(); // TelegramId -> Account
-	private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
 	public static void authenticate(Long telegramId) {
 		String msg = "    *_Authenticate_*\n\n" +
@@ -248,6 +247,6 @@ public class Authentication {
 
 	static void putAndDeleteAuthFeedbackMessage(Long telegramId, String textMessage) {
 		Message fm = MessageHandler.sendText(telegramId, textMessage);
-		scheduler.schedule(() -> MessageHandler.deleteMessage(telegramId, fm.getMessageId()), 4, TimeUnit.SECONDS);
+		QuickBite.scheduler.schedule(() -> MessageHandler.deleteMessage(telegramId, fm.getMessageId()), 4, TimeUnit.SECONDS);
 	}
 }

@@ -16,13 +16,15 @@ import org.telegram.telegrambots.meta.generics.TelegramClient;
 
 import java.util.HashMap;
 import java.util.Stack;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 	private final String botToken;
 	private final String botUsername = "QuickBiteHub_bot";
 	private final TelegramClient telegramClient;
-
 	public static final HashMap<Long, Stack<UserState>> userState = new HashMap<>(); // TelegramId -> State
+	public static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
 	public QuickBite() {
 		Dotenv dotenv = Dotenv.load();
