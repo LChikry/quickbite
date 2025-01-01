@@ -2,6 +2,7 @@ package org.quickbitehub;
 
 import org.quickbitehub.authentication.Authentication;
 import org.quickbitehub.authentication.Account;
+import org.quickbitehub.client.User;
 import org.quickbitehub.client.UserState;
 
 import io.github.cdimascio.dotenv.Dotenv;
@@ -57,6 +58,11 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 		String command = message.getText();
 		Long telegramId = message.getFrom().getId();
 		if (!command.equals("/logout") && !command.equals("/help") && Authentication.userSessions.get(telegramId) == null) {
+			if (sessionState.get(telegramId) != null && !sessionState.get(telegramId).isEmpty()) sessionState.get(telegramId).clear();
+			Stack<UserState> userStates = new Stack<>();
+			userStates.push(UserState.getValueOf(command));
+			userStates.push(UserState.AUTHENTICATION_PROCESS);
+			sessionState.put(telegramId, userStates);
 			Authentication.authenticate(telegramId);
 			return;
 		}
@@ -64,8 +70,8 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 			case "/start" -> viewDashboard(telegramId);
 			case "/order" -> issueOrder(telegramId);
 //			case "/cancel" -> cancelPendingOrder();
-//			case "/manage_orders" -> viewManageOrdersMenu();
-//			case "/settings" -> viewSettingsMenu();
+//			case "/manage_orders" -> viewManageOrdersPage();
+//			case "/settings" -> viewSettingsPage();
 			case "/logout" -> Authentication.signOut(telegramId);
 //			case "/help" -> viewHelpPage();
 		}
@@ -83,6 +89,11 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 			cbqData.equals(CBQData.SIGNUP_PROCESS.getData()) &&
 			Authentication.userSessions.get(telegramId) == null) {
 
+			if (sessionState.get(telegramId) != null && !sessionState.get(telegramId).isEmpty()) sessionState.get(telegramId).clear();
+			Stack<UserState> userStates = new Stack<>();
+			userStates.push(UserState.getValueOf(cbqData));
+			userStates.push(UserState.AUTHENTICATION_PROCESS);
+			sessionState.put(telegramId, userStates);
 			Authentication.authenticate(telegramId);
 			return;
 		}
@@ -125,7 +136,18 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 	}
 
 	public static void issueOrder(Long telegramId) {
-		Restaurant.viewRestaurants(telegramId, null);
+		if (sessionState.get(telegramId) == null || sessionState.get(telegramId).isEmpty() || !(sessionState.get(telegramId).peek() == UserState.ISSUING_ORDER_PROCESS)) {
+			sessionState.get(telegramId).push(UserState.ISSUING_ORDER_PROCESS);
+			Restaurant.viewRestaurants(telegramId, null);
+			return;
+		}
+		UserState userState = sessionState.get(telegramId).peek();
+		if (userState == UserState.ISSUING_ORDER_PROCESS) {
+			sessionState.get(telegramId).push(UserState.CHOOSING_PRODUCTS);
+			// choose products and quantity
+			return;
+		}
+
 		// tasks
 		/*
 			- choose product
@@ -139,5 +161,21 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 
 	}
 
+	public static void navigateToProperState(Long telegramId) {
+		if (sessionState.get(telegramId) == null || sessionState.get(telegramId).isEmpty()) {
+			sessionState.get(telegramId).push(UserState.DASHBOARD_PAGE);
+			viewDashboard(telegramId);
+			return;
+		}
 
+		UserState properState = sessionState.get(telegramId).pop();
+		switch (properState) {
+			case UserState.DASHBOARD_PAGE -> viewDashboard(telegramId);
+			case UserState.ISSUING_ORDER_PROCESS -> issueOrder(telegramId);
+//			case UserState.CANCEL_PENDING_ORDER -> cancelPendingOrder();
+//			case UserState.MANAGE_ORDERS_PAGE -> viewManageOrdersPage();
+//			case UserState.SETTINGS_PAGE -> viewSettingsPage();
+			case UserState.CHOOSING_PRODUCTS -> issueOrder(telegramId);
+		}
+	}
 }

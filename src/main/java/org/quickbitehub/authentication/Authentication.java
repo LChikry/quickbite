@@ -102,7 +102,8 @@ public class Authentication {
 		putRecentAuthFeedbackMessage(telegramId, feedbackMsg);
 		deleteRecentAuthFeedbackMessage(telegramId);
 		authProcesses.remove(telegramId); // the process is finished
-		QuickBite.viewDashboard(telegramId);
+		QuickBite.sessionState.get(telegramId).pop();
+		QuickBite.navigateToProperState(telegramId);
 	}
 
 	public static void signUp(Message message, Long telegramId) {
@@ -182,7 +183,8 @@ public class Authentication {
 		putRecentAuthFeedbackMessage(telegramId, feedbackMsg);
 		deleteRecentAuthFeedbackMessage(telegramId);
 		authProcesses.remove(telegramId); // the process is finished
-		QuickBite.viewDashboard(telegramId);
+		QuickBite.sessionState.get(telegramId).pop();
+		QuickBite.navigateToProperState(telegramId);
 	}
 
 	private static boolean isAuthenticationInformationValid(Long telegramId, String email, String password, CBQData processType) {

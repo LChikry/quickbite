@@ -1,5 +1,6 @@
 package org.quickbitehub.client;
 
+import org.quickbitehub.QuickBite;
 import org.quickbitehub.authentication.Account;
 import org.quickbitehub.authentication.Authentication;
 import org.quickbitehub.authentication.DBCredentials;
@@ -35,6 +36,8 @@ public class Restaurant {
 		if (allRestaurants.isEmpty()) {
 			String msg = Emoji.ORANGE_CIRCLE.getCode() + " Sorry, there is no restaurant currently operating in our bot\\.";
 			MessageHandler.sendText(telegramId, msg);
+			QuickBite.sessionState.get(telegramId).pop();
+			QuickBite.navigateToProperState(telegramId);
 			return;
 		}
 

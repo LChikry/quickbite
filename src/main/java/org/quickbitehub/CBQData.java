@@ -4,7 +4,7 @@ package org.quickbitehub;
 public enum CBQData {
 	SIGNING_PROCESS("---signing_process"),
 	SIGNUP_PROCESS("---signup_process"),
-	ISSUE_ORDER("---issue_order");
+	ISSUE_ORDER("/order");
 
 	private final String data;
 	CBQData(String cbqData) {
