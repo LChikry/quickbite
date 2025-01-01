@@ -1,7 +1,6 @@
 package org.quickbitehub.utils;
 
 import org.quickbitehub.CBQData;
-import org.quickbitehub.authentication.Account;
 import org.quickbitehub.client.Restaurant;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ForceReplyKeyboard;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
