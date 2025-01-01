@@ -134,6 +134,7 @@ public class Account implements Serializable {
 
 	static public boolean isEmailValid(String email) {
 		email = email.strip().trim().toLowerCase();
+		if (-1 != email.indexOf(' ')) return false;
 		if (email.endsWith(".") || email.startsWith(".")) return false;
 		int index = email.indexOf('@');
 		if (-1 == index || 0 == index || email.charAt(index-1) == '.' || email.charAt(index+1) == '.') return false;
