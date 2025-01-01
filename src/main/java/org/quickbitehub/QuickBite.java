@@ -68,7 +68,7 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 		}
 		switch (UserState.getValueOf(command)) {
 			case UserState.DASHBOARD_PAGE -> viewDashboard(telegramId);
-//			case "/cancel" -> cancelCurrentOperation(telegramId);
+			case UserState.CANCEL_CURRENT_OPERATION -> cancelCurrentOperation(telegramId);
 			case UserState.ISSUING_ORDER_PROCESS -> issueOrder(telegramId);
 //			case UserState.CANCEL_PENDING_ORDER -> cancelPendingOrder();
 //			case UserState.MANAGE_ORDERS_PAGE -> viewManageOrdersPage();
@@ -76,6 +76,11 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 			case UserState.LOGOUT -> Authentication.signOut(telegramId);
 //			case UserState.HELP_PAGE -> viewHelpPage();
 		}
+	}
+
+	private void cancelCurrentOperation(Long telegramId) {
+		sessionState.get(telegramId).clear();
+		navigateToProperState(telegramId);
 	}
 
 	private void botRepliesHandler(Message message) {
