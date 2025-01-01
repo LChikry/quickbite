@@ -135,12 +135,12 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 		if (restaurant == null ||
 				sessionState.get(telegramId) == null ||
 				sessionState.get(telegramId).isEmpty() ||
-				sessionState.get(telegramId).peek() != UserState.ISSUING_ORDER_PROCESS) {
+				sessionState.get(telegramId).peek() != UserState.CHOOSING_PRODUCTS) {
 			return;
 		}
-		sessionState.get(telegramId).push(UserState.CHOOSING_PRODUCTS);
-
 		System.out.println("we detected a restaurant");
+		// task: show the available products and ask for the quantity for each product
+		sessionState.get(telegramId).pop();
 	}
 
 	public static void viewDashboard(Long telegramId) {
@@ -151,9 +151,13 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 	}
 
 	public static void issueOrder(Long telegramId) {
-		if (sessionState.get(telegramId) == null || sessionState.get(telegramId).isEmpty() || !(sessionState.get(telegramId).peek() == UserState.ISSUING_ORDER_PROCESS)) {
+		if (sessionState.get(telegramId) == null ||
+				sessionState.get(telegramId).isEmpty() ||
+				!(sessionState.get(telegramId).peek() == UserState.ISSUING_ORDER_PROCESS)) {
 			sessionState.get(telegramId).push(UserState.ISSUING_ORDER_PROCESS);
 			Restaurant.viewRestaurants(telegramId, null);
+			QuickBite.sessionState.get(telegramId).pop();
+			QuickBite.sessionState.get(telegramId).push(UserState.CHOOSING_PRODUCTS);
 			return;
 		}
 		UserState userState = sessionState.get(telegramId).peek();

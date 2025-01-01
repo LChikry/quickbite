@@ -52,6 +52,7 @@ public class Restaurant {
 			}
 			String message = "Which restaurant you want to order from\\?";
 			MessageHandler.sendReplyKeyboard(telegramId, message, KeyboardFactory.getRestaurantChoicesKeyboard(account.getRecentUsedRestaurants()));
+			return;
 		}
 		// task: view the inline query results
 	}
