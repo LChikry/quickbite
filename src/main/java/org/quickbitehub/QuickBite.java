@@ -6,6 +6,7 @@ import org.quickbitehub.client.UserState;
 
 import io.github.cdimascio.dotenv.Dotenv;
 import org.quickbitehub.client.Restaurant;
+import org.quickbitehub.utils.MessageHandler;
 import org.telegram.telegrambots.client.okhttp.OkHttpTelegramClient;
 import org.telegram.telegrambots.longpolling.util.LongPollingSingleThreadUpdateConsumer;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
@@ -14,6 +15,7 @@ import org.telegram.telegrambots.meta.api.objects.inlinequery.InlineQuery;
 import org.telegram.telegrambots.meta.api.objects.message.Message;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Stack;
 import java.util.concurrent.Executors;
@@ -51,6 +53,10 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 	public void consume(Update update) {
 		if (update.hasMessage()) {
 			Message msg = update.getMessage();
+			if (msg.getDate() + 20 < Instant.now().getEpochSecond()) {
+				MessageHandler.deleteMessage(msg.getFrom().getId(), msg.getMessageId());
+				return;
+			}
 			if (msg.isCommand()) botCommandsHandler(msg);
 			else if (msg.isReply()) botRepliesHandler(msg);
 			else if (msg.hasText()) botMessageHandler(msg);
