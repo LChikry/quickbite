@@ -98,6 +98,7 @@ public class MessageHandler {
 		try {
 			telegramClient.execute(dm);
 		} catch (TelegramApiException e) {
+			if (e.getMessage().contains("[400]")) return;
 			System.out.println("MessageHandler: deleteMessage()");
 			System.out.println(e.getMessage());
 			e.printStackTrace();
