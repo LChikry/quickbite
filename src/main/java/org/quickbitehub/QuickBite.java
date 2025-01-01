@@ -92,7 +92,7 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 		String cbqData = cbq.getData();
 		Long telegramId = cbq.getFrom().getId();
 		if (!cbqData.equals(CBQData.SIGNING_PROCESS.getData()) &&
-			cbqData.equals(CBQData.SIGNUP_PROCESS.getData()) &&
+			!cbqData.equals(CBQData.SIGNUP_PROCESS.getData()) &&
 			Authentication.userSessions.get(telegramId) == null) {
 
 			if (sessionState.get(telegramId) != null && !sessionState.get(telegramId).isEmpty()) sessionState.get(telegramId).clear();

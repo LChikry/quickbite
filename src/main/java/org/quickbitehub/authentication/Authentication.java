@@ -78,6 +78,7 @@ public class Authentication {
 
 	private static void signInHandler(Long telegramId, String email, String password) {
 		if (!isAuthenticationInformationValid(telegramId, email, password, CBQData.SIGNING_PROCESS)) return;
+		email = Account.formatEmail(email);
 		Account userAccount = Account.authenticate(telegramId, email, password);
 		if (userAccount == null) {
 			deleteRecentAuthFeedbackMessage(telegramId);
@@ -168,11 +169,12 @@ public class Authentication {
 		String first_name = (String) userAuthSteps.get(AuthSteps.SIGNUP_FIRST_NAME_TXT.getStep());
 		String last_name = (String) userAuthSteps.get(AuthSteps.SIGNUP_LAST_NAME_TXT.getStep());
 
-		signUpHandler(telegramId, email.toLowerCase(), password, id, first_name, last_name, middle_names);
+		signUpHandler(telegramId, email, password, id, first_name, last_name, middle_names);
 	}
 
 	private static void signUpHandler(Long telegramId, String email, String password, String id, String first_name, String last_name, String middle_names) {
 		if (!isAuthenticationInformationValid(telegramId, email, password, CBQData.SIGNUP_PROCESS)) return;
+		email = Account.formatEmail(email);
 		Account userAccount = Account.signUp(email, password, telegramId, first_name, last_name, middle_names, UserType.CUSTOMER.getText(), null);
 		userSessions.put(telegramId, userAccount);
 		deleteRecentAuthFeedbackMessage(telegramId);
@@ -189,23 +191,29 @@ public class Authentication {
 
 	private static boolean isAuthenticationInformationValid(Long telegramId, String email, String password, CBQData processType) {
 		if (processType == CBQData.SIGNING_PROCESS) {
-			if (Account.isValidEmail(email) || Account.isAccountExist(email) || userSessions.get(telegramId) == null) {
-				Account userAccount = Account.authenticate(telegramId, email, password);
+			if (Account.isEmailValid(email) &&
+					Account.isAccountExist(Account.formatEmail(email)) &&
+					userSessions.get(telegramId) == null) {
+				Account userAccount = Account.authenticate(telegramId, Account.formatEmail(email), password);
 				return userAccount != null;
 			}
 		} else {
-			if (Account.isValidEmail(email) || !Account.isAccountExist(email) || userSessions.get(telegramId) == null) return true;
+			if (Account.isEmailValid(email) &&
+					!Account.isAccountExist(Account.formatEmail(email)) &&
+					userSessions.get(telegramId) == null) {
+				return true;
+			}
 		}
 
 		String textMsg = "";
-		if (Account.authenticate(telegramId, email, password) == null) {
-			textMsg = Emoji.RED_CIRCLE.getCode() + " *Sign In Failed*\nIncorrect Email or Password " + Emoji.SAD_FACE.getCode();
-		} else if (userSessions.get(telegramId) != null) {
-			textMsg = Emoji.ORANGE_CIRCLE.getCode() + " *Sign Up Failed*\nYou are Already Logged In " + Emoji.SAD_FACE.getCode();
-		} else if (!Account.isValidEmail(email)) {
-			textMsg = Emoji.RED_CIRCLE.getCode() + " *Sign Up Failed*\nInvalid Email " + Emoji.SAD_FACE.getCode();
-		} else if (Account.isAccountExist(email)) {
+		if (userSessions.get(telegramId) != null) {
+			textMsg = Emoji.ORANGE_CIRCLE.getCode() + " *Sign In/Up Failed*\nYou are Already Logged In " + Emoji.SAD_FACE.getCode();
+		} else if (!Account.isEmailValid(email)) {
+			textMsg = Emoji.RED_CIRCLE.getCode() + " *Sign In/Up Failed*\nInvalid Email " + Emoji.SAD_FACE.getCode();
+		} else if (Account.isAccountExist(Account.formatEmail(email))) {
 			textMsg = Emoji.ORANGE_CIRCLE.getCode() + " *Sign Up Failed*\nYou Already Have an Account; Just Sign In " + Emoji.SMILING_FACE.getCode();
+		} else if (Account.authenticate(telegramId, Account.formatEmail(email), password) == null) {
+			textMsg = Emoji.RED_CIRCLE.getCode() + " *Sign In Failed*\nIncorrect Email or Password " + Emoji.SAD_FACE.getCode();
 		}
 
 		deleteRecentAuthFeedbackMessage(telegramId);

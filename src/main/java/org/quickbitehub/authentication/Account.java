@@ -19,23 +19,23 @@ public class Account implements Serializable {
 	private HashMap<Long, Boolean> isAuthenticated = new HashMap<>(); // TelegramId (device) to isAuthentication
 	public static final int MAX_RECENT_USED_RESTAURANT_LENGTH = 8;
 	private final ArrayList<String> recentUsedRestaurants = new ArrayList<>(MAX_RECENT_USED_RESTAURANT_LENGTH); // recent used restaurantName in index 0
-	public static HashMap<String, Account> usersAccount = getAllAccounts(); // EMAIL to Account
+	public static HashMap<String, Account> usersAccount = getAllAccountsFromDB(); // EMAIL to Account
 
 	public Account(String EMAIL, String password, User USER, Long telegramId) {
 		this.ACCOUNT_SIGN_UP_DATE = LocalDate.now();
-		this.EMAIL = EMAIL;
+		this.EMAIL = formatEmail(EMAIL);
 		this.USER = USER;
 		this.USER_ID = USER.getUserId();
 		this.password = password;
 		this.isAuthenticated.put(telegramId, true);
 
-		insertAccount(EMAIL, password, Integer.valueOf(USER.getUserId()), this.ACCOUNT_SIGN_UP_DATE);
+		insertAccount(formatEmail(EMAIL), password, Integer.valueOf(USER.getUserId()), this.ACCOUNT_SIGN_UP_DATE);
 		this.ACCOUNT_ID = Account.getAccountIdFromDB(EMAIL);
 	}
 
 	public Account(String EMAIL, String password, String accountId, String userId, LocalDate signUpDate) {
 		this.ACCOUNT_SIGN_UP_DATE = signUpDate;
-		this.EMAIL = EMAIL;
+		this.EMAIL = formatEmail(EMAIL);
 		this.ACCOUNT_ID = accountId;
 		this.USER_ID = userId;
 		this.password = password;
@@ -51,7 +51,7 @@ public class Account implements Serializable {
 	}
 
 	public static void fetchAllAccounts() {
-		Account.usersAccount = getAllAccounts();
+		Account.usersAccount = getAllAccountsFromDB();
 	}
 
 
@@ -102,6 +102,7 @@ public class Account implements Serializable {
 	}
 
 	static public Account signUp(String email, String password, Long telegramId, String first_name, String last_name, String middle_names, String userType, String restaurantId) {
+		email = formatEmail(email);
 		Customer customer = null;
 		Employee employee = null;
 		if (Objects.equals(userType, UserType.CUSTOMER.getText())) {
@@ -131,12 +132,12 @@ public class Account implements Serializable {
 		return true;
 	}
 
-	static public boolean isValidEmail(String email) {
+	static public boolean isEmailValid(String email) {
 		email = email.strip().trim().toLowerCase();
 		if (email.endsWith(".") || email.startsWith(".")) return false;
 		int index = email.indexOf('@');
-		if (email.charAt(index-1) == '.' || email.charAt(index+1) == '.' || 0 == index) return false;
-		if (-1 == email.indexOf('@', index+1)) return false;
+		if (-1 == index || 0 == index || email.charAt(index-1) == '.' || email.charAt(index+1) == '.') return false;
+		if (-1 != email.indexOf('@', index+1)) return false; // we should have one @
 		if (-1 == email.indexOf('.', index+1)) return false;
 		return email.endsWith("@aui.ma");
 	}
@@ -146,6 +147,7 @@ public class Account implements Serializable {
 	}
 
 	static public String formatEmail(String email) {
+		assert (isEmailValid(email));
 		String formattedEmail = email.strip().trim().toLowerCase();
 		String emailIdentifier = formattedEmail.substring(0, formattedEmail.indexOf("@"));
 		emailIdentifier = emailIdentifier.replace(".", "");
@@ -212,7 +214,7 @@ public class Account implements Serializable {
 		return accountId;
 	}
 
-	public static HashMap<String, Account> getAllAccounts() {
+	public static HashMap<String, Account> getAllAccountsFromDB() {
 		String query = "SELECT * FROM Account";
 		HashMap<String, Account> accounts = new HashMap<>();  // HashMap to store customer data by customer_id
 
