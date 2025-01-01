@@ -1,4 +1,4 @@
-package org.quickbitehub.client;
+package org.quickbitehub.consumer;
 
 /* commands creation message to BotFather
 start - Dashboard

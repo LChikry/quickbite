@@ -1,4 +1,4 @@
-package org.quickbitehub.client;
+package org.quickbitehub.provider;
 
 public enum DaysOfWeek {
 	MONDAY,

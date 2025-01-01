@@ -1,4 +1,4 @@
-package org.quickbitehub.client;
+package org.quickbitehub.consumer;
 
 public enum UserType {
 	CUSTOMER("Customer"),

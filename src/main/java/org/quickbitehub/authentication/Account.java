@@ -1,6 +1,9 @@
 package org.quickbitehub.authentication;
 
-import org.quickbitehub.client.*;
+import org.quickbitehub.consumer.Customer;
+import org.quickbitehub.consumer.Employee;
+import org.quickbitehub.consumer.User;
+import org.quickbitehub.consumer.UserType;
 import org.quickbitehub.utils.Emoji;
 import org.telegram.telegrambots.meta.api.objects.message.Message;
 

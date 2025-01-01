@@ -6,16 +6,12 @@ import org.quickbitehub.utils.KeyboardFactory;
 import org.quickbitehub.utils.MessageHandler;
 import org.quickbitehub.QuickBite;
 import org.quickbitehub.utils.Emoji;
-import org.quickbitehub.client.UserType;
+import org.quickbitehub.consumer.UserType;
 import org.telegram.telegrambots.client.okhttp.OkHttpTelegramClient;
 import org.telegram.telegrambots.meta.api.objects.message.Message;
 
 import java.util.HashMap;
 import java.util.Objects;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-
 
 
 public class Authentication {

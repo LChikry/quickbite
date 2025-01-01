@@ -1,4 +1,4 @@
-package org.quickbitehub.client;
+package org.quickbitehub.provider;
 
 import org.quickbitehub.QuickBite;
 import org.quickbitehub.authentication.Account;
@@ -8,7 +8,6 @@ import org.quickbitehub.utils.KeyboardFactory;
 import org.quickbitehub.utils.MessageHandler;
 import org.quickbitehub.utils.Emoji;
 
-import javax.print.attribute.HashDocAttributeSet;
 import java.sql.*;
 import java.time.DayOfWeek;
 import java.time.OffsetDateTime;

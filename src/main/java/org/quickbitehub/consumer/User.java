@@ -1,4 +1,4 @@
-package org.quickbitehub.client;
+package org.quickbitehub.consumer;
 
 public abstract class User {
 	protected final String USER_ID;

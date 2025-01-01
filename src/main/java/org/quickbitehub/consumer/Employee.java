@@ -1,4 +1,4 @@
-package org.quickbitehub.client;
+package org.quickbitehub.consumer;
 
 import org.quickbitehub.authentication.DBCredentials;
 
