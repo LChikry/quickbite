@@ -153,7 +153,7 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 	public static void issueOrder(Long telegramId) {
 		if (sessionState.get(telegramId) == null ||
 				sessionState.get(telegramId).isEmpty() ||
-				!(sessionState.get(telegramId).peek() == UserState.ISSUING_ORDER_PROCESS)) {
+				sessionState.get(telegramId).peek() != UserState.ISSUING_ORDER_PROCESS) {
 			sessionState.get(telegramId).push(UserState.ISSUING_ORDER_PROCESS);
 			Restaurant.viewRestaurants(telegramId, null);
 			QuickBite.sessionState.get(telegramId).pop();
