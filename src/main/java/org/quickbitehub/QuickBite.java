@@ -1,12 +1,12 @@
 package org.quickbitehub;
 
 import org.quickbitehub.authentication.Authentication;
-import org.quickbitehub.authentication.Account;
 import org.quickbitehub.consumer.UserState;
 
 import io.github.cdimascio.dotenv.Dotenv;
 import org.quickbitehub.order.Order;
 import org.quickbitehub.provider.Restaurant;
+import org.quickbitehub.utils.CBQData;
 import org.quickbitehub.utils.MessageHandler;
 import org.telegram.telegrambots.client.okhttp.OkHttpTelegramClient;
 import org.telegram.telegrambots.longpolling.util.LongPollingSingleThreadUpdateConsumer;
@@ -36,18 +36,6 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 		Dotenv dotenv = Dotenv.load();
 		this.botToken = dotenv.get("BOT_TOKEN");
 		this.telegramClient = new OkHttpTelegramClient(this.botToken);
-	}
-
-	public String getBotUsername() {
-		return botUsername;
-	}
-
-	public String getBotToken() {
-		return botToken;
-	}
-
-	public boolean isAccountExist(String telegramId) {
-		return Account.usersAccount.containsKey(telegramId);
 	}
 
 	@Override
@@ -85,18 +73,8 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 //			case UserState.MANAGE_ORDERS_PAGE -> viewManageOrdersPage();
 //			case UserState.SETTINGS_PAGE -> viewSettingsPage();
 			case UserState.LOGOUT -> Authentication.signOut(telegramId);
-//			case UserState.HELP_PAGE -> viewHelpPage();
+			case UserState.HELP_PAGE -> viewHelpPage();
 		}
-	}
-
-	private void cancelCurrentOperation(Long telegramId) {
-		userState.get(telegramId).clear();
-		navigateToProperState(telegramId);
-	}
-
-	private void botRepliesHandler(Message message) {
-		Authentication.signIn(message, message.getChat().getId());
-		Authentication.signUp(message, message.getChat().getId());
 	}
 
 	private void botCallBackQueryHandler(CallbackQuery cbq) {
@@ -122,6 +100,11 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 		} else if (cbqData.equals(CBQData.ISSUE_ORDER.getData())) {
 			Order.issueOrder(telegramId);
 		}
+	}
+
+	private void botRepliesHandler(Message message) {
+		Authentication.signIn(message, message.getChat().getId());
+		Authentication.signUp(message, message.getChat().getId());
 	}
 
 	private void botInlineQueryHandler(InlineQuery inlineQuery) {
@@ -160,17 +143,6 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 		userState.get(telegramId).pop();
 	}
 
-	public static void viewDashboard(Long telegramId) {
-		// show dashboard menu
-		// it will show the balance
-		// it will show full name
-		// it will show in progress orders
-	}
-
-	private void viewHelpPage() {
-
-	}
-
 	public static void navigateToProperState(Long telegramId) {
 		if (userState.get(telegramId) == null || userState.get(telegramId).isEmpty()) {
 			userState.get(telegramId).push(UserState.DASHBOARD_PAGE);
@@ -181,11 +153,34 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 		UserState properState = userState.get(telegramId).pop();
 		switch (properState) {
 			case UserState.DASHBOARD_PAGE -> viewDashboard(telegramId);
-			case UserState.ISSUING_ORDER_PROCESS -> Order.issueOrder(telegramId);
+			case UserState.ISSUING_ORDER_PROCESS, UserState.CHOOSING_PRODUCTS -> Order.issueOrder(telegramId);
 //			case UserState.CANCEL_PENDING_ORDER -> cancelPendingOrder();
 //			case UserState.MANAGE_ORDERS_PAGE -> viewManageOrdersPage();
 //			case UserState.SETTINGS_PAGE -> viewSettingsPage();
-			case UserState.CHOOSING_PRODUCTS -> Order.issueOrder(telegramId);
+			case UserState.HELP_PAGE -> viewHelpPage();
 		}
+	}
+
+	public static void viewDashboard(Long telegramId) {
+		// show dashboard menu
+		// it will show the balance
+		// it will show full name
+		// it will show in progress orders
+	}
+
+	private void cancelCurrentOperation(Long telegramId) {
+		userState.get(telegramId).clear();
+		navigateToProperState(telegramId);
+	}
+
+	private static void viewHelpPage() {
+	}
+
+	public String getBotUsername() {
+		return botUsername;
+	}
+
+	public String getBotToken() {
+		return botToken;
 	}
 }

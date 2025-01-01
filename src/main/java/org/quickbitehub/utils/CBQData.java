@@ -1,4 +1,4 @@
-package org.quickbitehub;
+package org.quickbitehub.utils;
 
 // Call Back Query Data
 public enum CBQData {

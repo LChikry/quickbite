@@ -1,7 +1,7 @@
 package org.quickbitehub.authentication;
 
 import io.github.cdimascio.dotenv.Dotenv;
-import org.quickbitehub.CBQData;
+import org.quickbitehub.utils.CBQData;
 import org.quickbitehub.utils.KeyboardFactory;
 import org.quickbitehub.utils.MessageHandler;
 import org.quickbitehub.QuickBite;
