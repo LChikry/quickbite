@@ -243,7 +243,7 @@ public class Authentication {
 		HashMap<String, Object> existingSteps = authProcesses.getOrDefault(telegramId, new HashMap<>());
 		existingSteps.put(AuthSteps.SIGN_IN_UP_FEEDBACK_MSG.getStep(), fm);
 		authProcesses.put(telegramId, existingSteps);
-		try { Thread.sleep(3000); } catch (InterruptedException e) { throw new RuntimeException(e); }
+		try { Thread.sleep(1750); } catch (InterruptedException e) { throw new RuntimeException(e); }
 	}
 
 	private static void deleteRecentAuthFeedbackMessage(Long telegramId) {
