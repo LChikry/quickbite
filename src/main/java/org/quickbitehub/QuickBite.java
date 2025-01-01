@@ -22,6 +22,7 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 	private final String botToken;
 	private final String botUsername = "QuickBiteHub_bot";
 	private final TelegramClient telegramClient;
+	
 
 	public static final HashMap<Long, Stack<NavigationState>> sessionState = new HashMap<>(); // TelegramId -> State
 
@@ -56,12 +57,10 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 	private void botCommandsHandler(Message message) {
 		String command = message.getText();
 		Long telegramId = message.getFrom().getId();
-
 		if (Authentication.userSessions.get(telegramId) == null) {
 			Authentication.authenticate(telegramId);
 			return;
 		}
-
 		switch (command) {
 			case "/start" -> viewDashboard(telegramId);
 			case "/order" -> issueOrder(telegramId);
@@ -81,6 +80,13 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 	private void botQueryHandler(CallbackQuery cbq) {
 		String cbqData = cbq.getData();
 		Long telegramId = cbq.getFrom().getId();
+		if (!cbqData.equals(CBQData.SIGNING_PROCESS.getData()) &&
+			cbqData.equals(CBQData.SIGNUP_PROCESS.getData()) &&
+			Authentication.userSessions.get(telegramId) == null) {
+
+			Authentication.authenticate(telegramId);
+			return;
+		}
 
 		if (cbqData.equals(CBQData.SIGNING_PROCESS.getData())) {
 			Authentication.signIn(null, telegramId);
