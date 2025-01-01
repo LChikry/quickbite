@@ -32,13 +32,11 @@ public class Restaurant {
 		//task: insert into db
 	}
 
-	public static void viewRestaurants(Long telegramId, String query) {
+	public static boolean viewRestaurants(Long telegramId, String query) {
 		if (allRestaurants.isEmpty()) {
 			String msg = Emoji.ORANGE_CIRCLE.getCode() + " Sorry, there is no restaurant currently operating in our bot\\.";
 			MessageHandler.sendText(telegramId, msg);
-			QuickBite.sessionState.get(telegramId).pop();
-			QuickBite.navigateToProperState(telegramId);
-			return;
+			return false;
 		}
 
 		if (query == null) {
@@ -52,9 +50,10 @@ public class Restaurant {
 			}
 			String message = "Which restaurant you want to order from\\?";
 			MessageHandler.sendReplyKeyboard(telegramId, message, KeyboardFactory.getRestaurantChoicesKeyboard(account.getRecentUsedRestaurants()));
-			return;
+			return true;
 		}
 		// task: view the inline query results
+		return true;
 	}
 
 	public static void viewRestaurantProducts(Long telegramId, String query) {
