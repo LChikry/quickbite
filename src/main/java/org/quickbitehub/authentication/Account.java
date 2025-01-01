@@ -1,6 +1,9 @@
 package org.quickbitehub.authentication;
 
+import org.quickbitehub.QuickBite;
 import org.quickbitehub.client.*;
+import org.quickbitehub.utils.Emoji;
+import org.telegram.telegrambots.meta.api.objects.message.Message;
 
 import java.io.Serializable;
 import java.sql.*;
@@ -141,6 +144,27 @@ public class Account implements Serializable {
 		if (-1 != email.indexOf('@', index+1)) return false; // we should have one @
 		if (-1 == email.indexOf('.', index+1)) return false;
 		return email.endsWith("@aui.ma");
+	}
+
+	static boolean isAccountInformationValid(Long telegramId, String firstName, String lastName, String middleNames) {
+		firstName = firstName.trim().strip();
+		lastName = lastName.trim().strip();
+		middleNames = middleNames.trim().strip();
+		String fullName = firstName + " " + lastName + " " + middleNames;
+		// is fullName contains only Unicode letters and spaces
+		if (-1 == firstName.indexOf(' ') && -1 == lastName.indexOf(' ') && fullName.matches("^[\\p{L} ]+$")) return true;
+
+		String textMsg = Emoji.RED_CIRCLE.getCode() + " *Sign Up Failed*\nInvalid First/Last/Middle Name\\(s\\) " + Emoji.SAD_FACE.getCode();
+		Authentication.deleteRecentAuthFeedbackMessage(telegramId);
+		Authentication.putRecentAuthFeedbackMessage(telegramId, textMsg);
+		Authentication.deleteRecentAuthFeedbackMessage(telegramId);
+
+		var menuMsg = (Message) Authentication.authProcesses.get(telegramId).get(AuthSteps.SIGN_IN_UP_MENU.getStep());
+		HashMap<String, Object> temp = new HashMap<>();
+		temp.put(AuthSteps.SIGN_IN_UP_MENU.getStep(), menuMsg);
+		Authentication.authProcesses.remove(telegramId); // the process is finished
+		Authentication.authProcesses.put(telegramId, temp);
+		return false;
 	}
 
 	static public boolean isAccountExist(String email) {

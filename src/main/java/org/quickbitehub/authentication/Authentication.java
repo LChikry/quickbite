@@ -15,7 +15,7 @@ import java.util.Objects;
 
 public class Authentication {
 	private static final OkHttpTelegramClient telegramClient = new OkHttpTelegramClient(Dotenv.load().get("BOT_TOKEN"));
-	private static final HashMap<Long, HashMap<String, Object>> authProcesses = new HashMap<>(); // device(Telegram Account Id) -> Current Step
+	static final HashMap<Long, HashMap<String, Object>> authProcesses = new HashMap<>(); // device(Telegram Account Id) -> Current Step
 	public static final HashMap<Long, Account> userSessions = new HashMap<>(); // TelegramId -> Account
 
 	public static void authenticate(Long telegramId) {
@@ -103,7 +103,7 @@ public class Authentication {
 		putRecentAuthFeedbackMessage(telegramId, feedbackMsg);
 		deleteRecentAuthFeedbackMessage(telegramId);
 		authProcesses.remove(telegramId); // the process is finished
-		QuickBite.sessionState.get(telegramId).pop();
+		QuickBite.userState.get(telegramId).pop();
 		QuickBite.navigateToProperState(telegramId);
 	}
 
@@ -158,24 +158,29 @@ public class Authentication {
 		Message enteredPassword = (Message) userAuthSteps.get(AuthSteps.SIGNUP_MIDDLE_NAMES_MSG.getStep());
 		if (!Objects.equals(message.getReplyToMessage().getMessageId(), enteredPassword.getMessageId())) return;
 
-		String middle_names = message.getText().strip().trim();
+		String middleNames = message.getText().strip().trim();
 		MessageHandler.deleteMessage(telegramId, message.getReplyToMessage().getMessageId());
 		MessageHandler.deleteMessage(telegramId, message.getMessageId());
-		if (middle_names.equals("0")) middle_names = "";
+		if (middleNames.equals("0")) middleNames = "";
 
 		String email = (String) userAuthSteps.get(AuthSteps.SIGNUP_EMAIL_TXT.getStep());
 		String password = (String) userAuthSteps.get(AuthSteps.SIGNUP_PASSWORD_TXT.getStep());
 		String id = (String) userAuthSteps.get(AuthSteps.SIGNUP_ID_TXT.getStep());
-		String first_name = (String) userAuthSteps.get(AuthSteps.SIGNUP_FIRST_NAME_TXT.getStep());
-		String last_name = (String) userAuthSteps.get(AuthSteps.SIGNUP_LAST_NAME_TXT.getStep());
+		String firstName = (String) userAuthSteps.get(AuthSteps.SIGNUP_FIRST_NAME_TXT.getStep());
+		String lastName = (String) userAuthSteps.get(AuthSteps.SIGNUP_LAST_NAME_TXT.getStep());
 
-		signUpHandler(telegramId, email, password, id, first_name, last_name, middle_names);
+		signUpHandler(telegramId, email, password, id, firstName, lastName, middleNames);
 	}
 
-	private static void signUpHandler(Long telegramId, String email, String password, String id, String first_name, String last_name, String middle_names) {
+	private static void signUpHandler(Long telegramId, String email, String password, String id, String firstName, String lastName, String middleNames) {
 		if (!isAuthenticationInformationValid(telegramId, email, password, CBQData.SIGNUP_PROCESS)) return;
+		if (!Account.isAccountInformationValid(telegramId, firstName, lastName, middleNames)) return;
 		email = Account.formatEmail(email);
-		Account userAccount = Account.signUp(email, password, telegramId, first_name, last_name, middle_names, UserType.CUSTOMER.getText(), null);
+		firstName = Account.formatName(firstName);
+		lastName = Account.formatName(lastName);
+		if (!middleNames.equals("")) middleNames = Account.formatName(middleNames);
+
+		Account userAccount = Account.signUp(email, password, telegramId, firstName, lastName, middleNames, UserType.CUSTOMER.getText(), null);
 		userSessions.put(telegramId, userAccount);
 		deleteRecentAuthFeedbackMessage(telegramId);
 		Message msg = (Message) authProcesses.get(telegramId).get(AuthSteps.SIGN_IN_UP_MENU.getStep());
@@ -185,7 +190,7 @@ public class Authentication {
 		putRecentAuthFeedbackMessage(telegramId, feedbackMsg);
 		deleteRecentAuthFeedbackMessage(telegramId);
 		authProcesses.remove(telegramId); // the process is finished
-		QuickBite.sessionState.get(telegramId).pop();
+		QuickBite.userState.get(telegramId).pop();
 		QuickBite.navigateToProperState(telegramId);
 	}
 
@@ -240,13 +245,13 @@ public class Authentication {
 		assert userAccount.isAuthenticated(telegramId);
 		userAccount.logOut(telegramId);
 		userSessions.remove(telegramId);
-		if (QuickBite.sessionState.get(telegramId) != null) QuickBite.sessionState.get(telegramId).clear();
+		if (QuickBite.userState.get(telegramId) != null) QuickBite.userState.get(telegramId).clear();
 		String msg = Emoji.GREEN_CIRCLE.getCode() + " *_You have log out successfully\\. See you soon\\! \ud83d\udc4b_*";
 		putRecentAuthFeedbackMessage(telegramId, msg);
 		deleteRecentAuthFeedbackMessage(telegramId);
 	}
 
-	private static void putRecentAuthFeedbackMessage(Long telegramId, String textMessage) {
+	static void putRecentAuthFeedbackMessage(Long telegramId, String textMessage) {
 		Message fm = MessageHandler.sendText(telegramId, textMessage);
 		HashMap<String, Object> existingSteps = authProcesses.getOrDefault(telegramId, new HashMap<>());
 		existingSteps.put(AuthSteps.SIGN_IN_UP_FEEDBACK_MSG.getStep(), fm);
@@ -254,7 +259,7 @@ public class Authentication {
 		try { Thread.sleep(1750); } catch (InterruptedException e) { throw new RuntimeException(e); }
 	}
 
-	private static void deleteRecentAuthFeedbackMessage(Long telegramId) {
+	 static void deleteRecentAuthFeedbackMessage(Long telegramId) {
 		assert Authentication.authProcesses.get(telegramId) != null;
 		if (Authentication.authProcesses.get(telegramId).get(AuthSteps.SIGN_IN_UP_FEEDBACK_MSG.getStep()) == null) return;
 		Message msg = (Message) Authentication.authProcesses.get(telegramId).get(AuthSteps.SIGN_IN_UP_FEEDBACK_MSG.getStep());
