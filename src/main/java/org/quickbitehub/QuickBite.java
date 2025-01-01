@@ -2,7 +2,7 @@ package org.quickbitehub;
 
 import org.quickbitehub.authentication.Authentication;
 import org.quickbitehub.authentication.Account;
-import org.quickbitehub.client.NavigationState;
+import org.quickbitehub.client.UserState;
 
 import io.github.cdimascio.dotenv.Dotenv;
 import org.quickbitehub.client.Restaurant;
@@ -22,7 +22,7 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 	private final String botUsername = "QuickBiteHub_bot";
 	private final TelegramClient telegramClient;
 
-	public static final HashMap<Long, Stack<NavigationState>> sessionState = new HashMap<>(); // TelegramId -> State
+	public static final HashMap<Long, Stack<UserState>> sessionState = new HashMap<>(); // TelegramId -> State
 
 	public QuickBite() {
 		Dotenv dotenv = Dotenv.load();
@@ -114,6 +114,7 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 
 	private void botMessageHandler(Message message) {
 		Restaurant restaurant = Restaurant.allRestaurants.get(message.getText());
+		if (restaurant == null) return;
 	}
 
 	public static void viewDashboard(Long telegramId) {
