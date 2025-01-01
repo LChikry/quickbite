@@ -8,6 +8,7 @@ import org.quickbitehub.utils.KeyboardFactory;
 import org.quickbitehub.utils.MessageHandler;
 import org.quickbitehub.utils.Emoji;
 
+import javax.print.attribute.HashDocAttributeSet;
 import java.sql.*;
 import java.time.DayOfWeek;
 import java.time.OffsetDateTime;

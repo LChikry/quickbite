@@ -1,6 +1,9 @@
 package org.quickbitehub.order;
 
+import org.quickbitehub.QuickBite;
 import org.quickbitehub.authentication.DBCredentials;
+import org.quickbitehub.consumer.UserState;
+import org.quickbitehub.provider.Restaurant;
 
 import javax.money.Monetary;
 import javax.money.MonetaryAmount;
@@ -36,10 +39,28 @@ public class Order {
 	}
 
 	public static void issueOrder(Long telegramId) {
+		if (QuickBite.userState.get(telegramId) == null ||
+				QuickBite.userState.get(telegramId).isEmpty() ||
+				QuickBite.userState.get(telegramId).peek() != UserState.ISSUING_ORDER_PROCESS) {
+			QuickBite.userState.get(telegramId).push(UserState.ISSUING_ORDER_PROCESS);
+			if(!Restaurant.viewRestaurants(telegramId, null)) {
+				QuickBite.userState.get(telegramId).pop();
+				QuickBite.navigateToProperState(telegramId);
+				return;
+			}
+			QuickBite.userState.get(telegramId).pop();
+			QuickBite.userState.get(telegramId).push(UserState.CHOOSING_PRODUCTS);
+			return;
+		}
+		UserState userState = QuickBite.userState.get(telegramId).peek();
+		if (userState == UserState.ISSUING_ORDER_PROCESS) {
+			QuickBite.userState.get(telegramId).push(UserState.CHOOSING_PRODUCTS);
+			// choose products and quantity
+			return;
+		}
 
 		// tasks
 		/*
-			- choose restaurant
 			- choose product
 			- choose quantity
 			- choose next product
