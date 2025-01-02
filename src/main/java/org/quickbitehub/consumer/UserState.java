@@ -48,9 +48,20 @@ public enum UserState {
 
 	// Check if the current stack's top state is not authentication-related
 	public boolean isStateAuthRelated() {
-		return this == UserState.AUTHENTICATION_NEEDED ||
-				this == UserState.AUTHENTICATION_SIGNIN ||
-				this == UserState.AUTHENTICATION_SIGNUP;
+		return this == AUTHENTICATION_NEEDED ||
+				this == AUTHENTICATION_SIGNIN ||
+				this == AUTHENTICATION_SIGNUP;
+	}
+
+	public boolean isOperationState() {
+		return this == AUTHENTICATION_SIGNIN ||
+				this == AUTHENTICATION_SIGNUP ||
+				this == ISSUE_ORDER ||
+				this == IO_RESTAURANT_SELECTION ||
+				this == IO_PRODUCTS_SELECTION ||
+				this == IO_CONFIRMATION ||
+				this == CANCEL_PENDING_ORDER ||
+				this == AUTHENTICATION_SIGNOUT;
 	}
 
 	public static UserState getValueOf(String name) throws IllegalArgumentException {
