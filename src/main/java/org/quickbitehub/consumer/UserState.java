@@ -18,7 +18,8 @@ public enum UserState {
 	AUTHENTICATION_SIGNIN("/signin"),
 	AUTHENTICATION_SIGNUP("/signup"),
 	DASHBOARD_PAGE("/start"),
-	CANCEL_CURRENT_OPERATION("/cancel"),
+	CANCEL_CURRENT_OPERATION_WITH_NOTICE("/cancel"),
+	CANCEL_CURRENT_OPERATION_WITHOUT_NOTICE("/cancel_without_notice"),
 	ISSUE_ORDER("/order"),
 	IO_RESTAURANT_SELECTION("/select_restaurant"),
 	IO_PRODUCTS_SELECTION("/select_products"),
@@ -42,7 +43,7 @@ public enum UserState {
 	public boolean isImmediateState() {
 		return this == HELP_PAGE ||
 				this == AUTHENTICATION_SIGNOUT ||
-				this == CANCEL_CURRENT_OPERATION ||
+				this == CANCEL_CURRENT_OPERATION_WITH_NOTICE ||
 				this == BEFORE_NEXT_UPDATE;
 	}
 
@@ -70,7 +71,7 @@ public enum UserState {
 		if (name.equals(AUTHENTICATION_SIGNIN.getState())) return AUTHENTICATION_SIGNIN;
 		if (name.equals(AUTHENTICATION_SIGNUP.getState())) return AUTHENTICATION_SIGNUP;
 		if (name.equals(DASHBOARD_PAGE.getState())) return DASHBOARD_PAGE;
-		if (name.equals(CANCEL_CURRENT_OPERATION.getState())) return CANCEL_CURRENT_OPERATION;
+		if (name.equals(CANCEL_CURRENT_OPERATION_WITH_NOTICE.getState())) return CANCEL_CURRENT_OPERATION_WITH_NOTICE;
 		if (name.equals(ISSUE_ORDER.getState())) return ISSUE_ORDER;
 		if (name.equals(IO_RESTAURANT_SELECTION.getState())) return IO_RESTAURANT_SELECTION;
 		if (name.equals(IO_PRODUCTS_SELECTION.getState())) return IO_PRODUCTS_SELECTION;

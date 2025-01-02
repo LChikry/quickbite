@@ -159,18 +159,19 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 			case AUTHENTICATION_SIGNIN -> Authentication.signIn(null, telegramId);
 			case AUTHENTICATION_SIGNUP -> Authentication.signUp(null, telegramId);
 			case DASHBOARD_PAGE -> viewDashboardPage(telegramId);
-			case CANCEL_CURRENT_OPERATION -> cancelCurrentOperation(telegramId);
+			case CANCEL_CURRENT_OPERATION_WITH_NOTICE -> cancelCurrentOperation(telegramId, false);
+			case CANCEL_CURRENT_OPERATION_WITHOUT_NOTICE -> cancelCurrentOperation(telegramId, true);
 			case ISSUE_ORDER -> Order.issueOrder(telegramId);
 			case IO_RESTAURANT_SELECTION -> {
-				if (2 != userState.get(telegramId).search(UserState.ISSUE_ORDER)) cancelCurrentOperation(telegramId);
+				if (2 != userState.get(telegramId).search(UserState.ISSUE_ORDER)) cancelCurrentOperation(telegramId, false);
 				else Order.issueOrder(telegramId);
 			}
 			case UserState.IO_PRODUCTS_SELECTION -> {
-				if (2 != userState.get(telegramId).search(UserState.IO_RESTAURANT_SELECTION)) cancelCurrentOperation(telegramId);
+				if (2 != userState.get(telegramId).search(UserState.IO_RESTAURANT_SELECTION)) cancelCurrentOperation(telegramId, false);
 				else Order.issueOrder(telegramId);
 			}
 			case UserState.IO_CONFIRMATION -> {
-				if (2 != userState.get(telegramId).search(UserState.IO_PRODUCTS_SELECTION)) cancelCurrentOperation(telegramId);
+				if (2 != userState.get(telegramId).search(UserState.IO_PRODUCTS_SELECTION)) cancelCurrentOperation(telegramId, false);
 				else Order.issueOrder(telegramId);
 			}
 //			case CANCEL_PENDING_ORDER -> cancelPendingOrder();
@@ -204,9 +205,9 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 		MessageHandler.sendInlineKeyboard(telegramId, message, KeyboardFactory.getDashboardPageKeyboard(), LONG_DELAY_TIME_SEC);
 	}
 
-	public static void cancelCurrentOperation(Long telegramId) {
+	public static void cancelCurrentOperation(Long telegramId, boolean isNoticeSent) {
 		Stack<UserState> states = userState.get(telegramId);
-		if (!states.empty() && states.peek() == UserState.CANCEL_CURRENT_OPERATION) states.pop();
+		if (!states.empty() && states.peek() == UserState.CANCEL_CURRENT_OPERATION_WITH_NOTICE) states.pop();
 		String message;
 		if (states.empty() || !states.peek().isOperationState()) {
 			message = Emoji.ORANGE_CIRCLE.getCode() + " There is No Operation to Cancel\\, You are Good to Go " + Emoji.SMILING_FACE.getCode();
@@ -214,7 +215,7 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 			states.clear();
 			message = Emoji.BLUE_CIRCLE.getCode() + " Current Operation is Canceled\\.";
 		}
-		MessageHandler.sendText(telegramId, message, SHORT_DELAY_TIME_SEC);
+		if (!isNoticeSent) MessageHandler.sendText(telegramId, message, SHORT_DELAY_TIME_SEC);
 	}
 
 	private static void viewHelpPage(Long telegramId) {

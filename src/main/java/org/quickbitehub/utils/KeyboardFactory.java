@@ -74,7 +74,7 @@ public class KeyboardFactory {
 		immediateButtons.add(helpButton);
 		immediateButtons.add(signOutButton);
 
-		var cancelButton = InlineKeyboardButton.builder().text("Cancel Current Operation").callbackData(UserState.CANCEL_CURRENT_OPERATION.getState()).build();
+		var cancelButton = InlineKeyboardButton.builder().text("Cancel Current Operation").callbackData(UserState.CANCEL_CURRENT_OPERATION_WITH_NOTICE.getState()).build();
 		return InlineKeyboardMarkup
 				.builder()
 				.keyboardRow(new InlineKeyboardRow(orderButton))

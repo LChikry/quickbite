@@ -113,7 +113,7 @@ public class Authentication {
 			temp.put(AuthSteps.SIGN_IN_UP_MENU.getStep(), menuMsg);
 			authProcesses.remove(telegramId); // the process is finished
 			authProcesses.put(telegramId, temp);
-			QuickBite.cancelCurrentOperation(telegramId);
+			QuickBite.cancelCurrentOperation(telegramId, true);
 			return;
 		}
 
@@ -263,7 +263,7 @@ public class Authentication {
 		temp.put(AuthSteps.SIGN_IN_UP_MENU.getStep(), menuMsg);
 		authProcesses.remove(telegramId); // the process is finished
 		authProcesses.put(telegramId, temp);
-		QuickBite.cancelCurrentOperation(telegramId);
+		QuickBite.cancelCurrentOperation(telegramId, true);
 		return false;
 	}
 
