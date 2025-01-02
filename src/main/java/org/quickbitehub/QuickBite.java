@@ -6,15 +6,12 @@ import org.quickbitehub.consumer.UserState;
 import io.github.cdimascio.dotenv.Dotenv;
 import org.quickbitehub.order.Order;
 import org.quickbitehub.provider.Restaurant;
-import org.quickbitehub.utils.CBQData;
 import org.quickbitehub.utils.MessageHandler;
-import org.telegram.telegrambots.client.okhttp.OkHttpTelegramClient;
 import org.telegram.telegrambots.longpolling.util.LongPollingSingleThreadUpdateConsumer;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.inlinequery.InlineQuery;
 import org.telegram.telegrambots.meta.api.objects.message.Message;
-import org.telegram.telegrambots.meta.generics.TelegramClient;
 
 import java.time.Instant;
 import java.util.HashMap;
@@ -25,7 +22,6 @@ import java.util.concurrent.ScheduledExecutorService;
 public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 	private final String botToken;
 	private final String botUsername = "QuickBiteHub_bot";
-	private final TelegramClient telegramClient;
 	public static final HashMap<Long, Stack<UserState>> userState = new HashMap<>(); // TelegramId -> State
 	public static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 	public static final long STANDARD_DELAY_TIME_SEC = 30; // in seconds
@@ -35,13 +31,13 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 	public QuickBite() {
 		Dotenv dotenv = Dotenv.load();
 		this.botToken = dotenv.get("BOT_TOKEN");
-		this.telegramClient = new OkHttpTelegramClient(this.botToken);
 	}
 
 	@Override
 	public void consume(Update update) {
 		if (update.hasMessage()) {
 			Message msg = update.getMessage();
+			if (!userState.containsKey(msg.getChat().getId())) userState.put(msg.getChat().getId(), new Stack<>());
 			if (msg.getDate() + 20 < Instant.now().getEpochSecond()) {
 				MessageHandler.deleteMessage(msg.getFrom().getId(), msg.getMessageId());
 				return;
@@ -49,57 +45,39 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 			if (msg.isCommand()) botCommandsHandler(msg);
 			else if (msg.isReply()) botRepliesHandler(msg);
 			else if (msg.hasText()) botMessageHandler(msg);
-		} else if (update.hasCallbackQuery()) botCallBackQueryHandler(update.getCallbackQuery());
+		} else if (update.hasCallbackQuery()) {
+			if (!userState.containsKey(update.getCallbackQuery().getFrom().getId())) userState.put(update.getCallbackQuery().getFrom().getId(), new Stack<>());
+			botCallBackQueryHandler(update.getCallbackQuery());
+		}
 		else if (update.hasInlineQuery()) botInlineQueryHandler(update.getInlineQuery());
 	}
 
 	private void botCommandsHandler(Message message) {
-		String command = message.getText();
 		Long telegramId = message.getFrom().getId();
-		if (!command.equals("/logout") && !command.equals("/help") && Authentication.userSessions.get(telegramId) == null) {
-			if (userState.get(telegramId) != null && !userState.get(telegramId).isEmpty()) userState.get(telegramId).clear();
-			Stack<UserState> userStates = new Stack<>();
-			userStates.push(UserState.getValueOf(command));
-			userStates.push(UserState.AUTHENTICATION_PROCESS);
-			userState.put(telegramId, userStates);
-			Authentication.authenticate(telegramId);
-			return;
+		UserState newState = UserState.getValueOf(message.getText());
+		MessageHandler.deleteMessage(telegramId, message.getMessageId(), STANDARD_DELAY_TIME_SEC);
+		Stack<UserState> stack = userState.get(telegramId);
+		if (stack.isEmpty() ||
+				Authentication.isSessionAuthenticated(telegramId) ||
+				newState.isImmediateState() ||
+				newState.isStateAuthRelated() ||
+				!stack.peek().isStateAuthRelated()) {
+			stack.push(newState);
 		}
-		switch (UserState.getValueOf(command)) {
-			case UserState.DASHBOARD_PAGE -> viewDashboard(telegramId);
-			case UserState.CANCEL_CURRENT_OPERATION -> cancelCurrentOperation(telegramId);
-			case UserState.ISSUING_ORDER_PROCESS -> Order.issueOrder(telegramId);
-//			case UserState.CANCEL_PENDING_ORDER -> cancelPendingOrder();
-//			case UserState.MANAGE_ORDERS_PAGE -> viewManageOrdersPage();
-//			case UserState.SETTINGS_PAGE -> viewSettingsPage();
-			case UserState.LOGOUT -> Authentication.signOut(telegramId);
-			case UserState.HELP_PAGE -> viewHelpPage();
-		}
+		navigateToProperState(telegramId);
 	}
 
 	private void botCallBackQueryHandler(CallbackQuery cbq) {
-		String cbqData = cbq.getData();
 		Long telegramId = cbq.getFrom().getId();
-		if (!cbqData.equals(CBQData.SIGNING_PROCESS.getData()) &&
-			!cbqData.equals(CBQData.SIGNUP_PROCESS.getData()) &&
-			Authentication.userSessions.get(telegramId) == null) {
-
-			if (userState.get(telegramId) != null && !userState.get(telegramId).isEmpty()) userState.get(telegramId).clear();
-			Stack<UserState> userStates = new Stack<>();
-			userStates.push(UserState.getValueOf(cbqData));
-			userStates.push(UserState.AUTHENTICATION_PROCESS);
-			userState.put(telegramId, userStates);
-			Authentication.authenticate(telegramId);
-			return;
+		UserState newState = UserState.getValueOf(cbq.getData());
+		Stack<UserState> stack = userState.get(telegramId);
+		if (stack.isEmpty() ||
+				Authentication.isSessionAuthenticated(telegramId) ||
+				newState.isImmediateState() ||
+				newState.isStateAuthRelated()) {
+			stack.push(newState);
 		}
-
-		if (cbqData.equals(CBQData.SIGNING_PROCESS.getData())) {
-			Authentication.signIn(null, telegramId);
-		} else if (cbqData.equals(CBQData.SIGNUP_PROCESS.getData())) {
-			Authentication.signUp(null, telegramId);
-		} else if (cbqData.equals(CBQData.ISSUE_ORDER.getData())) {
-			Order.issueOrder(telegramId);
-		}
+		navigateToProperState(telegramId);
 	}
 
 	private void botRepliesHandler(Message message) {
@@ -112,12 +90,14 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 		String query = inlineQuery.getQuery().strip().trim().toLowerCase();
 		if (query.contains("restaurant")) {
 			query = query.substring(query.indexOf(":")+2);
-			if (userState.get(telegramId).peek() != UserState.ISSUING_ORDER_PROCESS) {
-				userState.get(telegramId).push(UserState.ISSUING_ORDER_PROCESS);
+			if (userState.get(telegramId).peek() != UserState.IO_RESTAURANT_SELECTION) {
+				userState.get(telegramId).push(UserState.IO_RESTAURANT_SELECTION);
 			}
+			QuickBite.userState.get(telegramId).pop();
 			if (!Restaurant.viewRestaurants(telegramId, query)) {
-				QuickBite.userState.get(telegramId).pop();
 				QuickBite.navigateToProperState(telegramId);
+			} else {
+				QuickBite.userState.get(telegramId).push(UserState.IO_PRODUCTS_SELECTION);
 			}
 			return;
 		}
@@ -125,6 +105,9 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 		if (query.contains("items")) {
 			query = query.substring(query.indexOf(":")+2);
 			Restaurant.viewRestaurantProducts(telegramId, query);
+			if (userState.get(telegramId).peek() != UserState.IO_PRODUCTS_SELECTION) {
+				userState.get(telegramId).push(UserState.IO_PRODUCTS_SELECTION);
+			}
 			return;
 		}
 	}
@@ -135,7 +118,7 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 		if (restaurant == null ||
 				userState.get(telegramId) == null ||
 				userState.get(telegramId).isEmpty() ||
-				userState.get(telegramId).peek() != UserState.CHOOSING_PRODUCTS) {
+				userState.get(telegramId).peek() != UserState.IO_PRODUCTS_SELECTION) {
 			return;
 		}
 		System.out.println("we detected a restaurant");
@@ -144,32 +127,60 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 	}
 
 	public static void navigateToProperState(Long telegramId) {
-		if (userState.get(telegramId) == null || userState.get(telegramId).isEmpty()) {
-			userState.get(telegramId).push(UserState.DASHBOARD_PAGE);
-			viewDashboard(telegramId);
-			return;
+		Stack<UserState> stack = userState.get(telegramId);
+		if (stack.isEmpty()) {
+			if (Authentication.isSessionAuthenticated(telegramId)) stack.push(UserState.DASHBOARD_PAGE);
+			else stack.push(UserState.AUTHENTICATION_NEEDED);
+		} else if (!Authentication.isSessionAuthenticated(telegramId) && !stack.peek().isStateAuthRelated()) {
+			stack.push(UserState.AUTHENTICATION_NEEDED);
 		}
 
-		UserState properState = userState.get(telegramId).pop();
+		UserState properState = stack.peek();
 		switch (properState) {
-			case UserState.DASHBOARD_PAGE -> viewDashboard(telegramId);
-			case UserState.ISSUING_ORDER_PROCESS, UserState.CHOOSING_PRODUCTS -> Order.issueOrder(telegramId);
-//			case UserState.CANCEL_PENDING_ORDER -> cancelPendingOrder();
-//			case UserState.MANAGE_ORDERS_PAGE -> viewManageOrdersPage();
-//			case UserState.SETTINGS_PAGE -> viewSettingsPage();
-			case UserState.HELP_PAGE -> viewHelpPage();
+			case AUTHENTICATION_NEEDED -> Authentication.authenticate(telegramId);
+			case AUTHENTICATION_SIGNIN -> Authentication.signIn(null, telegramId);
+			case AUTHENTICATION_SIGNUP -> Authentication.signUp(null, telegramId);
+			case DASHBOARD_PAGE -> viewDashboard(telegramId);
+			case CANCEL_CURRENT_OPERATION -> cancelCurrentOperation(telegramId);
+			case ISSUE_ORDER -> Order.issueOrder(telegramId);
+			case IO_RESTAURANT_SELECTION -> {
+				if (2 != userState.get(telegramId).search(UserState.ISSUE_ORDER)) cancelCurrentOperation(telegramId);
+				else Order.issueOrder(telegramId);
+			}
+			case UserState.IO_PRODUCTS_SELECTION -> {
+				if (2 != userState.get(telegramId).search(UserState.IO_RESTAURANT_SELECTION)) cancelCurrentOperation(telegramId);
+				else Order.issueOrder(telegramId);
+			}
+			case UserState.IO_CONFIRMATION -> {
+				if (2 != userState.get(telegramId).search(UserState.IO_PRODUCTS_SELECTION)) cancelCurrentOperation(telegramId);
+				else Order.issueOrder(telegramId);
+			}
+//			case CANCEL_PENDING_ORDER -> cancelPendingOrder();
+//			case MANAGE_ORDERS_PAGE -> viewManageOrdersPage();
+//			case SETTINGS_PAGE -> viewSettingsPage();
+			case AUTHENTICATION_SIGNOUT -> {
+				Authentication.signOut(telegramId);
+				userState.get(telegramId).pop();
+			}
+			case HELP_PAGE -> {
+				viewHelpPage();
+				userState.get(telegramId).pop();
+			}
 		}
 	}
 
 	public static void viewDashboard(Long telegramId) {
-		// show dashboard menu
+		// task: show dashboard menu
 		// it will show the balance
 		// it will show full name
 		// it will show in progress orders
+
+		// update state, currently, when we entered this function, the state contains showing the dashboard, what should be next, otherwise make sure it is determined next update
 	}
 
-	private void cancelCurrentOperation(Long telegramId) {
+	private static void cancelCurrentOperation(Long telegramId) {
 		userState.get(telegramId).clear();
+		if (!Authentication.isSessionAuthenticated(telegramId)) userState.get(telegramId).push(UserState.AUTHENTICATION_NEEDED);
 		navigateToProperState(telegramId);
 	}
 
