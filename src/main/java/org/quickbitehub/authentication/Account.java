@@ -165,9 +165,7 @@ public class Account implements Serializable {
 		temp.put(AuthSteps.SIGN_IN_UP_MENU.getStep(), menuMsg);
 		Authentication.authProcesses.remove(telegramId); // the process is finished
 		Authentication.authProcesses.put(telegramId, temp);
-		if (QuickBite.userState.get(telegramId).peek().isStateAuthProgressRelated()) {
-			QuickBite.userState.get(telegramId).pop();
-		}
+		QuickBite.cancelCurrentOperation(telegramId);
 		return false;
 	}
 

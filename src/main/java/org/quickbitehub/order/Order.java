@@ -60,7 +60,7 @@ public class Order {
 			QuickBite.userState.get(telegramId).push(UserState.IO_RESTAURANT_SELECTION);
 			if(!Restaurant.viewRestaurants(telegramId, null)) {
 				QuickBite.userState.get(telegramId).pop();
-				QuickBite.navigateToProperState(telegramId);
+//				QuickBite.navigateToProperState(telegramId);
 			} else {
 				QuickBite.userState.get(telegramId).pop();
 				QuickBite.userState.get(telegramId).push(UserState.IO_PRODUCTS_SELECTION);
