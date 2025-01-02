@@ -249,14 +249,14 @@ public class Authentication {
 
 	private static boolean isAuthenticationInformationValid(Long telegramId, String email, String password, UserState processType) {
 		if (processType == UserState.AUTHENTICATION_SIGNIN) {
-			if (Account.isEmailValid(email) &&
+			if (isEmailValid(email) &&
 					Account.isAccountExist(Account.formatEmail(email)) &&
 					userSessions.get(telegramId) == null) {
 				Account userAccount = Account.authenticate(telegramId, Account.formatEmail(email), password);
 				return userAccount != null;
 			}
 		} else {
-			if (Account.isEmailValid(email) &&
+			if (isEmailValid(email) &&
 					!Account.isAccountExist(Account.formatEmail(email)) &&
 					userSessions.get(telegramId) == null) {
 				return true;
@@ -266,7 +266,7 @@ public class Authentication {
 		String textMsg = "";
 		if (userSessions.get(telegramId) != null) {
 			textMsg = Emoji.ORANGE_CIRCLE.getCode() + " *Sign In/Up Failed*\nYou are already signed in " + Emoji.SAD_FACE.getCode();
-		} else if (!Account.isEmailValid(email)) {
+		} else if (!isEmailValid(email)) {
 			textMsg = Emoji.RED_CIRCLE.getCode() + " *Sign In/Up Failed*\nInvalid Email " + Emoji.SAD_FACE.getCode();
 		} else if (Account.isAccountExist(Account.formatEmail(email))) {
 			textMsg = Emoji.ORANGE_CIRCLE.getCode() + " *Sign Up Failed*\nYou Already Have an Account; Just Sign In " + Emoji.SMILING_FACE.getCode();
