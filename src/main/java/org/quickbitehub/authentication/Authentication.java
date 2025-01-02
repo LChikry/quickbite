@@ -278,13 +278,16 @@ public class Authentication {
 		assert userAccount.isAuthenticated(telegramId);
 		userAccount.logOut(telegramId);
 		userSessions.remove(telegramId);
-		if (QuickBite.userState.get(telegramId) != null) QuickBite.userState.get(telegramId).clear();
 		String msg = Emoji.GREEN_CIRCLE.getCode() + " *_You have log out successfully\\. See you soon\\! \ud83d\udc4b_*";
 		putAndDeleteAuthFeedbackMessage(telegramId, msg);
 	}
 
 	public static boolean isSessionAuthenticated(Long telegramId) {
 		return userSessions.get(telegramId) != null;
+	}
+
+	public static Account getSessionAccount(Long telegramId) {
+		return userSessions.get(telegramId);
 	}
 
 	static void putAndDeleteAuthFeedbackMessage(Long telegramId, String textMessage) {
