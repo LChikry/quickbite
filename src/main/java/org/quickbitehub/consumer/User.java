@@ -30,7 +30,7 @@ public abstract class User {
 	}
 
 	public String getUserFullName() {
-		return lastName + ", " + firstName + " " + middleNames;
+		return lastName + "\\, " + firstName + " " + middleNames;
 	}
 
 	public String getFirstName() {

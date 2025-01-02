@@ -205,9 +205,7 @@ public class Account implements Serializable {
 		return EMAIL;
 	}
 
-	public User getUser(Long telegramId) {
-		if (!this.isAuthenticated.get(telegramId)) return null;
-
+	public User getUser() {
 		return USER;
 	}
 

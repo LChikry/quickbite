@@ -9,7 +9,8 @@ public enum Emoji {
 	RIGHT_MAGNIFIER("\ud83d\udd0d"),
 	HAND_WAVING("\ud83d\udc4b"),
 	SMILING_FACE("\ud83d\ude01"),
-	SAD_FACE("\ud83d\ude1e");
+	SAD_FACE("\ud83d\ude1e"),
+	YELLOW_STARS("\u2728");
 
 	private final String code;
 
