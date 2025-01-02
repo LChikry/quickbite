@@ -1,5 +1,6 @@
 package org.quickbitehub.authentication;
 
+import org.apache.commons.validator.routines.EmailValidator;
 import org.quickbitehub.QuickBite;
 import org.quickbitehub.consumer.Customer;
 import org.quickbitehub.consumer.Employee;
@@ -139,14 +140,16 @@ public class Account implements Serializable {
 	}
 
 	static public boolean isEmailValid(String email) {
+		if (email == null || email.isBlank()) return false;
 		email = email.strip().trim().toLowerCase();
-		if (-1 != email.indexOf(' ')) return false;
-		if (email.endsWith(".") || email.startsWith(".")) return false;
-		int index = email.indexOf('@');
-		if (-1 == index || 0 == index || email.charAt(index-1) == '.' || email.charAt(index+1) == '.') return false;
-		if (-1 != email.indexOf('@', index+1)) return false; // we should have one @
-		if (-1 == email.indexOf('.', index+1)) return false;
-		return email.endsWith("@aui.ma");
+		String regexPattern4 = "^(?=.{1,64}@)[A-Za-z0-9_-]+(\\.[A-Za-z0-9_-]+)*@"
+					+ "[^-][A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)*(\\.[A-Za-z]{2,})$";
+		if (!email.matches(regexPattern4)) return false;
+		String RFC5322 = "^[a-zA-Z0-9_!#$%&'*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$";
+		if (!email.matches(RFC5322)) return false;
+		if (!EmailValidator.getInstance().isValid(email)) return false;
+
+		return true;
 	}
 
 	static boolean isAccountInformationValid(Long telegramId, String firstName, String lastName, String middleNames) {
