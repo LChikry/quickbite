@@ -5,7 +5,9 @@ import org.quickbitehub.consumer.UserState;
 
 import io.github.cdimascio.dotenv.Dotenv;
 import org.quickbitehub.order.Order;
+import org.quickbitehub.order.OrderStatus;
 import org.quickbitehub.provider.Restaurant;
+import org.quickbitehub.utils.Emoji;
 import org.quickbitehub.utils.KeyboardFactory;
 import org.quickbitehub.utils.MessageHandler;
 import org.telegram.telegrambots.longpolling.util.LongPollingSingleThreadUpdateConsumer;
@@ -138,6 +140,7 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 	}
 
 	public static void navigateToProperState(Long telegramId) {
+		assert (userState.get(telegramId) != null);
 		Stack<UserState> stack = userState.get(telegramId);
 		if (stack.isEmpty()) {
 			if (Authentication.isSessionAuthenticated(telegramId)) stack.push(UserState.DASHBOARD_PAGE);
@@ -153,7 +156,7 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 			case AUTHENTICATION_NEEDED -> Authentication.authenticate(telegramId);
 			case AUTHENTICATION_SIGNIN -> Authentication.signIn(null, telegramId);
 			case AUTHENTICATION_SIGNUP -> Authentication.signUp(null, telegramId);
-			case DASHBOARD_PAGE -> viewDashboard(telegramId);
+			case DASHBOARD_PAGE -> viewDashboardPage(telegramId);
 			case CANCEL_CURRENT_OPERATION -> cancelCurrentOperation(telegramId);
 			case ISSUE_ORDER -> Order.issueOrder(telegramId);
 			case IO_RESTAURANT_SELECTION -> {
@@ -173,7 +176,7 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 //			case SETTINGS_PAGE -> viewSettingsPage();
 			case AUTHENTICATION_SIGNOUT -> {
 				Authentication.signOut(telegramId);
-				userState.get(telegramId).pop();
+				userState.get(telegramId).clear();
 			}
 			case HELP_PAGE -> {
 				viewHelpPage(telegramId);
@@ -182,13 +185,20 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 		}
 	}
 
-	public static void viewDashboard(Long telegramId) {
-		// task: show dashboard menu
-		// it will show the balance
-		// it will show full name
-		// it will show in progress orders
+	public static void viewDashboardPage(Long telegramId) {
+		assert (Authentication.isSessionAuthenticated(telegramId));
+		String message = "*Welcome to Dashboard* " + Emoji.YELLOW_STARS.getCode() +
+				"\n" +
+				"\n*" + Authentication.getSessionAccount(telegramId).getUser().getUserFullName() + "*\\, from here you can take control of everything\\!" +
+				"\n" +
+				"\nMoney spent so far\\: *" + "*" +
+				"\n" +
+				"\n" + OrderStatus.PENDING.getStatus() + " orders\\: *" + "*" +
+				"\n" + OrderStatus.IN_PREPARATION.getStatus() + " orders\\: *" + "*" +
+				"\n" + OrderStatus.READY.getStatus() + " orders\\: *" + "*" +
+				"\n" + OrderStatus.CANCELED.getStatus() + " orders\\: *" + "*";
 
-		// update state, currently, when we entered this function, the state contains showing the dashboard, what should be next, otherwise make sure it is determined next update
+		MessageHandler.sendInlineKeyboard(telegramId, message, KeyboardFactory.getDashboardPageKeyboard(), LONG_DELAY_TIME_SEC);
 	}
 
 	public static void cancelCurrentOperation(Long telegramId) {
@@ -199,6 +209,7 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 	}
 
 	private static void viewHelpPage(Long telegramId) {
+		// task: correct urls as soon as you create the documentation
 		String msg = "_*Support Page*_" +
 				"\n" +
 				"\n    *How do I use QuickBite\\?*" +
