@@ -7,21 +7,25 @@ order - Issue an Order
 cancel_pending_order - Cancel a Pending Order
 manage_orders - Manage Your Orders
 settings - Configure Your Settings
-logout - Logout
+signout - Sing Out
 help - FAQ and Support
  */
 
 
 public enum UserState {
-	AUTHENTICATION_PROCESS(""),
+	AUTHENTICATION_NEEDED("/authenticate"),
+	AUTHENTICATION_SIGNIN("/signin"),
+	AUTHENTICATION_SIGNUP("/signup"),
 	DASHBOARD_PAGE("/start"),
 	CANCEL_CURRENT_OPERATION("/cancel"),
-	ISSUING_ORDER_PROCESS("/order"),
+	ISSUE_ORDER("/order"),
+	IO_RESTAURANT_SELECTION("/select_restaurant"),
+	IO_PRODUCTS_SELECTION("/select_products"),
+	IO_CONFIRMATION("/order_confirmation"),
 	CANCEL_PENDING_ORDER("/cancel_pending_order"),
 	MANAGE_ORDERS_PAGE("/manage_orders"),
-	CHOOSING_PRODUCTS(""),
 	SETTINGS_PAGE("/settings"),
-	LOGOUT("/logout"),
+	AUTHENTICATION_SIGNOUT("/signout"),
 	HELP_PAGE("/help");
 
 	private final String state;
@@ -29,18 +33,39 @@ public enum UserState {
 		this.state = state;
 	}
 
-	private String getState() {
+	public String getState() {
 		return state;
 	}
 
-	public static UserState getValueOf(String name) throws IllegalArgumentException{
+	// Check if the new state is immediate and doesn't require authentication
+	public boolean isImmediateState() {
+		return this == HELP_PAGE || this == AUTHENTICATION_SIGNOUT;
+	}
+
+	// Check if the current stack's top state is not authentication-related
+	public boolean isStateAuthRelated() {
+		return this == UserState.AUTHENTICATION_NEEDED ||
+				this == UserState.AUTHENTICATION_SIGNIN ||
+				this == UserState.AUTHENTICATION_SIGNUP;
+	}
+
+	public boolean isStateAuthProgressRelated() {
+		return this == UserState.AUTHENTICATION_SIGNIN || this == UserState.AUTHENTICATION_SIGNUP;
+	}
+
+	public static UserState getValueOf(String name) throws IllegalArgumentException {
+		if (name.equals(AUTHENTICATION_NEEDED.getState())) return AUTHENTICATION_NEEDED;
+		if (name.equals(AUTHENTICATION_SIGNIN.getState())) return AUTHENTICATION_SIGNIN;
+		if (name.equals(AUTHENTICATION_SIGNUP.getState())) return AUTHENTICATION_SIGNUP;
 		if (name.equals(DASHBOARD_PAGE.getState())) return DASHBOARD_PAGE;
 		if (name.equals(CANCEL_CURRENT_OPERATION.getState())) return CANCEL_CURRENT_OPERATION;
-		if (name.equals(ISSUING_ORDER_PROCESS.getState())) return ISSUING_ORDER_PROCESS;
+		if (name.equals(ISSUE_ORDER.getState())) return ISSUE_ORDER;
+		if (name.equals(IO_RESTAURANT_SELECTION.getState())) return IO_RESTAURANT_SELECTION;
+		if (name.equals(IO_PRODUCTS_SELECTION.getState())) return IO_PRODUCTS_SELECTION;
 		if (name.equals(CANCEL_PENDING_ORDER.getState())) return CANCEL_PENDING_ORDER;
 		if (name.equals(MANAGE_ORDERS_PAGE.getState())) return MANAGE_ORDERS_PAGE;
 		if (name.equals(SETTINGS_PAGE.getState())) return SETTINGS_PAGE;
-		if (name.equals(LOGOUT.getState())) return LOGOUT;
+		if (name.equals(AUTHENTICATION_SIGNOUT.getState())) return AUTHENTICATION_SIGNOUT;
 		if (name.equals(HELP_PAGE.getState())) return HELP_PAGE;
 
 		return valueOf(name);

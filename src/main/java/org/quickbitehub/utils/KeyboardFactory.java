@@ -1,5 +1,6 @@
 package org.quickbitehub.utils;
 
+import org.quickbitehub.consumer.UserState;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ForceReplyKeyboard;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
@@ -16,13 +17,13 @@ public class KeyboardFactory {
 		var logInButton = InlineKeyboardButton
 				.builder()
 				.text("Sign In")
-				.callbackData(CBQData.SIGNING_PROCESS.getData())
+				.callbackData(UserState.AUTHENTICATION_SIGNIN.getState())
 				.build();
 
 		var signUpButton = InlineKeyboardButton
 				.builder()
 				.text("Sign Up")
-				.callbackData(CBQData.SIGNUP_PROCESS.getData())
+				.callbackData(UserState.AUTHENTICATION_SIGNUP.getState())
 				.build();
 
 		return InlineKeyboardMarkup
