@@ -139,20 +139,6 @@ public class Account implements Serializable {
 		return true;
 	}
 
-	// non-Latin emails is not supported
-	static public boolean isEmailValid(String email) {
-		if (email == null || email.isBlank()) return false;
-		email = email.strip().trim().toLowerCase();
-		String regexPattern4 = "^(?=.{1,64}@)[A-Za-z0-9_-]+(\\.[A-Za-z0-9_-]+)*@"
-					+ "[^-][A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)*(\\.[A-Za-z]{2,})$";
-		if (!email.matches(regexPattern4)) return false;
-		String RFC5322 = "^[a-zA-Z0-9_!#$%&'*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$";
-		if (!email.matches(RFC5322)) return false;
-		if (!EmailValidator.getInstance().isValid(email)) return false;
-
-		return true;
-	}
-
 	static boolean isAccountInformationValid(Long telegramId, String firstName, String lastName, String middleNames) {
 		firstName = firstName.trim().strip();
 		lastName = lastName.trim().strip();
@@ -178,11 +164,12 @@ public class Account implements Serializable {
 	}
 
 	static public String formatEmail(String email) {
-		assert (isEmailValid(email));
+		assert (Authentication.isEmailValid(email));
 		String formattedEmail = email.strip().trim().toLowerCase();
-		String emailIdentifier = formattedEmail.substring(0, formattedEmail.indexOf("@"));
-		emailIdentifier = emailIdentifier.replace(".", "");
-		return emailIdentifier + formattedEmail.substring(formattedEmail.indexOf("@"));
+		String username = formattedEmail.substring(0, formattedEmail.indexOf("@"));
+		username = username.replace(".", "");
+		if (username.contains("+")) username = username.substring(0, username.indexOf('+'));
+		return username + formattedEmail.substring(formattedEmail.indexOf("@"));
 	}
 
 	static public String formatName(String name) {

@@ -1,6 +1,7 @@
 package org.quickbitehub.authentication;
 
 import io.github.cdimascio.dotenv.Dotenv;
+import org.apache.commons.validator.routines.EmailValidator;
 import org.quickbitehub.consumer.UserState;
 import org.quickbitehub.utils.KeyboardFactory;
 import org.quickbitehub.utils.MessageHandler;
@@ -18,6 +19,22 @@ public class Authentication {
 	private static final OkHttpTelegramClient telegramClient = new OkHttpTelegramClient(Dotenv.load().get("BOT_TOKEN"));
 	static final HashMap<Long, HashMap<String, Object>> authProcesses = new HashMap<>(); // device(Telegram Account Id) -> Current Step
 	public static final HashMap<Long, Account> userSessions = new HashMap<>(); // TelegramId -> Account
+
+	// source: https://www.baeldung.com/java-email-validation-regex
+	static public boolean isEmailValid(String email) {
+		if (email == null || email.isBlank()) return false;
+		email = email.strip().trim().toLowerCase();
+
+		String gmailPattern = "^(?=.{1,64}@)[A-Za-z0-9\\+_-]+(\\.[A-Za-z0-9\\+_-]+)*@"
+					+ "[^-][A-Za-z0-9\\+-]+(\\.[A-Za-z0-9\\+-]+)*(\\.[A-Za-z]{2,})$";
+
+		String nonLatinPattern = "^(?=.{1,64}@)[\\p{L}0-9_-]+(\\.[\\p{L}0-9_-]+)*@"
+					+ "[^-][\\p{L}0-9-]+(\\.[\\p{L}0-9-]+)*(\\.[\\p{L}]{2,})$";
+
+		return email.matches(nonLatinPattern) ||
+				email.matches(gmailPattern) ||
+				EmailValidator.getInstance().isValid(email);
+	}
 
 	public static void authenticate(Long telegramId) {
 		if (isSessionAuthenticated(telegramId)) {
