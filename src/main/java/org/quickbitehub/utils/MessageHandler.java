@@ -105,6 +105,16 @@ public class MessageHandler {
 		}
 	}
 
+	public static void deleteMessage(Long telegramId, Integer messageId, long autoDeleteDelayTime) {
+		if (autoDeleteDelayTime <= 0) {
+			deleteMessage(telegramId, messageId);
+			return;
+		}
+		QuickBite.scheduler.schedule(() -> MessageHandler.deleteMessage(telegramId, messageId),
+				autoDeleteDelayTime,
+				TimeUnit.SECONDS);
+	}
+
 	public static Message sendText(Long telegramId, String textMessage, long autoDeleteDelayTime) {
 		SendMessage msg = SendMessage
 				.builder()
