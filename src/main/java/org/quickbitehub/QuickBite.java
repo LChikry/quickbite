@@ -27,9 +27,11 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 	private final String botUsername = "QuickBiteHub_bot";
 	public static final HashMap<Long, Stack<UserState>> userState = new HashMap<>(); // TelegramId -> State
 	public static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+	public static final long SHORT_DELAY_TIME_SEC = 8; // in seconds
 	public static final long STANDARD_DELAY_TIME_SEC = 30; // in seconds
 	public static final long LONG_DELAY_TIME_SEC = 90; // in seconds
-	public static final long SHORT_DELAY_TIME_SEC = 8; // in seconds
+	public static final long ETERNITY_DELAY_TIME_SEC = 180; // in seconds
+
 
 	public QuickBite() {
 		Dotenv dotenv = Dotenv.load();
@@ -224,7 +226,7 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 				"\n" +
 				"\n_If you still have questions\\, or you encountered a problem\\, please do not hesitate to look at the documentation or contact us at *support@quickbitehub\\.org*_";
 
-		MessageHandler.sendInlineKeyboard(telegramId, msg, KeyboardFactory.getHelpPageKeyboard(), LONG_DELAY_TIME_SEC*2);
+		MessageHandler.sendInlineKeyboard(telegramId, msg, KeyboardFactory.getHelpPageKeyboard(), ETERNITY_DELAY_TIME_SEC);
 	}
 
 	public String getBotUsername() {

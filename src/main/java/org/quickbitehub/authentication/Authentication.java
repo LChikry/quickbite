@@ -36,7 +36,7 @@ public class Authentication {
 					"Sign in or Sing up, so you can benefit from our services that will streamline your food ordering process for greater life quality \ud83d\ude01";
 
 		Message signingMenu = MessageHandler.sendInlineKeyboard(telegramId, msg, KeyboardFactory.getSignInUpKeyboard(),
-				QuickBite.STANDARD_DELAY_TIME_SEC*2);
+				QuickBite.STANDARD_DELAY_TIME_SEC);
 		HashMap<String, Object> menuStep = new HashMap<>();
 		menuStep.put(AuthSteps.SIGN_IN_UP_MENU.getStep(), signingMenu);
 		authProcesses.put(telegramId, menuStep);
