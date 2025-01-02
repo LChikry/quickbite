@@ -33,6 +33,30 @@ public class KeyboardFactory {
 				.build();
 	}
 
+
+	public static InlineKeyboardMarkup getHelpPageKeyboard() {
+		var logInButton = InlineKeyboardButton
+				.builder()
+				.text("Docs for Users")
+				.url("www.google.com")
+				.build();
+
+		var signUpButton = InlineKeyboardButton
+				.builder()
+				.text("Docs for Restaurant Owners")
+				.url("www.google.com")
+				.build();
+
+		List<InlineKeyboardButton> buttons = new ArrayList<>(2);
+		buttons.add(logInButton);
+		buttons.add(signUpButton);
+
+		return InlineKeyboardMarkup
+				.builder()
+				.keyboardRow(new InlineKeyboardRow(buttons))
+				.build();
+	}
+
 	public static ForceReplyKeyboard getForceReplyKeyboard() {
 		return ForceReplyKeyboard.builder()
 				.forceReply(true)

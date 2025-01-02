@@ -1,12 +1,12 @@
 package org.quickbitehub;
 
-import org.checkerframework.checker.index.qual.LTEqLengthOf;
 import org.quickbitehub.authentication.Authentication;
 import org.quickbitehub.consumer.UserState;
 
 import io.github.cdimascio.dotenv.Dotenv;
 import org.quickbitehub.order.Order;
 import org.quickbitehub.provider.Restaurant;
+import org.quickbitehub.utils.KeyboardFactory;
 import org.quickbitehub.utils.MessageHandler;
 import org.telegram.telegrambots.longpolling.util.LongPollingSingleThreadUpdateConsumer;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
@@ -139,7 +139,6 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 
 	public static void navigateToProperState(Long telegramId) {
 		Stack<UserState> stack = userState.get(telegramId);
-		System.out.println(stack);
 		if (stack.isEmpty()) {
 			if (Authentication.isSessionAuthenticated(telegramId)) stack.push(UserState.DASHBOARD_PAGE);
 			else stack.push(UserState.AUTHENTICATION_NEEDED);
@@ -150,7 +149,6 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 		}
 
 		UserState properState = stack.peek();
-		System.out.println(stack);
 		switch (properState) {
 			case AUTHENTICATION_NEEDED -> Authentication.authenticate(telegramId);
 			case AUTHENTICATION_SIGNIN -> Authentication.signIn(null, telegramId);
@@ -178,7 +176,7 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 				userState.get(telegramId).pop();
 			}
 			case HELP_PAGE -> {
-				viewHelpPage();
+				viewHelpPage(telegramId);
 				userState.get(telegramId).pop();
 			}
 		}
@@ -200,7 +198,22 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 //		}
 	}
 
-	private static void viewHelpPage() {
+	private static void viewHelpPage(Long telegramId) {
+		String msg = "_*Support Page*_" +
+				"\n" +
+				"\n    *How do I use QuickBite\\?*" +
+				"\nYou can watch tutorials on YouTube or you can read the documentation [for users](www.google.com) or [for restaurant owners](www.google.com)\\." +
+				"\n" +
+				"\n    *What are the transaction and operation fees\\?*" +
+				"\nQuickBite charges a 00\\.00% fees in all kind of operations and transactions\\. QuickBite gets its funding solely from donations\\. However\\, services that may be used during order payment may charge fees\\, which is out of our control\\." +
+				"\n" +
+				"\n    *Why order can\\'t be canceled\\?*" +
+				"\nWhen you issue an order\\, and this order has been accepted by the restaurant\\, you cannot cancel the order anymore since this behavior will damage restaurants\\. However\\, you can cancel pending orders that have been not answered yet by the restaurant\\." +
+				"\n" +
+				"\n" +
+				"\n_If you still have questions\\, or you encountered a problem\\, please do not hesitate to look at the documentation or contact us at *support@quickbitehub\\.org*_";
+
+		MessageHandler.sendInlineKeyboard(telegramId, msg, KeyboardFactory.getHelpPageKeyboard(), LONG_DELAY_TIME_SEC*2);
 	}
 
 	public String getBotUsername() {
