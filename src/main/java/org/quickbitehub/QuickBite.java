@@ -36,9 +36,10 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 
 	@Override
 	public void consume(Update update) {
+		long telegramId = -1;
 		if (update.hasMessage()) {
 			Message msg = update.getMessage();
-			Long telegramId = msg.getChatId();
+			telegramId = msg.getChatId();
 			if (msg.getDate() + 20 < Instant.now().getEpochSecond()) {
 				MessageHandler.deleteMessage(telegramId, msg.getMessageId());
 				return;
@@ -47,22 +48,16 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 			if (msg.isCommand()) botCommandsHandler(msg);
 			else if (msg.isReply()) botRepliesHandler(msg);
 			else if (msg.hasText()) botMessageHandler(msg);
-
-			if (!userState.get(telegramId).isEmpty() && userState.get(telegramId).peek() == UserState.BEFORE_NEXT_UPDATE) {
-				userState.get(telegramId).pop();
-				navigateToProperState(telegramId);
-			}
 		} else if (update.hasCallbackQuery()) {
-			Long telegramId = update.getCallbackQuery().getFrom().getId();
+			telegramId = update.getCallbackQuery().getFrom().getId();
 			if (!userState.containsKey(telegramId)) userState.put(telegramId, new Stack<>());
 			botCallBackQueryHandler(update.getCallbackQuery());
-
-			if (!userState.get(telegramId).isEmpty() && userState.get(telegramId).peek() == UserState.BEFORE_NEXT_UPDATE) {
-				userState.get(telegramId).pop();
-				navigateToProperState(telegramId);
-			}
+		} else if (update.hasInlineQuery()) botInlineQueryHandler(update.getInlineQuery());
+		
+		if (telegramId != -1 && !userState.get(telegramId).isEmpty() && userState.get(telegramId).peek() == UserState.BEFORE_NEXT_UPDATE) {
+			userState.get(telegramId).pop();
+			navigateToProperState(telegramId);
 		}
-		else if (update.hasInlineQuery()) botInlineQueryHandler(update.getInlineQuery());
 	}
 
 	private void botCommandsHandler(Message message) {
