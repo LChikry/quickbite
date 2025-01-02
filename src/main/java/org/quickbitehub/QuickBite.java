@@ -1,5 +1,6 @@
 package org.quickbitehub;
 
+import org.checkerframework.checker.index.qual.LTEqLengthOf;
 import org.quickbitehub.authentication.Authentication;
 import org.quickbitehub.consumer.UserState;
 
@@ -37,17 +38,29 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 	public void consume(Update update) {
 		if (update.hasMessage()) {
 			Message msg = update.getMessage();
-			if (!userState.containsKey(msg.getChat().getId())) userState.put(msg.getChat().getId(), new Stack<>());
+			Long telegramId = msg.getChatId();
 			if (msg.getDate() + 20 < Instant.now().getEpochSecond()) {
-				MessageHandler.deleteMessage(msg.getFrom().getId(), msg.getMessageId());
+				MessageHandler.deleteMessage(telegramId, msg.getMessageId());
 				return;
 			}
+			if (!userState.containsKey(telegramId)) userState.put(telegramId, new Stack<>());
 			if (msg.isCommand()) botCommandsHandler(msg);
 			else if (msg.isReply()) botRepliesHandler(msg);
 			else if (msg.hasText()) botMessageHandler(msg);
+
+			if (!userState.get(telegramId).isEmpty() && userState.get(telegramId).peek() == UserState.BEFORE_NEXT_UPDATE) {
+				userState.get(telegramId).pop();
+				navigateToProperState(telegramId);
+			}
 		} else if (update.hasCallbackQuery()) {
-			if (!userState.containsKey(update.getCallbackQuery().getFrom().getId())) userState.put(update.getCallbackQuery().getFrom().getId(), new Stack<>());
+			Long telegramId = update.getCallbackQuery().getFrom().getId();
+			if (!userState.containsKey(telegramId)) userState.put(telegramId, new Stack<>());
 			botCallBackQueryHandler(update.getCallbackQuery());
+
+			if (!userState.get(telegramId).isEmpty() && userState.get(telegramId).peek() == UserState.BEFORE_NEXT_UPDATE) {
+				userState.get(telegramId).pop();
+				navigateToProperState(telegramId);
+			}
 		}
 		else if (update.hasInlineQuery()) botInlineQueryHandler(update.getInlineQuery());
 	}
@@ -81,8 +94,11 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 	}
 
 	private void botRepliesHandler(Message message) {
-		Authentication.signIn(message, message.getChat().getId());
-		Authentication.signUp(message, message.getChat().getId());
+		UserState currentState = userState.get(message.getChatId()).peek();
+		switch (currentState) {
+			case AUTHENTICATION_SIGNIN -> Authentication.signIn(message, message.getChat().getId());
+			case AUTHENTICATION_SIGNUP -> Authentication.signUp(message, message.getChat().getId());
+		}
 	}
 
 	private void botInlineQueryHandler(InlineQuery inlineQuery) {
@@ -128,14 +144,18 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 
 	public static void navigateToProperState(Long telegramId) {
 		Stack<UserState> stack = userState.get(telegramId);
+		System.out.println(stack);
 		if (stack.isEmpty()) {
 			if (Authentication.isSessionAuthenticated(telegramId)) stack.push(UserState.DASHBOARD_PAGE);
 			else stack.push(UserState.AUTHENTICATION_NEEDED);
-		} else if (!Authentication.isSessionAuthenticated(telegramId) && !stack.peek().isStateAuthRelated()) {
+		} else if (!Authentication.isSessionAuthenticated(telegramId) &&
+				!stack.peek().isStateAuthRelated() &&
+				!stack.peek().isImmediateState()) {
 			stack.push(UserState.AUTHENTICATION_NEEDED);
 		}
 
 		UserState properState = stack.peek();
+		System.out.println(stack);
 		switch (properState) {
 			case AUTHENTICATION_NEEDED -> Authentication.authenticate(telegramId);
 			case AUTHENTICATION_SIGNIN -> Authentication.signIn(null, telegramId);
@@ -178,10 +198,11 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 		// update state, currently, when we entered this function, the state contains showing the dashboard, what should be next, otherwise make sure it is determined next update
 	}
 
-	private static void cancelCurrentOperation(Long telegramId) {
+	public static void cancelCurrentOperation(Long telegramId) {
 		userState.get(telegramId).clear();
-		if (!Authentication.isSessionAuthenticated(telegramId)) userState.get(telegramId).push(UserState.AUTHENTICATION_NEEDED);
-		navigateToProperState(telegramId);
+//		if (!Authentication.isSessionAuthenticated(telegramId)) {
+//			userState.get(telegramId).push(UserState.AUTHENTICATION_NEEDED);
+//		}
 	}
 
 	private static void viewHelpPage() {

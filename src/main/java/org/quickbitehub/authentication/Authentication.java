@@ -21,10 +21,13 @@ public class Authentication {
 
 	public static void authenticate(Long telegramId) {
 		if (isSessionAuthenticated(telegramId)) {
-			String msg = Emoji.ORANGE_CIRCLE.getCode() + " You are already logged in\\!";
+			String msg = Emoji.ORANGE_CIRCLE.getCode() + " You are already signed in\\!";
 			putAndDeleteAuthFeedbackMessage(telegramId, msg);
-			QuickBite.userState.get(telegramId).pop();
-			QuickBite.navigateToProperState(telegramId);
+			while (!QuickBite.userState.get(telegramId).isEmpty() && QuickBite.userState.get(telegramId).peek().isStateAuthRelated()) {
+				QuickBite.userState.get(telegramId).pop();
+			}
+			if (QuickBite.userState.get(telegramId).isEmpty()) QuickBite.userState.get(telegramId).push(UserState.DASHBOARD_PAGE);
+			QuickBite.userState.get(telegramId).push(UserState.BEFORE_NEXT_UPDATE);
 			return;
 		}
 
@@ -57,12 +60,13 @@ public class Authentication {
 
 	public static void signIn(Message message, Long telegramId) {
 		if (isSessionAuthenticated(telegramId)) {
-			String msg = Emoji.ORANGE_CIRCLE.getCode() + " You are already logged in\\!";
+			String msg = Emoji.ORANGE_CIRCLE.getCode() + " You are already signed in\\!";
 			putAndDeleteAuthFeedbackMessage(telegramId, msg);
-			while (QuickBite.userState.get(telegramId).peek().isStateAuthRelated()) {
+			while (!QuickBite.userState.get(telegramId).isEmpty() && QuickBite.userState.get(telegramId).peek().isStateAuthRelated()) {
 				QuickBite.userState.get(telegramId).pop();
 			}
-			QuickBite.navigateToProperState(telegramId);
+			if (QuickBite.userState.get(telegramId).isEmpty()) QuickBite.userState.get(telegramId).push(UserState.DASHBOARD_PAGE);
+			QuickBite.userState.get(telegramId).push(UserState.BEFORE_NEXT_UPDATE);
 			return;
 		}
 
@@ -109,9 +113,7 @@ public class Authentication {
 			temp.put(AuthSteps.SIGN_IN_UP_MENU.getStep(), menuMsg);
 			authProcesses.remove(telegramId); // the process is finished
 			authProcesses.put(telegramId, temp);
-			if (QuickBite.userState.get(telegramId).peek().isStateAuthProgressRelated()) {
-				QuickBite.userState.get(telegramId).pop();
-			}
+			QuickBite.cancelCurrentOperation(telegramId);
 			return;
 		}
 
@@ -122,20 +124,22 @@ public class Authentication {
 		String feedbackMsg = Emoji.GREEN_CIRCLE.getCode() + " You Signed In Successfully " + Emoji.HAND_WAVING.getCode();
 		putAndDeleteAuthFeedbackMessage(telegramId, feedbackMsg);
 		authProcesses.remove(telegramId); // the process is finished
-		while (QuickBite.userState.get(telegramId).peek().isStateAuthRelated()) {
+		while (!QuickBite.userState.get(telegramId).isEmpty() && QuickBite.userState.get(telegramId).peek().isStateAuthRelated()) {
 			QuickBite.userState.get(telegramId).pop();
 		}
-		QuickBite.navigateToProperState(telegramId);
+		if (QuickBite.userState.get(telegramId).isEmpty()) QuickBite.userState.get(telegramId).push(UserState.DASHBOARD_PAGE);
+		QuickBite.userState.get(telegramId).push(UserState.BEFORE_NEXT_UPDATE);
 	}
 
 	public static void signUp(Message message, Long telegramId) {
 		if (isSessionAuthenticated(telegramId)) {
-			String msg = Emoji.ORANGE_CIRCLE.getCode() + " You are already logged in\\!";
+			String msg = Emoji.ORANGE_CIRCLE.getCode() + " You are already signed in\\!";
 			putAndDeleteAuthFeedbackMessage(telegramId, msg);
-			while (QuickBite.userState.get(telegramId).peek().isStateAuthRelated()) {
+			while (!QuickBite.userState.get(telegramId).isEmpty() && QuickBite.userState.get(telegramId).peek().isStateAuthRelated()) {
 				QuickBite.userState.get(telegramId).pop();
 			}
-			QuickBite.navigateToProperState(telegramId);
+			if (QuickBite.userState.get(telegramId).isEmpty()) QuickBite.userState.get(telegramId).push(UserState.DASHBOARD_PAGE);
+			QuickBite.userState.get(telegramId).push(UserState.BEFORE_NEXT_UPDATE);
 			return;
 		}
 
@@ -219,10 +223,11 @@ public class Authentication {
 		String feedbackMsg = Emoji.GREEN_CIRCLE.getCode() + " You've Created Your Account Successfully " + Emoji.HAND_WAVING.getCode();
 		putAndDeleteAuthFeedbackMessage(telegramId, feedbackMsg);
 		authProcesses.remove(telegramId); // the process is finished
-		while (QuickBite.userState.get(telegramId).peek().isStateAuthRelated()) {
+		while (!QuickBite.userState.get(telegramId).isEmpty() && QuickBite.userState.get(telegramId).peek().isStateAuthRelated()) {
 			QuickBite.userState.get(telegramId).pop();
 		}
-		QuickBite.navigateToProperState(telegramId);
+		if (QuickBite.userState.get(telegramId).isEmpty()) QuickBite.userState.get(telegramId).push(UserState.DASHBOARD_PAGE);
+		QuickBite.userState.get(telegramId).push(UserState.BEFORE_NEXT_UPDATE);
 	}
 
 	private static boolean isAuthenticationInformationValid(Long telegramId, String email, String password, UserState processType) {
@@ -243,7 +248,7 @@ public class Authentication {
 
 		String textMsg = "";
 		if (userSessions.get(telegramId) != null) {
-			textMsg = Emoji.ORANGE_CIRCLE.getCode() + " *Sign In/Up Failed*\nYou are Already Logged In " + Emoji.SAD_FACE.getCode();
+			textMsg = Emoji.ORANGE_CIRCLE.getCode() + " *Sign In/Up Failed*\nYou are already signed in " + Emoji.SAD_FACE.getCode();
 		} else if (!Account.isEmailValid(email)) {
 			textMsg = Emoji.RED_CIRCLE.getCode() + " *Sign In/Up Failed*\nInvalid Email " + Emoji.SAD_FACE.getCode();
 		} else if (Account.isAccountExist(Account.formatEmail(email))) {
@@ -258,16 +263,14 @@ public class Authentication {
 		temp.put(AuthSteps.SIGN_IN_UP_MENU.getStep(), menuMsg);
 		authProcesses.remove(telegramId); // the process is finished
 		authProcesses.put(telegramId, temp);
-		if (QuickBite.userState.get(telegramId).peek().isStateAuthProgressRelated()) {
-			QuickBite.userState.get(telegramId).pop();
-		}
+		QuickBite.cancelCurrentOperation(telegramId);
 		return false;
 	}
 
 	public static void signOut(Long telegramId) {
 		Account userAccount = userSessions.get(telegramId);
 		if (userAccount == null) {
-			String msg = Emoji.ORANGE_CIRCLE.getCode() + " You are not logged in\\!";
+			String msg = Emoji.ORANGE_CIRCLE.getCode() + " You are already signed out\\!";
 			putAndDeleteAuthFeedbackMessage(telegramId, msg);
 			return;
 		}
