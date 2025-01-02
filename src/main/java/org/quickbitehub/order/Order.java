@@ -39,22 +39,37 @@ public class Order {
 	}
 
 	public static void issueOrder(Long telegramId) {
+		if (QuickBite.userState.get(telegramId).peek() == UserState.ISSUE_ORDER) {
+			QuickBite.userState.get(telegramId).push(UserState.IO_RESTAURANT_SELECTION);
+			// view restaurants
+		} else if (QuickBite.userState.get(telegramId).peek() == UserState.IO_RESTAURANT_SELECTION) {
+			QuickBite.userState.get(telegramId).push(UserState.IO_PRODUCTS_SELECTION);
+			// determent restaurants
+			// view products
+		} else if (QuickBite.userState.get(telegramId).peek() == UserState.IO_PRODUCTS_SELECTION) {
+			QuickBite.userState.get(telegramId).push(UserState.IO_CONFIRMATION);
+			// determent products
+			// view confirmation
+		} else if (QuickBite.userState.get(telegramId).peek() == UserState.IO_CONFIRMATION) {
+			// get confirmation, then issue, otherwise cancel
+		}
+
 		if (QuickBite.userState.get(telegramId) == null ||
 				QuickBite.userState.get(telegramId).isEmpty() ||
-				QuickBite.userState.get(telegramId).peek() != UserState.ISSUING_ORDER_PROCESS) {
-			QuickBite.userState.get(telegramId).push(UserState.ISSUING_ORDER_PROCESS);
+				QuickBite.userState.get(telegramId).peek() != UserState.IO_RESTAURANT_SELECTION) {
+			QuickBite.userState.get(telegramId).push(UserState.IO_RESTAURANT_SELECTION);
 			if(!Restaurant.viewRestaurants(telegramId, null)) {
 				QuickBite.userState.get(telegramId).pop();
 				QuickBite.navigateToProperState(telegramId);
-				return;
+			} else {
+				QuickBite.userState.get(telegramId).pop();
+				QuickBite.userState.get(telegramId).push(UserState.IO_PRODUCTS_SELECTION);
 			}
-			QuickBite.userState.get(telegramId).pop();
-			QuickBite.userState.get(telegramId).push(UserState.CHOOSING_PRODUCTS);
 			return;
 		}
 		UserState userState = QuickBite.userState.get(telegramId).peek();
-		if (userState == UserState.ISSUING_ORDER_PROCESS) {
-			QuickBite.userState.get(telegramId).push(UserState.CHOOSING_PRODUCTS);
+		if (userState == UserState.IO_RESTAURANT_SELECTION) {
+			QuickBite.userState.get(telegramId).push(UserState.IO_PRODUCTS_SELECTION);
 			// choose products and quantity
 			return;
 		}

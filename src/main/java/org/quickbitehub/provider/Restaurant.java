@@ -32,6 +32,7 @@ public class Restaurant {
 		//task: insert into db
 	}
 
+	// boolean result answers: did we view restaurants
 	public static boolean viewRestaurants(Long telegramId, String query) {
 		if (allRestaurants.isEmpty()) {
 			String msg = Emoji.ORANGE_CIRCLE.getCode() + " Sorry, there is no restaurant currently operating in our bot\\.";
