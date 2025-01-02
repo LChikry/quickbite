@@ -49,4 +49,8 @@ public abstract class User {
 	public String getUserId() {
 		return USER_ID;
 	}
+
+	public String getUserType() {
+		return userType;
+	}
 }

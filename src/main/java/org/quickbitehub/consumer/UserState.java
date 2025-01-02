@@ -8,9 +8,12 @@ cancel_pending_order - Cancel a Pending Order
 manage_orders - Manage Your Orders
 settings - Configure Your Settings
 signout - Sing Out
+language - Change Interface Language
 help - FAQ and Support
  */
 
+
+import java.util.HashMap;
 
 public enum UserState {
 	BEFORE_NEXT_UPDATE("_before_next_update"),
@@ -27,10 +30,26 @@ public enum UserState {
 	CANCEL_PENDING_ORDER("/cancel_pending_order"),
 	MANAGE_ORDERS_PAGE("/manage_orders"),
 	SETTINGS_PAGE("/settings"),
+	CHANGE_EMAIL("/change_email"),
+	CHANGE_PASSWORD("/change_password"),
+	CHANGE_FAVORITE_RESTAURANTS("/change_favorite_restaurants"),
+	CHANGE_LANGUAGE("/language"),
+	CHANGE_FIRST_NAME("/change_first_name"),
+	CHANGE_LAST_NAME("/change_last_name"),
+	CHANGE_MIDDLE_NAMES("/change_middle_names"),
 	AUTHENTICATION_SIGNOUT("/signout"),
-	HELP_PAGE("/help");
+	HELP_PAGE("/help"),
+	PREVIOUS_KEYBOARD("/back");
 
 	private final String state;
+	private static final HashMap<String, UserState> stateMap = new HashMap<>();
+
+	static {
+		for (UserState userState : UserState.values()) {
+			stateMap.put(userState.state, userState);
+		}
+	}
+
 	UserState(String state) {
 		this.state = state;
 	}
@@ -62,25 +81,19 @@ public enum UserState {
 				this == IO_PRODUCTS_SELECTION ||
 				this == IO_CONFIRMATION ||
 				this == CANCEL_PENDING_ORDER ||
-				this == AUTHENTICATION_SIGNOUT;
+				this == AUTHENTICATION_SIGNOUT ||
+				this == CHANGE_EMAIL ||
+				this == CHANGE_PASSWORD ||
+				this == CHANGE_FAVORITE_RESTAURANTS ||
+				this == CHANGE_LANGUAGE ||
+				this == CHANGE_FIRST_NAME ||
+				this == CHANGE_LAST_NAME ||
+				this == CHANGE_MIDDLE_NAMES ||
+				this == PREVIOUS_KEYBOARD;
 	}
 
-	public static UserState getValueOf(String name) throws IllegalArgumentException {
-		if (name.equals(BEFORE_NEXT_UPDATE.getState())) return BEFORE_NEXT_UPDATE;
-		if (name.equals(AUTHENTICATION_NEEDED.getState())) return AUTHENTICATION_NEEDED;
-		if (name.equals(AUTHENTICATION_SIGNIN.getState())) return AUTHENTICATION_SIGNIN;
-		if (name.equals(AUTHENTICATION_SIGNUP.getState())) return AUTHENTICATION_SIGNUP;
-		if (name.equals(DASHBOARD_PAGE.getState())) return DASHBOARD_PAGE;
-		if (name.equals(CANCEL_CURRENT_OPERATION_WITH_NOTICE.getState())) return CANCEL_CURRENT_OPERATION_WITH_NOTICE;
-		if (name.equals(ISSUE_ORDER.getState())) return ISSUE_ORDER;
-		if (name.equals(IO_RESTAURANT_SELECTION.getState())) return IO_RESTAURANT_SELECTION;
-		if (name.equals(IO_PRODUCTS_SELECTION.getState())) return IO_PRODUCTS_SELECTION;
-		if (name.equals(CANCEL_PENDING_ORDER.getState())) return CANCEL_PENDING_ORDER;
-		if (name.equals(MANAGE_ORDERS_PAGE.getState())) return MANAGE_ORDERS_PAGE;
-		if (name.equals(SETTINGS_PAGE.getState())) return SETTINGS_PAGE;
-		if (name.equals(AUTHENTICATION_SIGNOUT.getState())) return AUTHENTICATION_SIGNOUT;
-		if (name.equals(HELP_PAGE.getState())) return HELP_PAGE;
-
+	public static UserState getValueOf(String name) {
+		if (stateMap.get(name) != null) return stateMap.get(name);
 		return valueOf(name);
 	}
 }

@@ -1,9 +1,11 @@
 package org.quickbitehub;
 
+import org.quickbitehub.authentication.Account;
 import org.quickbitehub.authentication.Authentication;
 import org.quickbitehub.consumer.UserState;
 
 import io.github.cdimascio.dotenv.Dotenv;
+import org.quickbitehub.consumer.UserType;
 import org.quickbitehub.order.Order;
 import org.quickbitehub.order.OrderStatus;
 import org.quickbitehub.provider.Restaurant;
@@ -17,6 +19,7 @@ import org.telegram.telegrambots.meta.api.objects.inlinequery.InlineQuery;
 import org.telegram.telegrambots.meta.api.objects.message.Message;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Stack;
 import java.util.concurrent.Executors;
@@ -176,7 +179,7 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 			}
 //			case CANCEL_PENDING_ORDER -> cancelPendingOrder();
 //			case MANAGE_ORDERS_PAGE -> viewManageOrdersPage();
-//			case SETTINGS_PAGE -> viewSettingsPage();
+			case SETTINGS_PAGE -> viewSettingsPage(telegramId);
 			case AUTHENTICATION_SIGNOUT -> {
 				Authentication.signOut(telegramId);
 				userState.get(telegramId).clear();
@@ -205,17 +208,17 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 		MessageHandler.sendInlineKeyboard(telegramId, message, KeyboardFactory.getDashboardPageKeyboard(), LONG_DELAY_TIME_SEC);
 	}
 
-	public static void cancelCurrentOperation(Long telegramId, boolean isNoticeSent) {
-		Stack<UserState> states = userState.get(telegramId);
-		if (!states.empty() && states.peek() == UserState.CANCEL_CURRENT_OPERATION_WITH_NOTICE) states.pop();
-		String message;
-		if (states.empty() || !states.peek().isOperationState()) {
-			message = Emoji.ORANGE_CIRCLE.getCode() + " There is No Operation to Cancel\\, You are Good to Go " + Emoji.SMILING_FACE.getCode();
-		} else {
-			states.clear();
-			message = Emoji.BLUE_CIRCLE.getCode() + " Current Operation is Canceled\\.";
-		}
-		if (!isNoticeSent) MessageHandler.sendText(telegramId, message, SHORT_DELAY_TIME_SEC);
+	public static void viewSettingsPage(Long telegramId) {
+		assert (Authentication.isSessionAuthenticated(telegramId));
+		Account userAccount = Authentication.getSessionAccount(telegramId);
+		LocalDate signUpDate = userAccount.getAccountSignUpDate();
+		String message = "*Settings*" +
+				"\n" +
+				"\nClick to change your information\\." +
+				"\n" +
+				"\nYou have been with us since " + signUpDate.getDayOfMonth() + " " + signUpDate.getMonth() + "\\, " + signUpDate.getYear() + " " + Emoji.HEART_FIGURE.getCode();
+		System.out.println(signUpDate);
+		MessageHandler.sendInlineKeyboard(telegramId, message, KeyboardFactory.getCustomerSettingsKeyboard(userAccount), ETERNITY_DELAY_TIME_SEC);
 	}
 
 	private static void viewHelpPage(Long telegramId) {
@@ -235,6 +238,19 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 				"\n_If you still have questions\\, or you encountered a problem\\, please do not hesitate to look at the documentation or contact us at *support@quickbitehub\\.org*_";
 
 		MessageHandler.sendInlineKeyboard(telegramId, msg, KeyboardFactory.getHelpPageKeyboard(), ETERNITY_DELAY_TIME_SEC);
+	}
+
+	public static void cancelCurrentOperation(Long telegramId, boolean isNoticeSent) {
+		Stack<UserState> states = userState.get(telegramId);
+		if (!states.empty() && states.peek() == UserState.CANCEL_CURRENT_OPERATION_WITH_NOTICE) states.pop();
+		String message;
+		if (states.empty() || !states.peek().isOperationState()) {
+			message = Emoji.ORANGE_CIRCLE.getCode() + " There is No Operation to Cancel\\, You are Good to Go " + Emoji.SMILING_FACE.getCode();
+		} else {
+			states.clear();
+			message = Emoji.BLUE_CIRCLE.getCode() + " Current Operation is Canceled\\.";
+		}
+		if (!isNoticeSent) MessageHandler.sendText(telegramId, message, SHORT_DELAY_TIME_SEC);
 	}
 
 	public String getBotUsername() {
