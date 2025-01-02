@@ -204,9 +204,8 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 
 	public static void cancelCurrentOperation(Long telegramId) {
 		userState.get(telegramId).clear();
-//		if (!Authentication.isSessionAuthenticated(telegramId)) {
-//			userState.get(telegramId).push(UserState.AUTHENTICATION_NEEDED);
-//		}
+		String message = Emoji.BLUE_CIRCLE.getCode() + " Current Operation is Canceled\\.";
+		MessageHandler.sendText(telegramId, message, SHORT_DELAY_TIME_SEC);
 	}
 
 	private static void viewHelpPage(Long telegramId) {
