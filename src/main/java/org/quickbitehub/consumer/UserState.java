@@ -40,7 +40,10 @@ public enum UserState {
 
 	// Check if the new state is immediate and doesn't require authentication
 	public boolean isImmediateState() {
-		return this == HELP_PAGE || this == AUTHENTICATION_SIGNOUT;
+		return this == HELP_PAGE ||
+				this == AUTHENTICATION_SIGNOUT ||
+				this == CANCEL_CURRENT_OPERATION ||
+				this == BEFORE_NEXT_UPDATE;
 	}
 
 	// Check if the current stack's top state is not authentication-related
@@ -48,10 +51,6 @@ public enum UserState {
 		return this == UserState.AUTHENTICATION_NEEDED ||
 				this == UserState.AUTHENTICATION_SIGNIN ||
 				this == UserState.AUTHENTICATION_SIGNUP;
-	}
-
-	public boolean isStateAuthProgressRelated() {
-		return this == UserState.AUTHENTICATION_SIGNIN || this == UserState.AUTHENTICATION_SIGNUP;
 	}
 
 	public static UserState getValueOf(String name) throws IllegalArgumentException {

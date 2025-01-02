@@ -65,7 +65,7 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 	private void botCommandsHandler(Message message) {
 		Long telegramId = message.getFrom().getId();
 		UserState newState = UserState.getValueOf(message.getText());
-		MessageHandler.deleteMessage(telegramId, message.getMessageId(), STANDARD_DELAY_TIME_SEC);
+		MessageHandler.deleteMessage(telegramId, message.getMessageId(), SHORT_DELAY_TIME_SEC);
 		Stack<UserState> stack = userState.get(telegramId);
 		if (stack.isEmpty() ||
 				Authentication.isSessionAuthenticated(telegramId) ||
@@ -187,6 +187,7 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 
 	public static void viewDashboardPage(Long telegramId) {
 		assert (Authentication.isSessionAuthenticated(telegramId));
+		// task add money and order values
 		String message = "*Welcome to Dashboard* " + Emoji.YELLOW_STARS.getCode() +
 				"\n" +
 				"\n*" + Authentication.getSessionAccount(telegramId).getUser().getUserFullName() + "*\\, from here you can take control of everything\\!" +
