@@ -13,6 +13,7 @@ help - FAQ and Support
 
 
 public enum UserState {
+	BEFORE_NEXT_UPDATE("_before_next_update"),
 	AUTHENTICATION_NEEDED("/authenticate"),
 	AUTHENTICATION_SIGNIN("/signin"),
 	AUTHENTICATION_SIGNUP("/signup"),
@@ -54,6 +55,7 @@ public enum UserState {
 	}
 
 	public static UserState getValueOf(String name) throws IllegalArgumentException {
+		if (name.equals(BEFORE_NEXT_UPDATE.getState())) return BEFORE_NEXT_UPDATE;
 		if (name.equals(AUTHENTICATION_NEEDED.getState())) return AUTHENTICATION_NEEDED;
 		if (name.equals(AUTHENTICATION_SIGNIN.getState())) return AUTHENTICATION_SIGNIN;
 		if (name.equals(AUTHENTICATION_SIGNUP.getState())) return AUTHENTICATION_SIGNUP;
