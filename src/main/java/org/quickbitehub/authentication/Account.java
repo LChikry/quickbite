@@ -139,6 +139,7 @@ public class Account implements Serializable {
 		return true;
 	}
 
+	// non-Latin emails is not supported
 	static public boolean isEmailValid(String email) {
 		if (email == null || email.isBlank()) return false;
 		email = email.strip().trim().toLowerCase();
