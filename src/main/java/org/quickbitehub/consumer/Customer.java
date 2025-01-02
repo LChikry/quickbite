@@ -55,6 +55,7 @@ public class Customer extends User {
 				String middleNames = resultSet.getString("user_middle_names");
 				Double balance = resultSet.getDouble("customer_balance");
 				String currency = resultSet.getString("currency");
+				if (middleNames == null) middleNames = "";
 
 				Customer customerData = new Customer(firstName, lastName, middleNames, customerId, currency, balance);
 				customers.put(customerId, customerData);

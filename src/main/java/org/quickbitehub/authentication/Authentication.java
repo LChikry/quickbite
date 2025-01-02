@@ -184,7 +184,7 @@ public class Authentication {
 				AuthSteps.SIGNUP_LAST_NAME_MSG.getStep(),
 				AuthSteps.SIGNUP_LAST_NAME_TXT.getStep(),
 				AuthSteps.SIGNUP_MIDDLE_NAMES_MSG.getStep(),
-				"Enter Middle Name\\(s\\) \\(otherwise 0\\)"
+				"Enter Middle Name\\(s\\) \\(otherwise send any character\\)"
 		);
 
 		var userAuthSteps = authProcesses.get(telegramId);
@@ -196,7 +196,7 @@ public class Authentication {
 		String middleNames = message.getText().strip().trim();
 		MessageHandler.deleteMessage(telegramId, message.getReplyToMessage().getMessageId());
 		MessageHandler.deleteMessage(telegramId, message.getMessageId());
-		if (middleNames.equals("0")) middleNames = "";
+		if (middleNames.length() == 1) middleNames = "";
 
 		String email = (String) userAuthSteps.get(AuthSteps.SIGNUP_EMAIL_TXT.getStep());
 		String password = (String) userAuthSteps.get(AuthSteps.SIGNUP_PASSWORD_TXT.getStep());
