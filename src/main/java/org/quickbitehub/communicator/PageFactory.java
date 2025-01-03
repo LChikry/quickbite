@@ -50,6 +50,21 @@ public class PageFactory {
 		return null;
 	}
 
+	public static void viewFavoriteRestaurants(Long telegramId) {
+		Account account = Authentication.userSessions.get(telegramId);
+		assert (account != null);
+
+		String message;
+		if (!account.getFavoriteRestaurants().isEmpty()) {
+			message = "Which restaurant you want to order from\\?";
+		} else {
+			message = "We didn\\'t find any favorite restaurants\\, click on search to search for restaurants and add some favorite ones";
+		}
+		MessageHandler.sendReplyKeyboard(telegramId, message,
+				KeyboardFactory.getRestaurantChoicesKeyboard(account.getFavoriteRestaurants()),
+				PageFactory.STANDARD_DELAY_TIME_SEC);
+	}
+
 	public static Integer viewSettingsPage(Long telegramId, Integer messageId) {
 		assert (Authentication.isSessionAuthenticated(telegramId));
 		Account userAccount = Authentication.getSessionAccount(telegramId);

@@ -38,12 +38,7 @@ public class Order {
 		this.CUSTOMER_ID = customerId;
 	}
 
-	public static void issueOrder(Long telegramId) {
-		if (!State.isStateless(telegramId) || State.getCurrentState(telegramId) == UserState.IO_FAVORITE_RESTAURANT_SELECTION) {
-			if (Restaurant.viewFavoriteRestaurants(telegramId, null)) State.pushRequiredState(telegramId, UserState.IO_FAVORITE_RESTAURANT_SELECTION);
-			else State.applyImmediateState(telegramId, UserState.CANCEL_CURRENT_OPERATION_WITH_NOTICE);
-			return;
-		}
+	public static void issueOrder() {
 		// tasks
 		/*
 			- show favorite restaurant with search option (send notice if there is no favorite restaurants)

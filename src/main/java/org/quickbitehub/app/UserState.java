@@ -23,11 +23,10 @@ public enum UserState {
 	DASHBOARD_PAGE("/start"),
 	CANCEL_CURRENT_OPERATION_WITH_NOTICE("/cancel"),
 	__CANCEL_CURRENT_OPERATION_WITHOUT_NOTICE("__cancel_without_notice"),
-	ISSUE_ORDER("/order"),
-	IO_FAVORITE_RESTAURANT_SELECTION("/select_restaurant"),
-	IO_RESTAURANT_SEARCH("/search_restaurant"),
-	IO_PRODUCTS_SEARCH("/search_products"),
-	IO_CONFIRMATION("/order_confirmation"),
+	SELECT_FAVORITE_RESTAURANT("/order"),
+	SEARCH_FOR_RESTAURANTS("/search_restaurant"),
+	SEARCH_FOR_PRODUCTS("/search_products"),
+	CONFIRM_ORDER("/confirm_order"),
 	CANCEL_PENDING_ORDER("/cancel_pending_order"),
 	MANAGE_ORDERS_PAGE("/manage_orders"),
 	SETTINGS_PAGE("/settings"),
@@ -76,11 +75,10 @@ public enum UserState {
 	public boolean isOperationState() {
 		return this == AUTHENTICATION_SIGNIN ||
 				this == AUTHENTICATION_SIGNUP ||
-				this == ISSUE_ORDER ||
-				this == IO_FAVORITE_RESTAURANT_SELECTION ||
-				this == IO_RESTAURANT_SEARCH ||
-				this == IO_PRODUCTS_SEARCH ||
-				this == IO_CONFIRMATION ||
+				this == SELECT_FAVORITE_RESTAURANT ||
+				this == SEARCH_FOR_RESTAURANTS ||
+				this == SEARCH_FOR_PRODUCTS ||
+				this == CONFIRM_ORDER ||
 				this == CANCEL_PENDING_ORDER ||
 				this == AUTHENTICATION_SIGNOUT ||
 				this == CHANGE_EMAIL ||

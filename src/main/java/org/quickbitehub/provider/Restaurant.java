@@ -1,5 +1,7 @@
 package org.quickbitehub.provider;
 
+import org.quickbitehub.app.State;
+import org.quickbitehub.app.UserState;
 import org.quickbitehub.authentication.Account;
 import org.quickbitehub.authentication.Authentication;
 import org.quickbitehub.authentication.DBCredentials;
@@ -30,37 +32,6 @@ public class Restaurant {
 	public static void insertRestaurant(Restaurant restaurant) {
 		allRestaurants.put(restaurant.getRestaurantName(), restaurant);
 		//task: insert into db
-	}
-
-	// boolean result answers: did we view restaurants
-	public static boolean viewFavoriteRestaurants(Long telegramId, String query) {
-		if (allRestaurants.isEmpty()) {
-			String msg = Emoji.ORANGE_CIRCLE.getCode() + " Sorry, there is no restaurant currently operating in our bot\\.";
-			MessageHandler.sendText(telegramId, msg, PageFactory.SHORT_DELAY_TIME_SEC);
-			return false;
-		}
-
-		if (query == null) {
-			Account account = Authentication.userSessions.get(telegramId);
-			assert (account != null);
-			if (account.getFavoriteRestaurants().isEmpty()) {
-				for (String restaurantName : Restaurant.allRestaurants.keySet()) {
-					account.addFavoriteRestaurant(restaurantName);
-					if (account.getFavoriteRestaurants().size() >= Account.MAX_FAVORITE_RESTAURANT_LENGTH) break;
-				}
-			}
-			String message = "Which restaurant you want to order from\\?";
-			MessageHandler.sendReplyKeyboard(telegramId, message,
-					KeyboardFactory.getRestaurantChoicesKeyboard(account.getFavoriteRestaurants()),
-					PageFactory.STANDARD_DELAY_TIME_SEC);
-			return true;
-		}
-		// task: view the inline query results
-		return true;
-	}
-
-	public static void viewRestaurantProducts(Long telegramId, String query) {
-
 	}
 
 	public boolean isOpen() {

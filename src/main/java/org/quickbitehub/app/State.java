@@ -3,7 +3,6 @@ package org.quickbitehub.app;
 import org.quickbitehub.authentication.Authentication;
 import org.quickbitehub.communicator.Emoji;
 import org.quickbitehub.communicator.MessageHandler;
-import org.quickbitehub.order.Order;
 import org.quickbitehub.communicator.PageFactory;
 
 import java.util.HashMap;
@@ -62,19 +61,10 @@ public class State {
 			case DASHBOARD_PAGE -> updateKeyboardState(telegramId, PageFactory.viewDashboardPage(telegramId, messageId), properState);
 			case CANCEL_CURRENT_OPERATION_WITH_NOTICE -> cancelCurrentOperation(telegramId, false);
 			case __CANCEL_CURRENT_OPERATION_WITHOUT_NOTICE -> cancelCurrentOperation(telegramId, true);
-			case ISSUE_ORDER -> Order.issueOrder(telegramId);
-//			case IO_RESTAURANT_SELECTION -> {
-//				if (2 != eventualState.search(UserState.ISSUE_ORDER)) cancelCurrentOperation(telegramId, false);
-//				else Order.issueOrder(telegramId);
-//			}
-//			case UserState.IO_PRODUCTS_SELECTION -> {
-//				if (2 != eventualState.search(UserState.IO_RESTAURANT_SELECTION)) cancelCurrentOperation(telegramId, false);
-//				else Order.issueOrder(telegramId);
-//			}
-//			case UserState.IO_CONFIRMATION -> {
-//				if (2 != eventualState.search(UserState.IO_PRODUCTS_SELECTION)) cancelCurrentOperation(telegramId, false);
-//				else Order.issueOrder(telegramId);
-//			}
+			case SELECT_FAVORITE_RESTAURANT -> PageFactory.viewFavoriteRestaurants(telegramId);
+//			case SEARCH_FOR_RESTAURANTS ->
+//			case SEARCH_FOR_PRODUCTS ->
+//			case CONFIRM_ORDER ->
 //			case CANCEL_PENDING_ORDER -> cancelPendingOrder();
 //			case MANAGE_ORDERS_PAGE -> viewManageOrdersPage();
 			case SETTINGS_PAGE -> updateKeyboardState(telegramId, PageFactory.viewSettingsPage(telegramId, messageId), properState);

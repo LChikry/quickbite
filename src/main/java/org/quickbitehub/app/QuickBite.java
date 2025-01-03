@@ -95,7 +95,7 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 		Restaurant restaurant = Restaurant.allRestaurants.get(message.getText());
 		if (restaurant == null ||
 				State.isStateless(telegramId) ||
-				State.getCurrentState(telegramId) != UserState.IO_FAVORITE_RESTAURANT_SELECTION) {
+				State.getCurrentState(telegramId) != UserState.SELECT_FAVORITE_RESTAURANT) {
 			return;
 		}
 		System.out.println("we detected a restaurant");
