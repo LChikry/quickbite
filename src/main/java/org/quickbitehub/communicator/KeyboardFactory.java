@@ -43,21 +43,20 @@ public class KeyboardFactory {
 				.text("Docs for Users")
 				.url("www.google.com")
 				.build();
-
 		var ownersDoc = InlineKeyboardButton
 				.builder()
 				.text("Docs for Restaurant Owners")
 				.url("www.google.com")
 				.build();
-
 		return InlineKeyboardMarkup
 				.builder()
 				.keyboardRow(new InlineKeyboardRow(usersDoc, ownersDoc))
+				.keyboardRow(new InlineKeyboardRow(backButton))
 				.build();
 	}
 
 	public static InlineKeyboardMarkup getDashboardPageKeyboard() {
-		var orderButton = InlineKeyboardButton.builder().text("Issue an Order").callbackData(UserState.ISSUE_ORDER.getState()).build();
+		var orderButton = InlineKeyboardButton.builder().text("Issue an Order").callbackData(UserState.SELECT_FAVORITE_RESTAURANT.getState()).build();
 
 		var cancelOrderButton = InlineKeyboardButton.builder().text("Cancel Pending Order").callbackData(UserState.CANCEL_PENDING_ORDER.getState()).build();
 		var manageOrdersButton = InlineKeyboardButton.builder().text("Manage Orders").callbackData(UserState.MANAGE_ORDERS_PAGE.getState()).build();
