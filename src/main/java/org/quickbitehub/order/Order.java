@@ -1,8 +1,8 @@
 package org.quickbitehub.order;
 
-import org.quickbitehub.QuickBite;
+import org.quickbitehub.app.State;
 import org.quickbitehub.authentication.DBCredentials;
-import org.quickbitehub.consumer.UserState;
+import org.quickbitehub.app.UserState;
 import org.quickbitehub.provider.Restaurant;
 
 import javax.money.Monetary;
@@ -39,47 +39,17 @@ public class Order {
 	}
 
 	public static void issueOrder(Long telegramId) {
-		if (QuickBite.userState.get(telegramId).peek() == UserState.ISSUE_ORDER) {
-			QuickBite.userState.get(telegramId).push(UserState.IO_RESTAURANT_SELECTION);
-			// view restaurants
-		} else if (QuickBite.userState.get(telegramId).peek() == UserState.IO_RESTAURANT_SELECTION) {
-			QuickBite.userState.get(telegramId).push(UserState.IO_PRODUCTS_SELECTION);
-			// determent restaurants
-			// view products
-		} else if (QuickBite.userState.get(telegramId).peek() == UserState.IO_PRODUCTS_SELECTION) {
-			QuickBite.userState.get(telegramId).push(UserState.IO_CONFIRMATION);
-			// determent products
-			// view confirmation
-		} else if (QuickBite.userState.get(telegramId).peek() == UserState.IO_CONFIRMATION) {
-			// get confirmation, then issue, otherwise cancel
-		}
-
-		if (QuickBite.userState.get(telegramId) == null ||
-				QuickBite.userState.get(telegramId).isEmpty() ||
-				QuickBite.userState.get(telegramId).peek() != UserState.IO_RESTAURANT_SELECTION) {
-			QuickBite.userState.get(telegramId).push(UserState.IO_RESTAURANT_SELECTION);
-			if(!Restaurant.viewRestaurants(telegramId, null)) {
-				QuickBite.userState.get(telegramId).pop();
-//				QuickBite.navigateToProperState(telegramId);
-			} else {
-				QuickBite.userState.get(telegramId).pop();
-				QuickBite.userState.get(telegramId).push(UserState.IO_PRODUCTS_SELECTION);
-			}
+		if (!State.isStateless(telegramId) || State.getCurrentState(telegramId) == UserState.IO_FAVORITE_RESTAURANT_SELECTION) {
+			if (Restaurant.viewFavoriteRestaurants(telegramId, null)) State.pushRequiredState(telegramId, UserState.IO_FAVORITE_RESTAURANT_SELECTION);
+			else State.applyImmediateState(telegramId, UserState.CANCEL_CURRENT_OPERATION_WITH_NOTICE);
 			return;
 		}
-		UserState userState = QuickBite.userState.get(telegramId).peek();
-		if (userState == UserState.IO_RESTAURANT_SELECTION) {
-			QuickBite.userState.get(telegramId).push(UserState.IO_PRODUCTS_SELECTION);
-			// choose products and quantity
-			return;
-		}
-
 		// tasks
 		/*
-			- choose product
-			- choose quantity
-			- choose next product
-			- confirm
+			- show favorite restaurant with search option (send notice if there is no favorite restaurants)
+			- check from choice and proceed to product or restaurant lists (web)
+			- choose & search products and their quantity (web)
+			- confirm (web)
 		 */
 	}
 

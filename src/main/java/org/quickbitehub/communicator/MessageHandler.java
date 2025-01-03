@@ -1,22 +1,31 @@
-package org.quickbitehub.utils;
+package org.quickbitehub.communicator;
 
 import io.github.cdimascio.dotenv.Dotenv;
-import org.quickbitehub.QuickBite;
 import org.telegram.telegrambots.client.okhttp.OkHttpTelegramClient;
+import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageReplyMarkup;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.message.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class MessageHandler {
 	private static final TelegramClient telegramClient = new OkHttpTelegramClient(Dotenv.load().get("BOT_TOKEN"));
+	private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
-	public static Message sendForceReply(Long telegramId, String message, long autoDeleteDelayTime) {
+	public static void shutdownScheduler() {
+		Runtime.getRuntime().addShutdownHook(new Thread(MessageHandler.scheduler::shutdown));
+	}
+
+	public static Message sendForceReply(Long telegramId, String message) {
 		SendMessage sm = SendMessage
 				.builder()
 				.chatId(telegramId)
@@ -27,11 +36,9 @@ public class MessageHandler {
 
 		try {
 			Message sentMessage = telegramClient.execute(sm);
-			if (autoDeleteDelayTime > 0) {
-				QuickBite.scheduler.schedule(() -> MessageHandler.deleteMessage(telegramId, sentMessage.getMessageId()),
-						autoDeleteDelayTime,
+			scheduler.schedule(() -> MessageHandler.deleteMessage(telegramId, sentMessage.getMessageId()),
+						PageFactory.STANDARD_DELAY_TIME_SEC,
 						TimeUnit.SECONDS);
-			}
 			return sentMessage;
 		} catch (TelegramApiException e) {
 			System.out.println("MessageHandler: sendInlineKeyboard");
@@ -52,7 +59,7 @@ public class MessageHandler {
 		try {
 			Message sentMessage = telegramClient.execute(sm);
 			if (autoDeleteDelayTime > 0) {
-				QuickBite.scheduler.schedule(() -> MessageHandler.deleteMessage(telegramId, sentMessage.getMessageId()),
+				scheduler.schedule(() -> MessageHandler.deleteMessage(telegramId, sentMessage.getMessageId()),
 						autoDeleteDelayTime,
 						TimeUnit.SECONDS);
 			}
@@ -76,7 +83,7 @@ public class MessageHandler {
 		try {
 			Message sentMessage = telegramClient.execute(sm);
 			if (autoDeleteDelayTime > 0) {
-				QuickBite.scheduler.schedule(() -> MessageHandler.deleteMessage(telegramId, sentMessage.getMessageId()),
+				scheduler.schedule(() -> MessageHandler.deleteMessage(telegramId, sentMessage.getMessageId()),
 						autoDeleteDelayTime,
 						TimeUnit.SECONDS);
 			}
@@ -110,7 +117,7 @@ public class MessageHandler {
 			deleteMessage(telegramId, messageId);
 			return;
 		}
-		QuickBite.scheduler.schedule(() -> MessageHandler.deleteMessage(telegramId, messageId),
+		scheduler.schedule(() -> MessageHandler.deleteMessage(telegramId, messageId),
 				autoDeleteDelayTime,
 				TimeUnit.SECONDS);
 	}
@@ -126,7 +133,7 @@ public class MessageHandler {
 		try {
 			Message sentMessage = telegramClient.execute(msg);
 			if (autoDeleteDelayTime > 0) {
-				QuickBite.scheduler.schedule(() -> MessageHandler.deleteMessage(telegramId, sentMessage.getMessageId()),
+				scheduler.schedule(() -> MessageHandler.deleteMessage(telegramId, sentMessage.getMessageId()),
 						autoDeleteDelayTime,
 						TimeUnit.SECONDS);
 			}
@@ -137,4 +144,40 @@ public class MessageHandler {
 		}
 		return null;
 	}
+
+	public static void editInlineKeyboard(Long telegramId, Integer messageId, String message, InlineKeyboardMarkup kb) {
+		EditMessageText newContent = EditMessageText
+				.builder()
+				.chatId(telegramId)
+				.messageId(messageId)
+				.text(message)
+				.parseMode("MarkdownV2")
+				.build();
+
+		EditMessageReplyMarkup newKeyboard = EditMessageReplyMarkup
+				.builder()
+				.chatId(telegramId)
+				.messageId(messageId)
+				.replyMarkup(kb)
+				.build();
+		try {
+			telegramClient.execute(newContent);
+			telegramClient.execute(newKeyboard);
+		} catch (TelegramApiException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public static void answerCallBackQuery(String cbqId) {
+		AnswerCallbackQuery close = AnswerCallbackQuery
+				.builder()
+				.callbackQueryId(cbqId)
+				.build();
+		try {
+			telegramClient.execute(close);
+		} catch (TelegramApiException e) {
+			e.printStackTrace();
+		}
+	}
+
 }

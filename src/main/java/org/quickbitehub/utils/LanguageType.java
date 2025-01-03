@@ -1,6 +1,4 @@
-package org.quickbitehub.consumer;
-
-import org.intellij.lang.annotations.Language;
+package org.quickbitehub.utils;
 
 public enum LanguageType {
 	ARABIC("Arabic"),

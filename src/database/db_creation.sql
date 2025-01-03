@@ -23,12 +23,15 @@ CREATE TABLE Users (
 
 CREATE TABLE Account (
 	account_id              SERIAL PRIMARY KEY,
-	account_email           VARCHAR(100) NOT NULL,
+	account_email           VARCHAR(64) NOT NULL,
+	unformatted_account_email       VARCHAR(64) NOT NULL,
 	account_password        VARCHAR(128) NOT NULL,
 	user_id                 INT NOT NULL,
 	account_signup_date     DATE NOT NULL,
 
-	CONSTRAINT fk_belongs_to FOREIGN KEY (user_id) REFERENCES Users(user_id) ON UPDATE CASCADE
+	CONSTRAINT fk_belongs_to FOREIGN KEY (user_id) REFERENCES Users(user_id) ON UPDATE CASCADE,
+	CONSTRAINT uq_account_email UNIQUE (account_email),
+	CONSTRAINT uq_unformatted_account_email UNIQUE (unformatted_account_email)
 );
 
 CREATE TABLE Restaurant (

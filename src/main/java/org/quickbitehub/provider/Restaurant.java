@@ -1,12 +1,12 @@
 package org.quickbitehub.provider;
 
-import org.quickbitehub.QuickBite;
 import org.quickbitehub.authentication.Account;
 import org.quickbitehub.authentication.Authentication;
 import org.quickbitehub.authentication.DBCredentials;
-import org.quickbitehub.utils.KeyboardFactory;
-import org.quickbitehub.utils.MessageHandler;
-import org.quickbitehub.utils.Emoji;
+import org.quickbitehub.communicator.KeyboardFactory;
+import org.quickbitehub.communicator.MessageHandler;
+import org.quickbitehub.communicator.Emoji;
+import org.quickbitehub.communicator.PageFactory;
 
 import java.sql.*;
 import java.time.DayOfWeek;
@@ -33,26 +33,26 @@ public class Restaurant {
 	}
 
 	// boolean result answers: did we view restaurants
-	public static boolean viewRestaurants(Long telegramId, String query) {
+	public static boolean viewFavoriteRestaurants(Long telegramId, String query) {
 		if (allRestaurants.isEmpty()) {
 			String msg = Emoji.ORANGE_CIRCLE.getCode() + " Sorry, there is no restaurant currently operating in our bot\\.";
-			MessageHandler.sendText(telegramId, msg, QuickBite.SHORT_DELAY_TIME_SEC);
+			MessageHandler.sendText(telegramId, msg, PageFactory.SHORT_DELAY_TIME_SEC);
 			return false;
 		}
 
 		if (query == null) {
 			Account account = Authentication.userSessions.get(telegramId);
 			assert (account != null);
-			if (account.getRecentUsedRestaurants().isEmpty()) {
+			if (account.getFavoriteRestaurants().isEmpty()) {
 				for (String restaurantName : Restaurant.allRestaurants.keySet()) {
-					account.addRecentUsedRestaurant(restaurantName);
-					if (account.getRecentUsedRestaurants().size() >= Account.MAX_RECENT_USED_RESTAURANT_LENGTH) break;
+					account.addFavoriteRestaurant(restaurantName);
+					if (account.getFavoriteRestaurants().size() >= Account.MAX_FAVORITE_RESTAURANT_LENGTH) break;
 				}
 			}
 			String message = "Which restaurant you want to order from\\?";
 			MessageHandler.sendReplyKeyboard(telegramId, message,
-					KeyboardFactory.getRestaurantChoicesKeyboard(account.getRecentUsedRestaurants()),
-					QuickBite.LONG_DELAY_TIME_SEC);
+					KeyboardFactory.getRestaurantChoicesKeyboard(account.getFavoriteRestaurants()),
+					PageFactory.STANDARD_DELAY_TIME_SEC);
 			return true;
 		}
 		// task: view the inline query results

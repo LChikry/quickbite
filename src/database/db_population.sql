@@ -35,6 +35,11 @@ VALUES
 ('lahoucine@example.com', 'hashedpassword5', 5, '2024-12-5 8:00:00+00'),
 ('rourou@example.com', 'hashedpassword6', 6, '2024-12-6 7:00:00+00');
 
+INSERT INTO Account (account_email, unformatted_account_email, account_password, user_id, account_signup_date)
+VALUES
+('lchikry@aui.ma', 'L.Chikry@aui.ma' , 'a', 1, '2024-12-31'),
+('yrahati@aui.ma', 'Y.Rahati@aui.ma', 'r', 3, '2024-01-01');
+
 INSERT INTO Category (category_name)
 VALUES
 ('Appetizers'),

@@ -1,8 +1,8 @@
-package org.quickbitehub.utils;
+package org.quickbitehub.communicator;
 
 import org.quickbitehub.authentication.Account;
-import org.quickbitehub.consumer.LanguageType;
-import org.quickbitehub.consumer.UserState;
+import org.quickbitehub.utils.LanguageType;
+import org.quickbitehub.app.UserState;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ForceReplyKeyboard;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
@@ -11,7 +11,6 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKe
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,25 +38,21 @@ public class KeyboardFactory {
 	}
 
 	public static InlineKeyboardMarkup getHelpPageKeyboard() {
-		var logInButton = InlineKeyboardButton
+		var usersDoc = InlineKeyboardButton
 				.builder()
 				.text("Docs for Users")
 				.url("www.google.com")
 				.build();
 
-		var signUpButton = InlineKeyboardButton
+		var ownersDoc = InlineKeyboardButton
 				.builder()
 				.text("Docs for Restaurant Owners")
 				.url("www.google.com")
 				.build();
 
-		List<InlineKeyboardButton> buttons = new ArrayList<>(2);
-		buttons.add(logInButton);
-		buttons.add(signUpButton);
-
 		return InlineKeyboardMarkup
 				.builder()
-				.keyboardRow(new InlineKeyboardRow(buttons))
+				.keyboardRow(new InlineKeyboardRow(usersDoc, ownersDoc))
 				.build();
 	}
 
@@ -66,24 +61,17 @@ public class KeyboardFactory {
 
 		var cancelOrderButton = InlineKeyboardButton.builder().text("Cancel Pending Order").callbackData(UserState.CANCEL_PENDING_ORDER.getState()).build();
 		var manageOrdersButton = InlineKeyboardButton.builder().text("Manage Orders").callbackData(UserState.MANAGE_ORDERS_PAGE.getState()).build();
-		List<InlineKeyboardButton> orderActionButtons = new ArrayList<>(2);
-		orderActionButtons.add(cancelOrderButton);
-		orderActionButtons.add(manageOrdersButton);
 
 		var settingsButton = InlineKeyboardButton.builder().text("Settings").callbackData(UserState.SETTINGS_PAGE.getState()).build();
 		var helpButton = InlineKeyboardButton.builder().text("Help").callbackData(UserState.HELP_PAGE.getState()).build();
 		var signOutButton = InlineKeyboardButton.builder().text("Sign Out").callbackData(UserState.AUTHENTICATION_SIGNOUT.getState()).build();
-		List<InlineKeyboardButton> immediateButtons = new ArrayList<>(2);
-		immediateButtons.add(settingsButton);
-		immediateButtons.add(helpButton);
-		immediateButtons.add(signOutButton);
 
 		var cancelButton = InlineKeyboardButton.builder().text("Cancel Current Operation").callbackData(UserState.CANCEL_CURRENT_OPERATION_WITH_NOTICE.getState()).build();
 		return InlineKeyboardMarkup
 				.builder()
 				.keyboardRow(new InlineKeyboardRow(orderButton))
-				.keyboardRow(new InlineKeyboardRow(orderActionButtons))
-				.keyboardRow(new InlineKeyboardRow(immediateButtons))
+				.keyboardRow(new InlineKeyboardRow(cancelOrderButton, manageOrdersButton))
+				.keyboardRow(new InlineKeyboardRow(settingsButton, helpButton, signOutButton))
 				.keyboardRow(new InlineKeyboardRow(cancelButton))
 				.build();
 	}
@@ -103,7 +91,7 @@ public class KeyboardFactory {
 					.build();
 			kbRow.add(new KeyboardRow(restButton));
 		}
-		String text = Emoji.LEFT_MAGNIFIER.getCode().repeat(2) + " Click to Search For Others... " + Emoji.RIGHT_MAGNIFIER.getCode().repeat(2);
+		String text = Emoji.LEFT_MAGNIFIER.getCode().repeat(2) + " No favorite Rest. Search... " + Emoji.RIGHT_MAGNIFIER.getCode().repeat(2);
 		var restButton = KeyboardButton.builder()
 				.text(text)
 				.build();
@@ -115,7 +103,7 @@ public class KeyboardFactory {
 	}
 
 	public static InlineKeyboardMarkup getCustomerSettingsKeyboard(Account customerAccount) {
-		String email = customerAccount.getAccountEmail();
+		String email = customerAccount.getUnformattedEmail();
 		var emailButton = InlineKeyboardButton.builder().text("Email: " + email).callbackData(UserState.CHANGE_EMAIL.getState()).build();
 		var passwordButton = InlineKeyboardButton.builder().text("Change Password").callbackData(UserState.CHANGE_PASSWORD.getState()).build();
 

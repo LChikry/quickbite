@@ -1,4 +1,4 @@
-package org.quickbitehub.utils;
+package org.quickbitehub.communicator;
 
 public enum Emoji {
 	RED_CIRCLE("\ud83d\udd34"),

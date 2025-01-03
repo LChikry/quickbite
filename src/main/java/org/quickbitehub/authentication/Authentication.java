@@ -1,22 +1,21 @@
 package org.quickbitehub.authentication;
 
-import io.github.cdimascio.dotenv.Dotenv;
 import org.apache.commons.validator.routines.EmailValidator;
-import org.quickbitehub.consumer.UserState;
-import org.quickbitehub.utils.KeyboardFactory;
-import org.quickbitehub.utils.MessageHandler;
-import org.quickbitehub.QuickBite;
-import org.quickbitehub.utils.Emoji;
+import org.quickbitehub.app.State;
+import org.quickbitehub.app.UserState;
+import org.quickbitehub.communicator.MessageHandler;
+import org.quickbitehub.communicator.Emoji;
+import org.quickbitehub.communicator.PageFactory;
 import org.quickbitehub.consumer.UserType;
-import org.telegram.telegrambots.client.okhttp.OkHttpTelegramClient;
 import org.telegram.telegrambots.meta.api.objects.message.Message;
 
 import java.util.HashMap;
 import java.util.Objects;
 
+import static org.quickbitehub.communicator.PageFactory.SHORT_DELAY_TIME_SEC;
+
 
 public class Authentication {
-	private static final OkHttpTelegramClient telegramClient = new OkHttpTelegramClient(Dotenv.load().get("BOT_TOKEN"));
 	static final HashMap<Long, HashMap<String, Object>> authProcesses = new HashMap<>(); // device(Telegram Account Id) -> Current Step
 	public static final HashMap<Long, Account> userSessions = new HashMap<>(); // TelegramId -> Account
 
@@ -25,38 +24,32 @@ public class Authentication {
 		if (email == null || email.isBlank()) return false;
 		email = email.strip().trim().toLowerCase();
 
-		String gmailPattern = "^(?=.{1,64}@)[A-Za-z0-9\\+_-]+(\\.[A-Za-z0-9\\+_-]+)*@"
-					+ "[^-][A-Za-z0-9\\+-]+(\\.[A-Za-z0-9\\+-]+)*(\\.[A-Za-z]{2,})$";
+		String gmailPattern = "^(?=.{1,64}@)[A-Za-z0-9+_-]+(\\.[A-Za-z0-9+_-]+)*@"
+					+ "[^-][A-Za-z0-9+-]+(\\.[A-Za-z0-9+-]+)*(\\.[A-Za-z]{2,})$";
 
 		String nonLatinPattern = "^(?=.{1,64}@)[\\p{L}0-9_-]+(\\.[\\p{L}0-9_-]+)*@"
-					+ "[^-][\\p{L}0-9-]+(\\.[\\p{L}0-9-]+)*(\\.[\\p{L}]{2,})$";
+					+ "[^-][\\p{L}0-9-]+(\\.[\\p{L}0-9-]+)*(\\.\\p{L}{2,})$";
 
 		return email.matches(nonLatinPattern) ||
 				email.matches(gmailPattern) ||
 				EmailValidator.getInstance().isValid(email);
 	}
 
-	public static void authenticate(Long telegramId) {
-		if (isSessionAuthenticated(telegramId)) {
-			String msg = Emoji.ORANGE_CIRCLE.getCode() + " You are already signed in\\!";
-			putAndDeleteAuthFeedbackMessage(telegramId, msg);
-			while (!QuickBite.userState.get(telegramId).isEmpty() && QuickBite.userState.get(telegramId).peek().isStateAuthRelated()) {
-				QuickBite.userState.get(telegramId).pop();
-			}
-			if (QuickBite.userState.get(telegramId).isEmpty()) QuickBite.userState.get(telegramId).push(UserState.DASHBOARD_PAGE);
-			QuickBite.userState.get(telegramId).push(UserState.BEFORE_NEXT_UPDATE);
-			return;
-		}
+	private static boolean isAuthNeeded(Long telegramId) {
+		if (!isSessionAuthenticated(telegramId)) return true;
+		String msg = Emoji.ORANGE_CIRCLE.getCode() + " You are already signed in\\!";
+		putAndDeleteAuthFeedbackMessage(telegramId, msg);
+		State.popAuthRelatedState(telegramId);
+		return false;
+	}
 
-		String msg = "    *_Authenticate_*\n\n" +
-					"Welcome to QuickBite, where you can Skip the Line, Save the Time for What Matters Most\\.\n" +
-					"Sign in or Sing up, so you can benefit from our services that will streamline your food ordering process for greater life quality \ud83d\ude01";
-
-		Message signingMenu = MessageHandler.sendInlineKeyboard(telegramId, msg, KeyboardFactory.getSignInUpKeyboard(),
-				QuickBite.STANDARD_DELAY_TIME_SEC);
+	public static Integer authenticate(Long telegramId) {
+		if (!isAuthNeeded(telegramId)) return null;
+		Message authMsg = PageFactory.viewAuthenticationPage(telegramId);
 		HashMap<String, Object> menuStep = new HashMap<>();
-		menuStep.put(AuthSteps.SIGN_IN_UP_MENU.getStep(), signingMenu);
+		menuStep.put(AuthSteps.SIGN_IN_UP_MENU.getStep(), authMsg);
 		authProcesses.put(telegramId, menuStep);
+		return authMsg.getMessageId();
 	}
 
 	private static void getReplySendNextPrompt(Message message, Long telegramId, HashMap<String, Object> userAuthSteps, String msg, String txt, String nextMsgKey, String nextMsgPrompt) {
@@ -70,32 +63,26 @@ public class Authentication {
 		MessageHandler.deleteMessage(telegramId, message.getReplyToMessage().getMessageId());
 		MessageHandler.deleteMessage(telegramId, message.getMessageId());
 
-		Message nextMessage = MessageHandler.sendForceReply(telegramId, nextMsgPrompt, QuickBite.STANDARD_DELAY_TIME_SEC);
+		Message nextMessage = MessageHandler.sendForceReply(telegramId, nextMsgPrompt);
 		userAuthSteps.put(nextMsgKey, nextMessage);
 		authProcesses.put(telegramId, userAuthSteps);
 	}
 
 	public static void signIn(Message message, Long telegramId) {
-		if (isSessionAuthenticated(telegramId)) {
-			String msg = Emoji.ORANGE_CIRCLE.getCode() + " You are already signed in\\!";
-			putAndDeleteAuthFeedbackMessage(telegramId, msg);
-			while (!QuickBite.userState.get(telegramId).isEmpty() && QuickBite.userState.get(telegramId).peek().isStateAuthRelated()) {
-				QuickBite.userState.get(telegramId).pop();
-			}
-			if (QuickBite.userState.get(telegramId).isEmpty()) QuickBite.userState.get(telegramId).push(UserState.DASHBOARD_PAGE);
-			QuickBite.userState.get(telegramId).push(UserState.BEFORE_NEXT_UPDATE);
-			return;
-		}
-
+		if (!isAuthNeeded(telegramId)) return;
+		System.out.println("auth is needed");
 		if (message == null) {
-			Message msg = MessageHandler.sendForceReply(telegramId, "Enter Email\\:", QuickBite.STANDARD_DELAY_TIME_SEC);
+			System.out.println("msg is null");
+			Message msg = MessageHandler.sendForceReply(telegramId, "Enter Email\\:");
 
 			HashMap<String, Object> existingProcess = authProcesses.getOrDefault(telegramId, new HashMap<>());
 			existingProcess.put(AuthSteps.SIGNING_EMAIL_MSG.getStep(), msg);
 			authProcesses.put(telegramId, existingProcess);
-
+			State.pushRequiredState(telegramId, UserState.AUTHENTICATION_SIGNIN);
 			return;
 		}
+
+		System.out.println("msg is not null");
 
 		var userAuthSteps = authProcesses.get(telegramId);
 		getReplySendNextPrompt(message, telegramId, authProcesses.get(telegramId),
@@ -118,7 +105,7 @@ public class Authentication {
 	}
 
 	private static void signInHandler(Long telegramId, String email, String password) {
-		if (!isAuthenticationInformationValid(telegramId, email, password, UserState.AUTHENTICATION_SIGNIN)) return;
+		if (isAuthInfoInvalid(telegramId, email, password, UserState.AUTHENTICATION_SIGNIN)) return;
 		email = Account.formatEmail(email);
 		Account userAccount = Account.authenticate(telegramId, email, password);
 		if (userAccount == null) {
@@ -130,7 +117,7 @@ public class Authentication {
 			temp.put(AuthSteps.SIGN_IN_UP_MENU.getStep(), menuMsg);
 			authProcesses.remove(telegramId); // the process is finished
 			authProcesses.put(telegramId, temp);
-			QuickBite.cancelCurrentOperation(telegramId, true);
+			State.applyImmediateState(telegramId, UserState.__CANCEL_CURRENT_OPERATION_WITHOUT_NOTICE);
 			return;
 		}
 
@@ -141,27 +128,13 @@ public class Authentication {
 		String feedbackMsg = Emoji.GREEN_CIRCLE.getCode() + " You Signed In Successfully " + Emoji.HAND_WAVING.getCode();
 		putAndDeleteAuthFeedbackMessage(telegramId, feedbackMsg);
 		authProcesses.remove(telegramId); // the process is finished
-		while (!QuickBite.userState.get(telegramId).isEmpty() && QuickBite.userState.get(telegramId).peek().isStateAuthRelated()) {
-			QuickBite.userState.get(telegramId).pop();
-		}
-		if (QuickBite.userState.get(telegramId).isEmpty()) QuickBite.userState.get(telegramId).push(UserState.DASHBOARD_PAGE);
-		QuickBite.userState.get(telegramId).push(UserState.BEFORE_NEXT_UPDATE);
+		State.popAuthRelatedState(telegramId);
 	}
 
 	public static void signUp(Message message, Long telegramId) {
-		if (isSessionAuthenticated(telegramId)) {
-			String msg = Emoji.ORANGE_CIRCLE.getCode() + " You are already signed in\\!";
-			putAndDeleteAuthFeedbackMessage(telegramId, msg);
-			while (!QuickBite.userState.get(telegramId).isEmpty() && QuickBite.userState.get(telegramId).peek().isStateAuthRelated()) {
-				QuickBite.userState.get(telegramId).pop();
-			}
-			if (QuickBite.userState.get(telegramId).isEmpty()) QuickBite.userState.get(telegramId).push(UserState.DASHBOARD_PAGE);
-			QuickBite.userState.get(telegramId).push(UserState.BEFORE_NEXT_UPDATE);
-			return;
-		}
-
+		if (!isAuthNeeded(telegramId)) return;
 		if (message == null) {
-			Message msg = MessageHandler.sendForceReply(telegramId, "Enter Email\\:", QuickBite.STANDARD_DELAY_TIME_SEC);
+			Message msg = MessageHandler.sendForceReply(telegramId, "Enter Email\\:");
 
 			HashMap<String, Object> existingProcess = authProcesses.getOrDefault(telegramId, new HashMap<>());
 			existingProcess.put(AuthSteps.SIGNUP_EMAIL_MSG.getStep(), msg);
@@ -174,13 +147,6 @@ public class Authentication {
 				AuthSteps.SIGNUP_EMAIL_TXT.getStep(),
 				AuthSteps.SIGNUP_PASSWORD_MSG.getStep(),
 				"Enter Password\\:"
-		);
-
-		getReplySendNextPrompt(message, telegramId, authProcesses.get(telegramId),
-				AuthSteps.SIGNUP_PASSWORD_MSG.getStep(),
-				AuthSteps.SIGNUP_PASSWORD_TXT.getStep(),
-				AuthSteps.SIGNUP_ID_MSG.getStep(),
-				"Enter University ID\\:"
 		);
 
 		getReplySendNextPrompt(message, telegramId, authProcesses.get(telegramId),
@@ -217,22 +183,22 @@ public class Authentication {
 
 		String email = (String) userAuthSteps.get(AuthSteps.SIGNUP_EMAIL_TXT.getStep());
 		String password = (String) userAuthSteps.get(AuthSteps.SIGNUP_PASSWORD_TXT.getStep());
-		String id = (String) userAuthSteps.get(AuthSteps.SIGNUP_ID_TXT.getStep());
 		String firstName = (String) userAuthSteps.get(AuthSteps.SIGNUP_FIRST_NAME_TXT.getStep());
 		String lastName = (String) userAuthSteps.get(AuthSteps.SIGNUP_LAST_NAME_TXT.getStep());
 
-		signUpHandler(telegramId, email, password, id, firstName, lastName, middleNames);
+		signUpHandler(telegramId, email, password, firstName, lastName, middleNames);
 	}
 
-	private static void signUpHandler(Long telegramId, String email, String password, String id, String firstName, String lastName, String middleNames) {
-		if (!isAuthenticationInformationValid(telegramId, email, password, UserState.AUTHENTICATION_SIGNUP)) return;
+	private static void signUpHandler(Long telegramId, String email, String password, String firstName, String lastName, String middleNames) {
+		if (isAuthInfoInvalid(telegramId, email, password, UserState.AUTHENTICATION_SIGNUP)) return;
 		if (!Account.isAccountInformationValid(telegramId, firstName, lastName, middleNames)) return;
+		String unformattedEmail = email;
 		email = Account.formatEmail(email);
 		firstName = Account.formatName(firstName);
 		lastName = Account.formatName(lastName);
-		if (!middleNames.equals("")) middleNames = Account.formatName(middleNames);
+		if (!middleNames.isBlank()) middleNames = Account.formatName(middleNames);
 
-		Account userAccount = Account.signUp(email, password, telegramId, firstName, lastName, middleNames, UserType.CUSTOMER.getText(), null);
+		Account userAccount = Account.signUp(email, unformattedEmail, password, telegramId, firstName, lastName, middleNames, UserType.CUSTOMER.getText(), null);
 		userSessions.put(telegramId, userAccount);
 		Message msg = (Message) authProcesses.get(telegramId).get(AuthSteps.SIGN_IN_UP_MENU.getStep());
 		MessageHandler.deleteMessage(telegramId, msg.getMessageId());
@@ -240,26 +206,22 @@ public class Authentication {
 		String feedbackMsg = Emoji.GREEN_CIRCLE.getCode() + " You've Created Your Account Successfully " + Emoji.HAND_WAVING.getCode();
 		putAndDeleteAuthFeedbackMessage(telegramId, feedbackMsg);
 		authProcesses.remove(telegramId); // the process is finished
-		while (!QuickBite.userState.get(telegramId).isEmpty() && QuickBite.userState.get(telegramId).peek().isStateAuthRelated()) {
-			QuickBite.userState.get(telegramId).pop();
-		}
-		if (QuickBite.userState.get(telegramId).isEmpty()) QuickBite.userState.get(telegramId).push(UserState.DASHBOARD_PAGE);
-		QuickBite.userState.get(telegramId).push(UserState.BEFORE_NEXT_UPDATE);
+		State.popAuthRelatedState(telegramId);
 	}
 
-	private static boolean isAuthenticationInformationValid(Long telegramId, String email, String password, UserState processType) {
+	private static boolean isAuthInfoInvalid(Long telegramId, String email, String password, UserState processType) {
 		if (processType == UserState.AUTHENTICATION_SIGNIN) {
 			if (isEmailValid(email) &&
 					Account.isAccountExist(Account.formatEmail(email)) &&
 					userSessions.get(telegramId) == null) {
 				Account userAccount = Account.authenticate(telegramId, Account.formatEmail(email), password);
-				return userAccount != null;
+				return userAccount == null;
 			}
 		} else {
 			if (isEmailValid(email) &&
 					!Account.isAccountExist(Account.formatEmail(email)) &&
 					userSessions.get(telegramId) == null) {
-				return true;
+				return false;
 			}
 		}
 
@@ -280,8 +242,8 @@ public class Authentication {
 		temp.put(AuthSteps.SIGN_IN_UP_MENU.getStep(), menuMsg);
 		authProcesses.remove(telegramId); // the process is finished
 		authProcesses.put(telegramId, temp);
-		QuickBite.cancelCurrentOperation(telegramId, true);
-		return false;
+		State.applyImmediateState(telegramId, UserState.__CANCEL_CURRENT_OPERATION_WITHOUT_NOTICE);
+		return true;
 	}
 
 	public static void signOut(Long telegramId) {
@@ -291,7 +253,6 @@ public class Authentication {
 			putAndDeleteAuthFeedbackMessage(telegramId, msg);
 			return;
 		}
-
 		assert userAccount.isAuthenticated(telegramId);
 		userAccount.logOut(telegramId);
 		userSessions.remove(telegramId);
@@ -302,12 +263,10 @@ public class Authentication {
 	public static boolean isSessionAuthenticated(Long telegramId) {
 		return userSessions.get(telegramId) != null;
 	}
-
 	public static Account getSessionAccount(Long telegramId) {
 		return userSessions.get(telegramId);
 	}
-
 	static void putAndDeleteAuthFeedbackMessage(Long telegramId, String textMessage) {
-		Message fm = MessageHandler.sendText(telegramId, textMessage, QuickBite.SHORT_DELAY_TIME_SEC);
+		MessageHandler.sendText(telegramId, textMessage, SHORT_DELAY_TIME_SEC);
 	}
 }
