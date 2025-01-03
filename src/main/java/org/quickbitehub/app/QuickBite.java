@@ -88,30 +88,6 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 	}
 
 	private void botInlineQueryHandler(InlineQuery inlineQuery) {
-//		Long telegramId = inlineQuery.getFrom().getId();
-//		String query = inlineQuery.getQuery().strip().trim().toLowerCase();
-//		if (query.contains("restaurant")) {
-//			query = query.substring(query.indexOf(":")+2);
-//			if (userState.get(telegramId).peek() != UserState.IO_RESTAURANT_SELECTION) {
-//				userState.get(telegramId).push(UserState.IO_RESTAURANT_SELECTION);
-//			}
-//			QuickBite.userState.get(telegramId).pop();
-//			if (!Restaurant.viewFavoriteRestaurants(telegramId, query)) {
-//				QuickBite.navigateToProperState(telegramId, null);
-//			} else {
-//				QuickBite.userState.get(telegramId).push(UserState.IO_PRODUCTS_SELECTION);
-//			}
-//			return;
-//		}
-//
-//		if (query.contains("items")) {
-//			query = query.substring(query.indexOf(":")+2);
-//			Restaurant.viewRestaurantProducts(telegramId, query);
-//			if (userState.get(telegramId).peek() != UserState.IO_PRODUCTS_SELECTION) {
-//				userState.get(telegramId).push(UserState.IO_PRODUCTS_SELECTION);
-//			}
-//			return;
-//		}
 	}
 
 	private void botMessageHandler(Message message) {
