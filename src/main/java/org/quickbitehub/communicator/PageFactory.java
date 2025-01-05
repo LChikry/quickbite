@@ -1,23 +1,15 @@
 package org.quickbitehub.communicator;
 
-import org.quickbitehub.app.QuickBite;
 import org.quickbitehub.authentication.Account;
 import org.quickbitehub.authentication.Authentication;
 import org.quickbitehub.order.OrderStatus;
 import org.telegram.telegrambots.meta.api.objects.message.Message;
 
+import java.sql.Time;
 import java.time.LocalDate;
 import java.util.Objects;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 
 public class PageFactory {
-	public static final long SHORT_DELAY_TIME_SEC = 8; // in seconds
-	public static final long STANDARD_DELAY_TIME_SEC = 30; // in seconds
-	public static final long LONG_DELAY_TIME_SEC = 90; // in seconds
-	public static final long LARGE_DELAY_TIME_SEC = 180; // in seconds
-	public static final long NO_DELAY_TIME= 0; // in seconds
-
 	public static Message viewAuthenticationPage(Long telegramId) {
 		String msg = """
 				    *_Authenticate_*
@@ -26,7 +18,7 @@ public class PageFactory {
 				Sign in or Sing up, so you can benefit from our services that will streamline your food ordering process for greater life quality \ud83d\ude01""";
 
 		return MessageHandler.sendInlineKeyboard(telegramId, msg, KeyboardFactory.getSignInUpKeyboard(),
-				STANDARD_DELAY_TIME_SEC);
+				TimeConstants.STANDARD_DELAY_TIME_SEC.time());
 	}
 
 	public static Integer viewDashboardPage(Long telegramId, Integer messageId) {
@@ -44,7 +36,7 @@ public class PageFactory {
 				"\n" + OrderStatus.CANCELED.getStatus() + " orders\\: *" + "*";
 
 		if (null == messageId) {
-			return (Objects.requireNonNull(MessageHandler.sendInlineKeyboard(telegramId, message, KeyboardFactory.getDashboardPageKeyboard(), NO_DELAY_TIME))).getMessageId();
+			return (Objects.requireNonNull(MessageHandler.sendInlineKeyboard(telegramId, message, KeyboardFactory.getDashboardPageKeyboard(), TimeConstants.NO_DELAY_TIME.time()))).getMessageId();
 		}
 		MessageHandler.editInlineKeyboard(telegramId, messageId, message, KeyboardFactory.getDashboardPageKeyboard());
 		return null;
@@ -62,7 +54,7 @@ public class PageFactory {
 		}
 		MessageHandler.sendReplyKeyboard(telegramId, message,
 				KeyboardFactory.getRestaurantChoicesKeyboard(account.getFavoriteRestaurants()),
-				PageFactory.STANDARD_DELAY_TIME_SEC);
+				TimeConstants.STANDARD_DELAY_TIME_SEC.time());
 	}
 
 	public static Integer viewSettingsPage(Long telegramId, Integer messageId) {
@@ -75,7 +67,7 @@ public class PageFactory {
 				"\n" +
 				"\nYou have been with us since " + signUpDate.getDayOfMonth() + " " + signUpDate.getMonth() + "\\, " + signUpDate.getYear() + " " + Emoji.HEART_FIGURE.getCode();
 		if (null == messageId) {
-			return (Objects.requireNonNull(MessageHandler.sendInlineKeyboard(telegramId, message, KeyboardFactory.getCustomerSettingsKeyboard(userAccount), NO_DELAY_TIME))).getMessageId();
+			return (Objects.requireNonNull(MessageHandler.sendInlineKeyboard(telegramId, message, KeyboardFactory.getCustomerSettingsKeyboard(userAccount), TimeConstants.NO_DELAY_TIME.time()))).getMessageId();
 		}
 		MessageHandler.editInlineKeyboard(telegramId, messageId, message, KeyboardFactory.getCustomerSettingsKeyboard(userAccount));
 		return null;
@@ -98,7 +90,7 @@ public class PageFactory {
 				"\n_If you still have questions\\, or you encountered a problem\\, please do not hesitate to look at the documentation or contact us at *support@quickbitehub\\.org*_";
 
 		if (null == messageId) {
-			return (Objects.requireNonNull(MessageHandler.sendInlineKeyboard(telegramId, msg, KeyboardFactory.getHelpPageKeyboard(), LARGE_DELAY_TIME_SEC))).getMessageId();
+			return (Objects.requireNonNull(MessageHandler.sendInlineKeyboard(telegramId, msg, KeyboardFactory.getHelpPageKeyboard(), TimeConstants.LARGE_DELAY_TIME_SEC.time()))).getMessageId();
 		}
 		MessageHandler.editInlineKeyboard(telegramId, messageId, msg, KeyboardFactory.getHelpPageKeyboard());
 		return null;

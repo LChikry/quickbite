@@ -12,9 +12,6 @@ import org.telegram.telegrambots.meta.api.objects.message.Message;
 import java.util.HashMap;
 import java.util.Objects;
 
-import static org.quickbitehub.communicator.PageFactory.SHORT_DELAY_TIME_SEC;
-
-
 public class Authentication {
 	static final HashMap<Long, HashMap<String, Object>> authProcesses = new HashMap<>(); // device(Telegram Account Id) -> Current Step
 	public static final HashMap<Long, Account> userSessions = new HashMap<>(); // TelegramId -> Account
