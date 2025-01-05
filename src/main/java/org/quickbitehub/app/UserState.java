@@ -39,7 +39,7 @@ public enum UserState {
 	CHANGE_MIDDLE_NAMES("/change_middle_names"),
 	AUTHENTICATION_SIGNOUT("/signout"),
 	HELP_PAGE("/help"),
-	PREVIOUS_KEYBOARD("/back");
+	__PREVIOUS_KEYBOARD("__back");
 
 	private final String state;
 	private static final HashMap<String, UserState> stateMap = new HashMap<>();
@@ -88,7 +88,7 @@ public enum UserState {
 				this == CHANGE_FIRST_NAME ||
 				this == CHANGE_LAST_NAME ||
 				this == CHANGE_MIDDLE_NAMES ||
-				this == PREVIOUS_KEYBOARD;
+				this == __PREVIOUS_KEYBOARD;
 	}
 
 	public static UserState getValueOf(String name) {

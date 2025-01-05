@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class KeyboardFactory {
-	private static final InlineKeyboardButton backButton = InlineKeyboardButton.builder().text(Emoji.LEFT_TRANSPARENT_ARROW.getCode()+" Back").callbackData(UserState.PREVIOUS_KEYBOARD.getState()).build();
+	private static final InlineKeyboardButton backButton = InlineKeyboardButton.builder().text(Emoji.LEFT_TRANSPARENT_ARROW.getCode()+" Back").callbackData(UserState.__PREVIOUS_KEYBOARD.getState()).build();
 
 	public static InlineKeyboardMarkup getSignInUpKeyboard() {
 		var logInButton = InlineKeyboardButton
@@ -36,7 +36,6 @@ public class KeyboardFactory {
 				.keyboardRow(new InlineKeyboardRow(signUpButton))
 				.build();
 	}
-
 	public static InlineKeyboardMarkup getHelpPageKeyboard() {
 		var usersDoc = InlineKeyboardButton
 				.builder()
@@ -54,7 +53,6 @@ public class KeyboardFactory {
 				.keyboardRow(new InlineKeyboardRow(backButton))
 				.build();
 	}
-
 	public static InlineKeyboardMarkup getDashboardPageKeyboard() {
 		var orderButton = InlineKeyboardButton.builder().text("Issue an Order").callbackData(UserState.SELECT_FAVORITE_RESTAURANT.getState()).build();
 
@@ -74,13 +72,11 @@ public class KeyboardFactory {
 				.keyboardRow(new InlineKeyboardRow(cancelButton))
 				.build();
 	}
-
 	public static ForceReplyKeyboard getForceReplyKeyboard() {
 		return ForceReplyKeyboard.builder()
 				.forceReply(true)
 				.build();
 	}
-
 	public static ReplyKeyboardMarkup getRestaurantChoicesKeyboard(ArrayList<String> recentUsedRestaurantNames) {
 		List<KeyboardRow> kbRow = new ArrayList<>();
 		ReplyKeyboardMarkup replyKb = new ReplyKeyboardMarkup(kbRow);
@@ -100,7 +96,6 @@ public class KeyboardFactory {
 		replyKb.setKeyboard(kbRow);
 		return replyKb;
 	}
-
 	public static InlineKeyboardMarkup getCustomerSettingsKeyboard(Account customerAccount) {
 		String email = customerAccount.getUnformattedEmail();
 		var emailButton = InlineKeyboardButton.builder().text("Email: " + email).callbackData(UserState.CHANGE_EMAIL.getState()).build();
