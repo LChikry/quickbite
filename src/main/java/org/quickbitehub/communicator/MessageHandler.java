@@ -37,7 +37,7 @@ public class MessageHandler {
 		try {
 			Message sentMessage = telegramClient.execute(sm);
 			scheduler.schedule(() -> MessageHandler.deleteMessage(telegramId, sentMessage.getMessageId()),
-						PageFactory.STANDARD_DELAY_TIME_SEC,
+						TimeConstants.STANDARD_DELAY_TIME_SEC.time(),
 						TimeUnit.SECONDS);
 			return sentMessage;
 		} catch (TelegramApiException e) {
@@ -95,7 +95,7 @@ public class MessageHandler {
 		return null;
 	}
 
-	public static void deleteMessage(Long telegramId, Integer messageId) {
+	private static void deleteMessage(Long telegramId, Integer messageId) {
 		DeleteMessage dm = DeleteMessage
 				.builder()
 				.chatId(telegramId)

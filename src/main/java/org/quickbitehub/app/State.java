@@ -90,7 +90,7 @@ public class State {
 		// we delete all keyboards in the chat if we are going to create new one
 		if (msgId != null && !keyboardsState.isEmpty()) {
 			for (var oldMsgId : keyboardsState.keySet()) {
-				MessageHandler.deleteMessage(telegramId, oldMsgId);
+				MessageHandler.deleteMessage(telegramId, oldMsgId, TimeConstants.NO_DELAY_TIME.time());
 			}
 		} else if (msgId == null) msgId = keyboardsState.keySet().iterator().next(); // otherwise, we take the id of existing one
 		keyboardsState.clear();

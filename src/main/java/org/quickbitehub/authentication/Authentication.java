@@ -1,11 +1,13 @@
 package org.quickbitehub.authentication;
 
 import org.apache.commons.validator.routines.EmailValidator;
+import org.checkerframework.checker.units.qual.Time;
 import org.quickbitehub.app.State;
 import org.quickbitehub.app.UserState;
 import org.quickbitehub.communicator.MessageHandler;
 import org.quickbitehub.communicator.Emoji;
 import org.quickbitehub.communicator.PageFactory;
+import org.quickbitehub.communicator.TimeConstants;
 import org.quickbitehub.consumer.UserType;
 import org.telegram.telegrambots.meta.api.objects.message.Message;
 
@@ -57,8 +59,8 @@ public class Authentication {
 
 		userAuthSteps.put(txt, message.getText().trim().strip());
 		userAuthSteps.remove(msg);
-		MessageHandler.deleteMessage(telegramId, message.getReplyToMessage().getMessageId());
-		MessageHandler.deleteMessage(telegramId, message.getMessageId());
+		MessageHandler.deleteMessage(telegramId, message.getReplyToMessage().getMessageId(), TimeConstants.NO_DELAY_TIME.time());
+		MessageHandler.deleteMessage(telegramId, message.getMessageId(), TimeConstants.NO_DELAY_TIME.time());
 
 		Message nextMessage = MessageHandler.sendForceReply(telegramId, nextMsgPrompt);
 		userAuthSteps.put(nextMsgKey, nextMessage);
@@ -67,9 +69,7 @@ public class Authentication {
 
 	public static void signIn(Message message, Long telegramId) {
 		if (!isAuthNeeded(telegramId)) return;
-		System.out.println("auth is needed");
 		if (message == null) {
-			System.out.println("msg is null");
 			Message msg = MessageHandler.sendForceReply(telegramId, "Enter Email\\:");
 
 			HashMap<String, Object> existingProcess = authProcesses.getOrDefault(telegramId, new HashMap<>());
@@ -78,8 +78,6 @@ public class Authentication {
 			State.pushRequiredState(telegramId, UserState.AUTHENTICATION_SIGNIN);
 			return;
 		}
-
-		System.out.println("msg is not null");
 
 		var userAuthSteps = authProcesses.get(telegramId);
 		getReplySendNextPrompt(message, telegramId, authProcesses.get(telegramId),
@@ -94,8 +92,8 @@ public class Authentication {
 		if (!Objects.equals(message.getReplyToMessage().getMessageId(), enteredPassword.getMessageId())) return;
 
 		String password = message.getText();
-		MessageHandler.deleteMessage(telegramId, message.getReplyToMessage().getMessageId());
-		MessageHandler.deleteMessage(telegramId, message.getMessageId());
+		MessageHandler.deleteMessage(telegramId, message.getReplyToMessage().getMessageId(), TimeConstants.NO_DELAY_TIME.time());
+		MessageHandler.deleteMessage(telegramId, message.getMessageId(), TimeConstants.NO_DELAY_TIME.time());
 		String email = ((String) userAuthSteps.get(AuthSteps.SIGNING_EMAIL_TXT.getStep())).strip().trim().toLowerCase();
 
 		signInHandler(telegramId, email, password);
@@ -120,7 +118,7 @@ public class Authentication {
 
 		userSessions.put(telegramId, userAccount);
 		Integer msgId = ((Message) authProcesses.get(telegramId).get(AuthSteps.SIGN_IN_UP_MENU.getStep())).getMessageId();
-		MessageHandler.deleteMessage(telegramId, msgId);
+		MessageHandler.deleteMessage(telegramId, msgId, TimeConstants.NO_DELAY_TIME.time());
 
 		String feedbackMsg = Emoji.GREEN_CIRCLE.getCode() + " You Signed In Successfully " + Emoji.HAND_WAVING.getCode();
 		putAndDeleteAuthFeedbackMessage(telegramId, feedbackMsg);
@@ -174,8 +172,8 @@ public class Authentication {
 		if (!Objects.equals(message.getReplyToMessage().getMessageId(), enteredPassword.getMessageId())) return;
 
 		String middleNames = message.getText().strip().trim();
-		MessageHandler.deleteMessage(telegramId, message.getReplyToMessage().getMessageId());
-		MessageHandler.deleteMessage(telegramId, message.getMessageId());
+		MessageHandler.deleteMessage(telegramId, message.getReplyToMessage().getMessageId(), TimeConstants.NO_DELAY_TIME.time());
+		MessageHandler.deleteMessage(telegramId, message.getMessageId(), TimeConstants.NO_DELAY_TIME.time());
 		if (middleNames.length() == 1) middleNames = "";
 
 		String email = (String) userAuthSteps.get(AuthSteps.SIGNUP_EMAIL_TXT.getStep());
@@ -198,7 +196,7 @@ public class Authentication {
 		Account userAccount = Account.signUp(email, unformattedEmail, password, telegramId, firstName, lastName, middleNames, UserType.CUSTOMER.getText(), null);
 		userSessions.put(telegramId, userAccount);
 		Message msg = (Message) authProcesses.get(telegramId).get(AuthSteps.SIGN_IN_UP_MENU.getStep());
-		MessageHandler.deleteMessage(telegramId, msg.getMessageId());
+		MessageHandler.deleteMessage(telegramId, msg.getMessageId(), TimeConstants.NO_DELAY_TIME.time());
 
 		String feedbackMsg = Emoji.GREEN_CIRCLE.getCode() + " You've Created Your Account Successfully " + Emoji.HAND_WAVING.getCode();
 		putAndDeleteAuthFeedbackMessage(telegramId, feedbackMsg);
@@ -264,6 +262,6 @@ public class Authentication {
 		return userSessions.get(telegramId);
 	}
 	static void putAndDeleteAuthFeedbackMessage(Long telegramId, String textMessage) {
-		MessageHandler.sendText(telegramId, textMessage, SHORT_DELAY_TIME_SEC);
+		MessageHandler.sendText(telegramId, textMessage, TimeConstants.SHORT_DELAY_TIME_SEC.time());
 	}
 }

@@ -27,7 +27,7 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 			Message msg = update.getMessage();
 			telegramId = msg.getChatId();
 			if (msg.getDate() + 20 < Instant.now().getEpochSecond()) {
-				MessageHandler.deleteMessage(telegramId, msg.getMessageId());
+				MessageHandler.deleteMessage(telegramId, msg.getMessageId(), TimeConstants.NO_DELAY_TIME.time());
 				return;
 			}
 			if (State.isUserStateless(telegramId)) userState.put(telegramId, new Stack<>());
@@ -51,7 +51,7 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 	private void botCommandsHandler(Message message) {
 		Long telegramId = message.getFrom().getId();
 		UserState newState = UserState.getValueOf(message.getText());
-		MessageHandler.deleteMessage(telegramId, message.getMessageId(), SHORT_DELAY_TIME_SEC);
+		MessageHandler.deleteMessage(telegramId, message.getMessageId(), TimeConstants.SHORT_DELAY_TIME_SEC.time());
 		if (State.isUserStateless(telegramId) ||
 				Authentication.isSessionAuthenticated(telegramId) ||
 				newState.isImmediateState() ||
@@ -76,8 +76,6 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 	private void botRepliesHandler(Message message) {
 		Long telegramId = message.getChat().getId();
 		UserState currentState = State.getUserState(telegramId);
-
-		System.out.println("we in reply, state is: " + currentState);
 		switch (currentState) {
 			case AUTHENTICATION_SIGNIN -> Authentication.signIn(message, telegramId);
 			case AUTHENTICATION_SIGNUP -> Authentication.signUp(message, telegramId);
