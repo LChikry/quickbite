@@ -122,7 +122,7 @@ public class MessageHandler {
 				TimeUnit.SECONDS);
 	}
 
-	public static Message sendText(Long telegramId, String textMessage, long autoDeleteDelayTime) {
+	public static void sendText(Long telegramId, String textMessage, long autoDeleteDelayTime) {
 		SendMessage msg = SendMessage
 				.builder()
 				.chatId(telegramId)
@@ -137,12 +137,10 @@ public class MessageHandler {
 						autoDeleteDelayTime,
 						TimeUnit.SECONDS);
 			}
-			return sentMessage;
 		} catch (TelegramApiException e) {
 			e.printStackTrace();
 			System.out.println("MessageHandler: sendText");
 		}
-		return null;
 	}
 
 	public static void editInlineKeyboard(Long telegramId, Integer messageId, String message, InlineKeyboardMarkup kb) {
@@ -179,5 +177,4 @@ public class MessageHandler {
 			e.printStackTrace();
 		}
 	}
-
 }
