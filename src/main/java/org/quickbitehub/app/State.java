@@ -1,60 +1,87 @@
 package org.quickbitehub.app;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.quickbitehub.authentication.Authentication;
 import org.quickbitehub.communicator.*;
+import org.telegram.telegrambots.meta.api.objects.message.Message;
 
-import javax.print.attribute.standard.PageRanges;
 import java.util.HashMap;
 import java.util.Stack;
 
 public class State {
-	static final HashMap<Long, Stack<UserState>> userState = new HashMap<>(); // TelegramId -> State
+	static final HashMap<Long, Stack<Pair<UserState, Integer>>> userState = new HashMap<>(); // TelegramId -> State
 	static final HashMap<Long, HashMap<Integer, UserState[]>> keyboardState = new HashMap<>(); // TelegramId -> keyboard MessageId -> previous if exists, current, next state if exists
 	private static final int NUM_KEYBOARD_STATES = 2;
 
-	public static void pushRequiredState(Long telegramId, UserState newState) {
+	public static void pushRequiredState(Long telegramId, Pair<UserState, Integer> newState) {
 		var states = userState.get(telegramId);
-		UserState currentState = states.pop();
+		Pair<UserState, Integer> currentState = states.pop();
 		states.push(newState);
 		states.push(currentState);
 	}
-	static void pushImmediateState(Long telegramId, UserState recentState) {userState.get(telegramId).push(recentState);}
-	public static void applyImmediateState(Long telegramId, UserState newState) {
+	static void pushImmediateState(Long telegramId, Pair<UserState, Integer> recentState) {userState.get(telegramId).push(recentState);}
+	public static void applyImmediateState(Long telegramId, Pair<UserState, Integer> newState) {
 		var states = userState.get(telegramId);
-		UserState currentState = states.pop();
+		Pair<UserState, Integer> currentState = states.pop();
 		states.push(newState);
-		states.push(UserState.__BEFORE_NEXT_UPDATE);
+		states.push(Pair.of(UserState.__BEFORE_NEXT_UPDATE, null));
 		states.push(currentState);
 	}
 	public static boolean isUserStateless(Long telegramId) {
 		return !userState.containsKey(telegramId) || userState.get(telegramId).isEmpty();
 	}
-	public static UserState getUserState(Long telegramId) {return userState.get(telegramId).peek();}
+	public static UserState getUserState(Long telegramId) {return userState.get(telegramId).peek().getLeft();}
 	public static void popAuthRelatedState(Long telegramId) {
 		var states = userState.get(telegramId);
-		while (!states.isEmpty() && states.peek().isStateAuthRelated()) {states.pop();}
+		while (!states.isEmpty() && states.peek().getLeft().isStateAuthRelated()) {
+			if (states.peek().getRight() != null) {
+				MessageHandler.deleteMessage(telegramId, states.pop().getRight(), TimeConstants.NO_DELAY_TIME.time());
+			} else states.pop();
+		}
 		if (states.isEmpty()) {
-			states.push(UserState.DASHBOARD_PAGE);
-			states.push(UserState.__BEFORE_NEXT_UPDATE);
+			states.push(Pair.of(UserState.DASHBOARD_PAGE, null));
+			states.push(Pair.of(UserState.__BEFORE_NEXT_UPDATE, null));
 		}
 	}
-	static void navigateToProperState(Long telegramId, Integer messageId) {
-		Stack<UserState> eventualState = userState.get(telegramId);
+	static void navigateToProperState(Long telegramId, Message message) {
+		Stack<Pair<UserState, Integer>> eventualState = userState.get(telegramId);
 		if (eventualState.isEmpty()) {
-			if (Authentication.isSessionAuthenticated(telegramId)) eventualState.push(UserState.DASHBOARD_PAGE);
-			else eventualState.push(UserState.AUTHENTICATION_NEEDED);
+			if (Authentication.isSessionAuthenticated(telegramId)) {
+				eventualState.push(Pair.of(UserState.DASHBOARD_PAGE, null));
+			}
+			else eventualState.push(Pair.of(UserState.AUTHENTICATION_NEEDED, null));
 		} else if (!Authentication.isSessionAuthenticated(telegramId) &&
-				!eventualState.peek().isStateAuthRelated() &&
-				!eventualState.peek().isImmediateState()) {
-			eventualState.push(UserState.AUTHENTICATION_NEEDED);
+				!eventualState.peek().getLeft().isStateAuthRelated() &&
+				!eventualState.peek().getLeft().isImmediateState()) {
+			eventualState.push(Pair.of(UserState.AUTHENTICATION_NEEDED, null));
 		}
 
-		UserState properState = eventualState.peek();
+		UserState properState = eventualState.peek().getLeft();
+
+		System.out.println("the state now is: " + properState);
+
+		var sentMsgId = switch (properState) {
+			case AUTHENTICATION_NEEDED -> Authentication.authenticate(telegramId);
+			case DASHBOARD_PAGE -> PageFactory.viewDashboardPage(telegramId, message.getMessageId());
+//			case MANAGE_ORDERS_PAGE -> viewManageOrdersPage();
+			case SETTINGS_PAGE -> PageFactory.viewSettingsPage(telegramId, message.getMessageId());
+			case HELP_PAGE -> PageFactory.viewHelpPage(telegramId, message.getMessageId());
+			default -> null;
+		};
+
+		if (sentMsgId != null) {
+			updateKeyboardState(telegramId, sentMsgId, properState);
+			if (eventualState.peek().getRight() != null) {
+				MessageHandler.deleteMessage(telegramId, eventualState.pop().getRight(), TimeConstants.NO_DELAY_TIME.time());
+				return;
+			}
+			eventualState.pop();
+			return;
+		}
+
 		switch (properState) {
-			case AUTHENTICATION_NEEDED -> updateKeyboardState(telegramId, Authentication.authenticate(telegramId), properState);
-			case AUTHENTICATION_SIGNIN -> Authentication.signIn(null, telegramId);
-			case AUTHENTICATION_SIGNUP -> Authentication.signUp(null, telegramId);
-			case DASHBOARD_PAGE -> updateKeyboardState(telegramId, PageFactory.viewDashboardPage(telegramId, messageId), properState);
+			case AUTHENTICATION_SIGNIN -> Authentication.signIn(message, telegramId);
+			case AUTHENTICATION_SIGNUP -> Authentication.signUp(message, telegramId);
 			case CANCEL_CURRENT_OPERATION_WITH_NOTICE -> cancelCurrentOperation(telegramId, false);
 			case __CANCEL_CURRENT_OPERATION_WITHOUT_NOTICE -> cancelCurrentOperation(telegramId, true);
 			case SELECT_FAVORITE_RESTAURANT -> PageFactory.viewFavoriteRestaurants(telegramId);
@@ -62,28 +89,37 @@ public class State {
 //			case SEARCH_FOR_PRODUCTS ->
 //			case CONFIRM_ORDER ->
 //			case CANCEL_PENDING_ORDER -> cancelPendingOrder();
-//			case MANAGE_ORDERS_PAGE -> viewManageOrdersPage();
-			case SETTINGS_PAGE -> updateKeyboardState(telegramId, PageFactory.viewSettingsPage(telegramId, messageId), properState);
 			case AUTHENTICATION_SIGNOUT -> Authentication.signOut(telegramId);
-			case HELP_PAGE -> updateKeyboardState(telegramId, PageFactory.viewHelpPage(telegramId, messageId), properState);
-			case __PREVIOUS_KEYBOARD -> eventualState.push(keyboardState.get(telegramId).get(messageId)[0]);
+			case __PREVIOUS_KEYBOARD -> eventualState.push(Pair.of(keyboardState.get(telegramId).get(message.getMessageId())[0], null));
 			default -> MessageFactory.sendIncorrectOperationNotice(telegramId);
 		}
-		if (properState == UserState.AUTHENTICATION_SIGNOUT) eventualState.clear();
-		else eventualState.pop();
+
+		if (eventualState.peek().getRight() != null) {
+			MessageHandler.deleteMessage(telegramId, eventualState.pop().getRight(), TimeConstants.NO_DELAY_TIME.time());
+		}
+		if (properState == UserState.AUTHENTICATION_SIGNOUT) {
+			for (Pair<UserState, Integer> userStateIntegerPair : eventualState) {
+				MessageHandler.deleteMessage(telegramId, userStateIntegerPair.getRight(), TimeConstants.NO_DELAY_TIME.time());
+			}
+			eventualState.clear();
+		}
 	}
 	private static void cancelCurrentOperation(Long telegramId, boolean isNoticeSent) {
-		Stack<UserState> states = userState.get(telegramId);
-		assert (states.peek() == UserState.CANCEL_CURRENT_OPERATION_WITH_NOTICE || states.peek() == UserState.__CANCEL_CURRENT_OPERATION_WITHOUT_NOTICE);
-		UserState cancelType = states.pop(); // so that NavigateToProperState can pop the current state if it was not an op.
+		Stack<Pair<UserState, Integer>> states = userState.get(telegramId);
+		assert (states.peek().getLeft() == UserState.CANCEL_CURRENT_OPERATION_WITH_NOTICE ||
+				states.peek().getLeft() == UserState.__CANCEL_CURRENT_OPERATION_WITHOUT_NOTICE);
+		Pair<UserState, Integer> cancelType = states.pop(); // so that NavigateToProperState can pop the current state if it was not an op.
 		String message;
-		if (states.empty() || !states.peek().isOperationState()) {
+		if (states.empty() || !states.peek().getLeft().isOperationState()) {
 			message = Emoji.ORANGE_CIRCLE.getCode() + " There is No Operation to Cancel\\, You are Good to Go " + Emoji.SMILING_FACE.getCode();
 		} else {
+			for (Pair<UserState, Integer> userStateIntegerPair : states) {
+				MessageHandler.deleteMessage(telegramId, userStateIntegerPair.getRight(), TimeConstants.NO_DELAY_TIME.time());
+			}
 			states.clear();
 			message = Emoji.BLUE_CIRCLE.getCode() + " Current Operation Has Been Canceled\\.";
 		}
-		if (!isNoticeSent) MessageHandler.sendText(telegramId, message, TimeConstants.SHORT_DELAY_TIME_SEC.time());
+		if (!isNoticeSent) MessageHandler.sendShortNotice(telegramId, message);
 	}
 	private static void updateKeyboardState(Long telegramId, Integer msgId, UserState currentState) {
 		var keyboardsState = keyboardState.get(telegramId);

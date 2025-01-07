@@ -1,5 +1,7 @@
 package org.quickbitehub.authentication;
 
+import org.apache.commons.lang3.tuple.Pair;
+import org.quickbitehub.communicator.MessageHandler;
 import org.quickbitehub.consumer.*;
 import org.quickbitehub.communicator.Emoji;
 import org.quickbitehub.utils.LanguageType;
@@ -104,26 +106,6 @@ public class Account implements Serializable {
 		this.unformattedEmail = newEmail;
 		usersAccount.put(email, currentAccount);
 		return true;
-	}
-
-	static boolean isAccountInformationValid(Long telegramId, String firstName, String lastName, String middleNames) {
-		firstName = firstName.trim().strip();
-		lastName = lastName.trim().strip();
-		middleNames = middleNames.trim().strip();
-		String fullName = firstName + " " + lastName + " " + middleNames;
-		// is fullName contains only Unicode letters and spaces
-		if (-1 == firstName.indexOf(' ') && -1 == lastName.indexOf(' ') && fullName.matches("^[\\p{L} ]+$")) return true;
-
-		String textMsg = Emoji.RED_CIRCLE.getCode() + " *Sign Up Failed*\nInvalid First/Last/Middle Name\\(s\\) " + Emoji.SAD_FACE.getCode();
-		Authentication.putAndDeleteAuthFeedbackMessage(telegramId, textMsg);
-
-		var menuMsg = (Message) Authentication.authProcesses.get(telegramId).get(AuthSteps.SIGN_IN_UP_MENU.getStep());
-		HashMap<String, Object> temp = new HashMap<>();
-		temp.put(AuthSteps.SIGN_IN_UP_MENU.getStep(), menuMsg);
-		Authentication.authProcesses.remove(telegramId); // the process is finished
-		Authentication.authProcesses.put(telegramId, temp);
-		State.applyImmediateState(telegramId, UserState.__CANCEL_CURRENT_OPERATION_WITHOUT_NOTICE);
-		return false;
 	}
 
 	static public String formatEmail(String email) {

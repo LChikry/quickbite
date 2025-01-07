@@ -5,7 +5,6 @@ import org.quickbitehub.authentication.Authentication;
 import org.quickbitehub.order.OrderStatus;
 import org.telegram.telegrambots.meta.api.objects.message.Message;
 
-import java.sql.Time;
 import java.time.LocalDate;
 import java.util.Objects;
 
@@ -18,9 +17,8 @@ public class PageFactory {
 				Sign in or Sing up, so you can benefit from our services that will streamline your food ordering process for greater life quality \ud83d\ude01""";
 
 		return MessageHandler.sendInlineKeyboard(telegramId, msg, KeyboardFactory.getSignInUpKeyboard(),
-				TimeConstants.STANDARD_DELAY_TIME_SEC.time());
+				TimeConstants.NO_DELAY_TIME.time());
 	}
-
 	public static Integer viewDashboardPage(Long telegramId, Integer messageId) {
 		assert (Authentication.isSessionAuthenticated(telegramId));
 		// task add money and order values
@@ -36,12 +34,19 @@ public class PageFactory {
 				"\n" + OrderStatus.CANCELED.getStatus() + " orders\\: *" + "*";
 
 		if (null == messageId) {
-			return (Objects.requireNonNull(MessageHandler.sendInlineKeyboard(telegramId, message, KeyboardFactory.getDashboardPageKeyboard(), TimeConstants.NO_DELAY_TIME.time()))).getMessageId();
+			return (Objects.requireNonNull(
+						MessageHandler.sendInlineKeyboard(
+							telegramId,
+							message,
+							KeyboardFactory.getDashboardPageKeyboard(),
+							TimeConstants.NO_DELAY_TIME.time()
+						)
+				)
+			).getMessageId();
 		}
 		MessageHandler.editInlineKeyboard(telegramId, messageId, message, KeyboardFactory.getDashboardPageKeyboard());
 		return null;
 	}
-
 	public static void viewFavoriteRestaurants(Long telegramId) {
 		Account account = Authentication.userSessions.get(telegramId);
 		assert (account != null);
@@ -54,9 +59,8 @@ public class PageFactory {
 		}
 		MessageHandler.sendReplyKeyboard(telegramId, message,
 				KeyboardFactory.getRestaurantChoicesKeyboard(account.getFavoriteRestaurants()),
-				TimeConstants.STANDARD_DELAY_TIME_SEC.time());
+				TimeConstants.NO_DELAY_TIME.time());
 	}
-
 	public static Integer viewSettingsPage(Long telegramId, Integer messageId) {
 		assert (Authentication.isSessionAuthenticated(telegramId));
 		Account userAccount = Authentication.getSessionAccount(telegramId);
@@ -67,12 +71,19 @@ public class PageFactory {
 				"\n" +
 				"\nYou have been with us since " + signUpDate.getDayOfMonth() + " " + signUpDate.getMonth() + "\\, " + signUpDate.getYear() + " " + Emoji.HEART_FIGURE.getCode();
 		if (null == messageId) {
-			return (Objects.requireNonNull(MessageHandler.sendInlineKeyboard(telegramId, message, KeyboardFactory.getCustomerSettingsKeyboard(userAccount), TimeConstants.NO_DELAY_TIME.time()))).getMessageId();
+			return (Objects.requireNonNull(
+						MessageHandler.sendInlineKeyboard(
+							telegramId,
+							message,
+							KeyboardFactory.getCustomerSettingsKeyboard(userAccount),
+							TimeConstants.NO_DELAY_TIME.time()
+						)
+					)
+			).getMessageId();
 		}
 		MessageHandler.editInlineKeyboard(telegramId, messageId, message, KeyboardFactory.getCustomerSettingsKeyboard(userAccount));
 		return null;
 	}
-
 	public static Integer viewHelpPage(Long telegramId, Integer messageId) {
 		// task: correct urls as soon as you create the documentation
 		String msg = "_*Support Page*_" +
@@ -90,7 +101,15 @@ public class PageFactory {
 				"\n_If you still have questions\\, or you encountered a problem\\, please do not hesitate to look at the documentation or contact us at *support@quickbitehub\\.org*_";
 
 		if (null == messageId) {
-			return (Objects.requireNonNull(MessageHandler.sendInlineKeyboard(telegramId, msg, KeyboardFactory.getHelpPageKeyboard(), TimeConstants.LARGE_DELAY_TIME_SEC.time()))).getMessageId();
+			return (Objects.requireNonNull(
+						MessageHandler.sendInlineKeyboard(
+								telegramId,
+								msg,
+								KeyboardFactory.getHelpPageKeyboard(),
+								TimeConstants.NO_DELAY_TIME.time()
+						)
+					)
+			).getMessageId();
 		}
 		MessageHandler.editInlineKeyboard(telegramId, messageId, msg, KeyboardFactory.getHelpPageKeyboard());
 		return null;

@@ -13,6 +13,7 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 
+import java.sql.Time;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -22,10 +23,9 @@ public class MessageHandler {
 	private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
 	public static void shutdownScheduler() {
-		Runtime.getRuntime().addShutdownHook(new Thread(MessageHandler.scheduler::shutdown));
+		Runtime.getRuntime().addShutdownHook(new Thread(scheduler::shutdown));
 	}
-
-	public static Message sendForceReply(Long telegramId, String message) {
+	public static Message sendForceReply(Long telegramId, String message, long autoDeleteDelayTime) {
 		SendMessage sm = SendMessage
 				.builder()
 				.chatId(telegramId)
@@ -36,9 +36,11 @@ public class MessageHandler {
 
 		try {
 			Message sentMessage = telegramClient.execute(sm);
-			scheduler.schedule(() -> MessageHandler.deleteMessage(telegramId, sentMessage.getMessageId()),
+			if (autoDeleteDelayTime != TimeConstants.NO_DELAY_TIME.time()) {
+				scheduler.schedule(() -> deleteMessage(telegramId, sentMessage.getMessageId()),
 						TimeConstants.STANDARD_DELAY_TIME_SEC.time(),
 						TimeUnit.SECONDS);
+			}
 			return sentMessage;
 		} catch (TelegramApiException e) {
 			System.out.println("MessageHandler: sendInlineKeyboard");
@@ -46,7 +48,6 @@ public class MessageHandler {
 		}
 		return null;
 	}
-
 	public static Message sendInlineKeyboard(Long telegramId, String message, InlineKeyboardMarkup kb, long autoDeleteDelayTime){
 		SendMessage sm = SendMessage
 				.builder()
@@ -58,8 +59,8 @@ public class MessageHandler {
 
 		try {
 			Message sentMessage = telegramClient.execute(sm);
-			if (autoDeleteDelayTime > 0) {
-				scheduler.schedule(() -> MessageHandler.deleteMessage(telegramId, sentMessage.getMessageId()),
+			if (autoDeleteDelayTime != TimeConstants.NO_DELAY_TIME.time()) {
+				scheduler.schedule(() -> deleteMessage(telegramId, sentMessage.getMessageId()),
 						autoDeleteDelayTime,
 						TimeUnit.SECONDS);
 			}
@@ -70,7 +71,6 @@ public class MessageHandler {
 		}
 		return null;
 	}
-
 	public static Message sendReplyKeyboard(Long telegramId, String message, ReplyKeyboardMarkup kb, long autoDeleteDelayTime) {
 		SendMessage sm = SendMessage
 				.builder()
@@ -82,8 +82,8 @@ public class MessageHandler {
 
 		try {
 			Message sentMessage = telegramClient.execute(sm);
-			if (autoDeleteDelayTime > 0) {
-				scheduler.schedule(() -> MessageHandler.deleteMessage(telegramId, sentMessage.getMessageId()),
+			if (autoDeleteDelayTime != TimeConstants.NO_DELAY_TIME.time()) {
+				scheduler.schedule(() -> deleteMessage(telegramId, sentMessage.getMessageId()),
 						autoDeleteDelayTime,
 						TimeUnit.SECONDS);
 			}
@@ -94,7 +94,6 @@ public class MessageHandler {
 		}
 		return null;
 	}
-
 	private static void deleteMessage(Long telegramId, Integer messageId) {
 		DeleteMessage dm = DeleteMessage
 				.builder()
@@ -111,38 +110,15 @@ public class MessageHandler {
 			e.printStackTrace();
 		}
 	}
-
 	public static void deleteMessage(Long telegramId, Integer messageId, long autoDeleteDelayTime) {
-		if (autoDeleteDelayTime <= 0) {
+		if (autoDeleteDelayTime == TimeConstants.NO_DELAY_TIME.time()) {
 			deleteMessage(telegramId, messageId);
 			return;
 		}
-		scheduler.schedule(() -> MessageHandler.deleteMessage(telegramId, messageId),
+		scheduler.schedule(() -> deleteMessage(telegramId, messageId),
 				autoDeleteDelayTime,
 				TimeUnit.SECONDS);
 	}
-
-	public static void sendText(Long telegramId, String textMessage, long autoDeleteDelayTime) {
-		SendMessage msg = SendMessage
-				.builder()
-				.chatId(telegramId)
-				.text(textMessage)
-				.parseMode("MarkdownV2")
-				.build();
-
-		try {
-			Message sentMessage = telegramClient.execute(msg);
-			if (autoDeleteDelayTime > 0) {
-				scheduler.schedule(() -> MessageHandler.deleteMessage(telegramId, sentMessage.getMessageId()),
-						autoDeleteDelayTime,
-						TimeUnit.SECONDS);
-			}
-		} catch (TelegramApiException e) {
-			e.printStackTrace();
-			System.out.println("MessageHandler: sendText");
-		}
-	}
-
 	public static void editInlineKeyboard(Long telegramId, Integer messageId, String message, InlineKeyboardMarkup kb) {
 		EditMessageText newContent = EditMessageText
 				.builder()
@@ -165,7 +141,32 @@ public class MessageHandler {
 			e.printStackTrace();
 		}
 	}
+	public static void sendText(Long telegramId, String textMessage, long autoDeleteDelayTime) {
+		SendMessage msg = SendMessage
+				.builder()
+				.chatId(telegramId)
+				.text(textMessage)
+				.parseMode("MarkdownV2")
+				.build();
 
+		try {
+			Message sentMessage = telegramClient.execute(msg);
+			if (autoDeleteDelayTime != TimeConstants.NO_DELAY_TIME.time()) {
+				scheduler.schedule(() -> deleteMessage(telegramId, sentMessage.getMessageId()),
+						autoDeleteDelayTime,
+						TimeUnit.SECONDS);
+			}
+		} catch (TelegramApiException e) {
+			e.printStackTrace();
+			System.out.println("MessageHandler: sendText");
+		}
+	}
+	public static void sendShortNotice(long telegramId, String noticeMessage) {
+		sendText(telegramId, noticeMessage, TimeConstants.SHORT_DELAY_TIME_SEC.time());
+	}
+	public static void sendLongNotice(long telegramId, String noticeMessage) {
+		sendText(telegramId, noticeMessage, TimeConstants.STANDARD_DELAY_TIME_SEC.time());
+	}
 	public static void answerCallBackQuery(String cbqId) {
 		AnswerCallbackQuery close = AnswerCallbackQuery
 				.builder()

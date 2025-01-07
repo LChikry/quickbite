@@ -1,5 +1,6 @@
 package org.quickbitehub.app;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.quickbitehub.authentication.Authentication;
 
 import org.quickbitehub.communicator.TimeConstants;
@@ -51,13 +52,12 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 	private void botCommandsHandler(Message message) {
 		Long telegramId = message.getFrom().getId();
 		UserState newState = UserState.getValueOf(message.getText());
-		MessageHandler.deleteMessage(telegramId, message.getMessageId(), TimeConstants.SHORT_DELAY_TIME_SEC.time());
 		if (State.isUserStateless(telegramId) ||
 				Authentication.isSessionAuthenticated(telegramId) ||
 				newState.isImmediateState() ||
 				newState.isStateAuthRelated() ||
 				!State.getUserState(telegramId).isStateAuthRelated()) {
-			State.pushImmediateState(telegramId, newState);
+			State.pushImmediateState(telegramId, Pair.of(newState, message.getMessageId()));
 		}
 		navigateToProperState(telegramId, null);
 	}
@@ -68,18 +68,14 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 				Authentication.isSessionAuthenticated(telegramId) ||
 				newState.isImmediateState() ||
 				newState.isStateAuthRelated()) {
-			State.pushImmediateState(telegramId, newState);
+			State.pushImmediateState(telegramId, Pair.of(newState, null));
 		}
-		navigateToProperState(telegramId, cbq.getMessage().getMessageId());
+		navigateToProperState(telegramId, (Message) cbq.getMessage());
 		MessageHandler.answerCallBackQuery(cbq.getId());
 	}
 	private void botRepliesHandler(Message message) {
 		Long telegramId = message.getChat().getId();
-		UserState currentState = State.getUserState(telegramId);
-		switch (currentState) {
-			case AUTHENTICATION_SIGNIN -> Authentication.signIn(message, telegramId);
-			case AUTHENTICATION_SIGNUP -> Authentication.signUp(message, telegramId);
-		}
+		navigateToProperState(telegramId, message);
 		// deleting the message then the reply
 		MessageHandler.deleteMessage(telegramId, message.getReplyToMessage().getMessageId(), TimeConstants.NO_DELAY_TIME.time());
 		MessageHandler.deleteMessage(telegramId, message.getMessageId(), TimeConstants.NO_DELAY_TIME.time());
@@ -90,12 +86,15 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 		if (restaurant == null ||
 				State.isUserStateless(telegramId) ||
 				State.getUserState(telegramId) != UserState.SELECT_FAVORITE_RESTAURANT) {
+			if (message.getText().contains("search for restaurants")) {
+				// task: delete that message of searching + push the state of searching for a restaurant
+			}
 			return;
 		}
 		System.out.println("we detected a restaurant");
 		// task: show the available products and ask for the quantity for each product
 
-		MessageHandler.deleteMessage(telegramId, message.getMessageId(), TimeConstants.SHORT_DELAY_TIME_SEC.time());
+		MessageHandler.deleteMessage(telegramId, message.getMessageId(), TimeConstants.NO_DELAY_TIME.time());
 	}
 	private void botInlineQueryHandler(InlineQuery inlineQuery) {
 	}
