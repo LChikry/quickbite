@@ -17,23 +17,61 @@ import java.util.List;
 public class KeyboardFactory {
 	private static final InlineKeyboardButton backButton = InlineKeyboardButton.builder().text(Emoji.LEFT_TRANSPARENT_ARROW.getCode()+" Back").callbackData(UserState.__PREVIOUS_KEYBOARD.getState()).build();
 
-	public static InlineKeyboardMarkup getSignInUpKeyboard() {
-		var logInButton = InlineKeyboardButton
-				.builder()
-				.text("Sign In")
-				.callbackData(UserState.AUTHENTICATION_SIGNIN.getState())
-				.build();
-
-		var signUpButton = InlineKeyboardButton
-				.builder()
-				.text("Sign Up")
-				.callbackData(UserState.AUTHENTICATION_SIGNUP.getState())
-				.build();
+	public static InlineKeyboardMarkup getAuthenticationKeyboard() {
+		var signInButton = InlineKeyboardButton.builder().text("Sign In").callbackData(UserState.SIGNIN_PAGE.getState()).build();
+		var signUpButton = InlineKeyboardButton.builder().text("Sign Up").callbackData(UserState.SIGNUP_PAGE.getState()).build();
+		var helpButton = InlineKeyboardButton.builder().text("Help").callbackData(UserState.HELP_PAGE.getState()).build();
+		var languageButton = InlineKeyboardButton.builder().text(Emoji.SPEECH_BALLOON.getCode() + " Language").callbackData(UserState.CHANGE_LANGUAGE.getState()).build();
 
 		return InlineKeyboardMarkup
 				.builder()
-				.keyboardRow(new InlineKeyboardRow(logInButton))
+				.keyboardRow(new InlineKeyboardRow(signInButton))
 				.keyboardRow(new InlineKeyboardRow(signUpButton))
+				.keyboardRow(new InlineKeyboardRow(helpButton, languageButton))
+				.build();
+	}
+	public static InlineKeyboardMarkup getSignInKeyboard(String email, String hiddenPassword) {
+		if (email == null) email = "Email";
+		if (hiddenPassword == null) hiddenPassword = "Password";
+		var emailButton = InlineKeyboardButton.builder().text(email).callbackData(UserState.__SET_SIGNIN_EMAIL.getState()).build();
+		var passwordButton = InlineKeyboardButton.builder().text(hiddenPassword).callbackData(UserState.__SET_SIGNIN_PASSWORD.getState()).build();
+		var confirmButton = InlineKeyboardButton.builder().text("Confirm").callbackData(UserState.__CONFIRM_SIGNIN.getState()).build();
+		var signUpButton = InlineKeyboardButton.builder().text("Sign Up").callbackData(UserState.SIGNUP_PAGE.getState()).build();
+
+		return InlineKeyboardMarkup
+				.builder()
+				.keyboardRow(new InlineKeyboardRow(emailButton))
+				.keyboardRow(new InlineKeyboardRow(passwordButton))
+				.keyboardRow(new InlineKeyboardRow(confirmButton))
+				.keyboardRow(new InlineKeyboardRow(backButton, signUpButton))
+				.build();
+	}
+	public static InlineKeyboardMarkup getSignUpKeyboard(String email, String hiddenPassword, String firstName, String lastName, String middleNames) {
+		if (email == null) email = "Email";
+		if (hiddenPassword == null) hiddenPassword = "Password";
+		if (firstName == null) firstName = "First Name";
+		else firstName = "First Name: " + firstName;
+		if (lastName == null) lastName = "Last Name";
+		else lastName = "Last Name: " + lastName;
+		if (middleNames == null) middleNames = "Middle Name(s) (optional)";
+		else middleNames = "Middle Names(s): " + middleNames;
+		var emailButton = InlineKeyboardButton.builder().text(email).callbackData(UserState.__SET_SIGNUP_EMAIL.getState()).build();
+		var passwordButton = InlineKeyboardButton.builder().text(hiddenPassword).callbackData(UserState.__SET_SIGNUP_PASSWORD.getState()).build();
+		var firstNameButton = InlineKeyboardButton.builder().text(firstName).callbackData(UserState.__SET_SIGNUP_FIRST_NAME.getState()).build();
+		var lastNameButton = InlineKeyboardButton.builder().text(lastName).callbackData(UserState.__SET_SIGNUP_LAST_NAME.getState()).build();
+		var middleNamesButton = InlineKeyboardButton.builder().text(middleNames).callbackData(UserState.__SET_SIGNUP_MIDDLE_NAMES.getState()).build();
+		var confirmButton = InlineKeyboardButton.builder().text("Confirm").callbackData(UserState.__CONFIRM_SIGNUP.getState()).build();
+		var signInButton = InlineKeyboardButton.builder().text("Sign In").callbackData(UserState.SIGNIN_PAGE.getState()).build();
+
+		return InlineKeyboardMarkup
+				.builder()
+				.keyboardRow(new InlineKeyboardRow(emailButton))
+				.keyboardRow(new InlineKeyboardRow(passwordButton))
+				.keyboardRow(new InlineKeyboardRow(firstNameButton))
+				.keyboardRow(new InlineKeyboardRow(lastNameButton))
+				.keyboardRow(new InlineKeyboardRow(middleNamesButton))
+				.keyboardRow(new InlineKeyboardRow(confirmButton))
+				.keyboardRow(new InlineKeyboardRow(backButton, signInButton))
 				.build();
 	}
 	public static InlineKeyboardMarkup getHelpPageKeyboard() {

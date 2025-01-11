@@ -13,7 +13,11 @@ public enum Emoji {
 	YELLOW_STARS("\u2728"),
 	SPEECH_BALLOON("\ud83d\udcac"),
 	HEART_FIGURE("\u2764️"),
-	LEFT_TRANSPARENT_ARROW("\u2190");
+	LEFT_TRANSPARENT_ARROW("\u2190"),
+	LOCK_WITH_KEY("\ud83d\udd10"),
+	GOLDEN_KEY("\ud83d\udd11"),
+	REGISTRATION_PAPER("\ud83d\udccb"),
+	PASSWORD_DOT("\u25cf");
 
 	private final String code;
 

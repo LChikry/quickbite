@@ -62,7 +62,7 @@ public class State {
 //		System.out.println("the state now is: " + properState);
 		switch (properState) {
 			case AUTHENTICATION_PAGE -> pageId = Authentication.authenticate(telegramId, messageId);
-			case SIGNIN_PAGE, __SET_SIGNIN_EMAIL, __SET_SIGNIN_PASSWORD, __CONFIRM_SIGNIN-> pageId = Authentication.signIn(telegramId, properState, messageId, null, null);
+			case SIGNIN_PAGE, __SET_SIGNIN_EMAIL, __SET_SIGNIN_PASSWORD, __CONFIRM_SIGNIN-> Authentication.signIn(telegramId, properState, messageId, null, null);
 			case __GET_SIGNIN_EMAIL, __GET_SIGNIN_PASSWORD-> {
 				assert message != null;
 				Authentication.signIn(telegramId, properState,
@@ -113,8 +113,8 @@ public class State {
 		Integer pageId = null;
 		switch (prevKeyboard) {
 			case AUTHENTICATION_PAGE -> pageId = Authentication.authenticate(telegramId, msgId);
-			case SIGNIN_PAGE -> pageId = Authentication.signIn(telegramId, prevKeyboard, msgId, null, null);
-//			case SIGNUP_PAGE -> pageId = Authentication.signUp(telegramId, prevKeyboard, msgId, null, null);
+			case SIGNIN_PAGE -> Authentication.signIn(telegramId, prevKeyboard, msgId, null, null);
+//			case SIGNUP_PAGE -> Authentication.signUp(telegramId, prevKeyboard, msgId, null, null);
 			case DASHBOARD_PAGE -> pageId = PageFactory.viewDashboardPage(telegramId, msgId);
 //			case MANAGE_ORDERS_PAGE -> pageId = viewManageOrdersPage();
 			case SETTINGS_PAGE -> pageId = PageFactory.viewSettingsPage(telegramId, msgId);
@@ -141,7 +141,7 @@ public class State {
 	}
 	/*
 		Deletes all keyboards and left only one keyboard in the chat
-		Keep track of that keyboard state (right) and Id (left[0])
+		Keep track of that keyboard state (right) and id (left[0])
 		Keep track of all msgs (their id) that is related to that keyboard ([1] -> infinity)
 	 */
 	public static void updateKeyboardState(Long telegramId, Integer nextKeyboardId, UserState nextKeyboard) {
