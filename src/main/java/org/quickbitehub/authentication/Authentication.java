@@ -9,19 +9,23 @@ import org.quickbitehub.communicator.*;
 import java.util.HashMap;
 
 public class Authentication {
-	static final HashMap<Long, HashMap<UserState, String>> authenticationState = new HashMap<>(); // device(Telegram Account Id) -> Current Step
+	static final HashMap<Long, HashMap<UserState, String>> authenticationState = new HashMap<>(); // device(telegram id) -> Auth Steps -> related message id
 	public static final HashMap<Long, Account> userSession = new HashMap<>(); // TelegramId -> Account
 
+	public static boolean isSessionAuthenticated(Long telegramId) { return userSession.get(telegramId) != null; }
+	public static Account getSessionAccount(Long telegramId) { return userSession.get(telegramId); }
+	public static String getAuthStepValue(Long telegramId, UserState authStep) { return authenticationState.get(telegramId).get(authStep);}
+
 	// info source: https://www.baeldung.com/java-email-validation-regex
-	static public boolean isEmailValid(String email) {
+	public static boolean isEmailValid(String email) {
 		if (email == null || email.isBlank()) return false;
 		email = email.strip().trim().toLowerCase();
 
 		String gmailPattern = "^(?=.{1,64}@)[A-Za-z0-9+_-]+(\\.[A-Za-z0-9+_-]+)*@"
-					+ "[^-][A-Za-z0-9+-]+(\\.[A-Za-z0-9+-]+)*(\\.[A-Za-z]{2,})$";
+				+ "[^-][A-Za-z0-9+-]+(\\.[A-Za-z0-9+-]+)*(\\.[A-Za-z]{2,})$";
 
 		String nonLatinPattern = "^(?=.{1,64}@)[\\p{L}0-9_-]+(\\.[\\p{L}0-9_-]+)*@"
-					+ "[^-][\\p{L}0-9-]+(\\.[\\p{L}0-9-]+)*(\\.\\p{L}{2,})$";
+				+ "[^-][\\p{L}0-9-]+(\\.[\\p{L}0-9-]+)*(\\.\\p{L}{2,})$";
 
 		return email.matches(nonLatinPattern) ||
 				email.matches(gmailPattern) ||
@@ -34,72 +38,88 @@ public class Authentication {
 		State.popAuthRelatedState(telegramId);
 		return false;
 	}
-	public static boolean isSessionAuthenticated(Long telegramId) { return userSession.get(telegramId) != null; }
-	public static Account getSessionAccount(Long telegramId) { return userSession.get(telegramId); }
-	public static String getAuthStepValue(Long telegramId, UserState authStep) { return authenticationState.get(telegramId).get(authStep);}
+	private static void askForCredentials(long telegramId, UserState authState) {
+		String authPrompt = switch (authState) {
+			case __SET_SIGNIN_EMAIL, __SET_SIGNUP_EMAIL -> AuthPrompts.EMAIL.getPrompt();
+			case __SET_SIGNIN_PASSWORD, __SET_SIGNUP_PASSWORD -> AuthPrompts.PASSWORD.getPrompt();
+			case __SET_SIGNUP_FIRST_NAME -> AuthPrompts.FIRST_NAME.getPrompt();
+			case __SET_SIGNUP_LAST_NAME -> AuthPrompts.LAST_NAME.getPrompt();
+			case __SET_SIGNUP_MIDDLE_NAMES -> AuthPrompts.MIDDLE_NAMES.getPrompt();
+			default -> null;
+		};
+		assert (authPrompt != null);
+
+		var msgId = MessageHandler.sendForceReply(telegramId, authPrompt, TimeConstants.NO_TIME.time());
+		assert (msgId != null);
+		State.addKeyboardRelatedMessage(telegramId, msgId);
+		var userAuthState = authenticationState.get(telegramId);
+		userAuthState.put(authState, String.valueOf(msgId.intValue()));
+	}
+
 	public static Integer authenticate(Long telegramId, Integer messageId) {
 		if (!isAuthNeeded(telegramId)) return null;
 		return PageFactory.viewAuthenticationPage(telegramId, messageId);
 	}
-	public static void signIn(Long telegramId, UserState signInState, Integer messageId, Integer replyId, String credential) {
+
+	private static void viewSignInPage(long telegramId, Integer messageId) {
+		assert (messageId != null);
+		var userAuthState = authenticationState.get(telegramId);
+		userAuthState.clear();
+		var kbId = PageFactory.viewSignInPage(telegramId, messageId, null, null);
+		if (kbId == null) kbId = messageId;
+		userAuthState.put(UserState.SIGNIN_PAGE, String.valueOf(kbId.intValue()));
+		if (!kbId.equals(messageId)) State.updateKeyboardState(telegramId, kbId, UserState.SIGNIN_PAGE);
+	}
+	private static void collectSignInCredentials(long telegramId, UserState authState, Integer answerMessageId, Integer promptMessageId, String credential) {
+		assert (answerMessageId != null && promptMessageId != null && credential != null);
+		var userAuthState = authenticationState.get(telegramId);
+		UserState promptMessageState = null;
+		if (authState == UserState.__GET_SIGNIN_PASSWORD) {
+			promptMessageState = UserState.__SET_SIGNIN_PASSWORD;
+			MessageHandler.deleteMessage(telegramId, Integer.valueOf(userAuthState.get(UserState.__SET_SIGNIN_PASSWORD)), TimeConstants.NO_TIME.time());
+			MessageHandler.deleteMessage(telegramId, answerMessageId, TimeConstants.NO_TIME.time());
+		} else if (authState == UserState.__GET_SIGNIN_EMAIL) {
+			promptMessageState = UserState.__SET_SIGNIN_EMAIL;
+			State.addKeyboardRelatedMessage(telegramId, answerMessageId);
+		}
+		else assert (false);
+
+		System.out.println("answer: " + answerMessageId);
+		System.out.println("prompt: " + promptMessageId);
+		if (!String.valueOf(promptMessageId.intValue()).equals(userAuthState.get(promptMessageState))) {
+			MessageFactory.sendIncorrectInputNotice(telegramId);
+			return;
+		}
+
+		if (authState == UserState.__GET_SIGNIN_EMAIL && !isEmailValid(credential)) {
+			MessageHandler.sendShortNotice(telegramId, Emoji.RED_CIRCLE.getCode() + " Invalid Email");
+			State.applyImmediateState(telegramId, Pair.of(UserState.__SET_SIGNIN_EMAIL, null));
+			return;
+		}
+
+		userAuthState.put(authState, credential);
+		String email = userAuthState.get(UserState.__GET_SIGNIN_EMAIL);
+		String password = null;
+		if (userAuthState.get(UserState.__GET_SIGNIN_PASSWORD) != null) password = Emoji.PASSWORD_DOT.getCode().repeat(10);
+		PageFactory.updateSignInPage(telegramId, Integer.valueOf(userAuthState.get(UserState.SIGNIN_PAGE)), email, password);
+	}
+	public static void confirmSignIn(long telegramId) {
+		var userAuthState = authenticationState.get(telegramId);
+		String email = userAuthState.get(UserState.__GET_SIGNIN_EMAIL);
+		email = Account.formatEmail(email);
+		String password = userAuthState.get(UserState.__GET_SIGNIN_PASSWORD);
+		userAuthState.clear();
+		signInHandler(telegramId, email, password);
+	}
+	public static void signIn(Long telegramId, UserState signInState, Integer messageId, Integer olderMessageId, String credential) {
 		if (!isAuthNeeded(telegramId)) return;
 		if (!authenticationState.containsKey(telegramId)) authenticationState.put(telegramId, new HashMap<>());
-		var userAuthState = authenticationState.get(telegramId);
-		String email = null, password = null;
-		switch (signInState) {
-			case SIGNIN_PAGE -> {
-				userAuthState.clear();
-				var kbId = PageFactory.viewSignInPage(telegramId, messageId, email, password);
-				if (kbId != null) {
-					State.updateKeyboardState(telegramId, kbId, signInState);
-					userAuthState.put(UserState.SIGNIN_PAGE, String.valueOf(kbId));
-				} else userAuthState.put(UserState.SIGNIN_PAGE, String.valueOf(messageId));
-			}
-			case __SET_SIGNIN_EMAIL -> {
-				var msgId = MessageHandler.sendForceReply(telegramId, "Enter Email Address:", TimeConstants.NO_TIME.time());
-				State.addKeyboardRelatedMessage(telegramId, msgId);
-				userAuthState.put(UserState.__SET_SIGNIN_EMAIL, String.valueOf(msgId));
-			}
-			case __GET_SIGNIN_EMAIL -> {
-				State.addKeyboardRelatedMessage(telegramId, replyId);
-				if (!String.valueOf(messageId).equals(userAuthState.get(UserState.__SET_SIGNIN_EMAIL))) {
-					MessageFactory.sendIncorrectInputNotice(telegramId);
-					return;
-				}
-				if (!isEmailValid(credential)) {
-					MessageHandler.sendShortNotice(telegramId, Emoji.RED_CIRCLE.getCode() + " Invalid Email");
-					State.applyImmediateState(telegramId, Pair.of(UserState.__SET_SIGNIN_EMAIL, null));
-					return;
-				}
-				userAuthState.put(UserState.__GET_SIGNIN_EMAIL, credential);
-				if (userAuthState.get(UserState.__GET_SIGNIN_PASSWORD) != null) password = Emoji.PASSWORD_DOT.getCode().repeat(10);
 
-				PageFactory.updateSignInPage(telegramId, Integer.valueOf(userAuthState.get(UserState.SIGNIN_PAGE)), credential, password);
-			}
-			case __SET_SIGNIN_PASSWORD -> {
-				var msgId = MessageHandler.sendForceReply(telegramId, "Enter Password:", TimeConstants.NO_TIME.time());
-				State.addKeyboardRelatedMessage(telegramId, msgId);
-				userAuthState.put(UserState.__SET_SIGNIN_PASSWORD, String.valueOf(msgId));
-			}
-			case __GET_SIGNIN_PASSWORD -> {
-				MessageHandler.deleteMessage(telegramId, Integer.valueOf(userAuthState.get(UserState.__SET_SIGNIN_PASSWORD)), TimeConstants.NO_TIME.time());
-				MessageHandler.deleteMessage(telegramId, replyId, TimeConstants.NO_TIME.time());
-				if (!String.valueOf(messageId).equals(userAuthState.get(UserState.__SET_SIGNIN_PASSWORD))) {
-					MessageFactory.sendIncorrectInputNotice(telegramId);
-					return;
-				}
-				email = userAuthState.get(UserState.__GET_SIGNIN_EMAIL);
-				password = Emoji.PASSWORD_DOT.getCode().repeat(10);
-				userAuthState.put(UserState.__GET_SIGNIN_PASSWORD, credential);
-				PageFactory.updateSignInPage(telegramId, Integer.valueOf(userAuthState.get(UserState.SIGNIN_PAGE)), email, password);
-			}
-			case __CONFIRM_SIGNIN -> {
-				email = userAuthState.get(UserState.__GET_SIGNIN_EMAIL);
-				email = Account.formatEmail(email);
-				password = userAuthState.get(UserState.__GET_SIGNIN_PASSWORD);
-				userAuthState.clear();
-				signInHandler(telegramId, email, password);
-			}
+		switch (signInState) {
+			case SIGNIN_PAGE -> viewSignInPage(telegramId, messageId);
+			case __SET_SIGNIN_EMAIL, __SET_SIGNIN_PASSWORD -> askForCredentials(telegramId, signInState);
+			case __GET_SIGNIN_EMAIL, __GET_SIGNIN_PASSWORD -> collectSignInCredentials(telegramId, signInState, messageId, olderMessageId, credential);
+			case __CONFIRM_SIGNIN -> confirmSignIn(telegramId);
 			default -> {assert false;}
 		}
 	}

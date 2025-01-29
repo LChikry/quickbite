@@ -56,20 +56,19 @@ public class State {
 			eventualState.push(Pair.of(UserState.AUTHENTICATION_PAGE, null));
 		}
 		System.out.println(eventualState);
-		Integer pageId = null, messageId = null;
-		if (message != null) messageId = message.getMessageId();
+		Integer pageId = null, messageId = null, olderMessageId = null;
+		String messageText = null;
+		if (message != null) {
+			messageId = message.getMessageId();
+			if (message.getReplyToMessage() != null) olderMessageId = message.getReplyToMessage().getMessageId();
+			messageText = message.getText();
+		}
 		UserState properState = eventualState.peek().getLeft();
+		System.out.println("state: " + properState + "   msgId: " + messageId);
 //		System.out.println("the state now is: " + properState);
 		switch (properState) {
 			case AUTHENTICATION_PAGE -> pageId = Authentication.authenticate(telegramId, messageId);
-			case SIGNIN_PAGE, __SET_SIGNIN_EMAIL, __SET_SIGNIN_PASSWORD, __CONFIRM_SIGNIN-> Authentication.signIn(telegramId, properState, messageId, null, null);
-			case __GET_SIGNIN_EMAIL, __GET_SIGNIN_PASSWORD-> {
-				assert message != null;
-				Authentication.signIn(telegramId, properState,
-						message.getReplyToMessage().getMessageId(),
-						messageId,
-						message.getText());
-			}
+			case SIGNIN_PAGE, __SET_SIGNIN_EMAIL, __GET_SIGNIN_EMAIL, __SET_SIGNIN_PASSWORD, __GET_SIGNIN_PASSWORD, __CONFIRM_SIGNIN-> Authentication.signIn(telegramId, properState, messageId, olderMessageId, messageText);
 //			case SIGNUP_PAGE, __SET_SIGNUP_EMAIL, __SET_SIGNUP_PASSWORD, __SET_SIGNUP_FIRST_NAME, __SET_SIGNUP_LAST_NAME, __SET_SIGNUP_MIDDLE_NAMES, __CONFIRM_SIGNUP -> {
 //				pageId = Authentication.signUp(telegramId, properState,
 //						message.getReplyToMessage().getMessageId(),
