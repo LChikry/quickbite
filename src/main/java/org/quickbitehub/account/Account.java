@@ -1,13 +1,9 @@
-package org.quickbitehub.authentication;
+package org.quickbitehub.account;
 
-import org.apache.commons.lang3.tuple.Pair;
-import org.quickbitehub.communicator.MessageHandler;
+import org.quickbitehub.authentication.AuthenticationController;
+import org.quickbitehub.database.DBCredentials;
 import org.quickbitehub.consumer.*;
-import org.quickbitehub.communicator.Emoji;
 import org.quickbitehub.utils.LanguageType;
-import org.quickbitehub.app.State;
-import org.quickbitehub.app.UserState;
-import org.telegram.telegrambots.meta.api.objects.message.Message;
 
 import java.io.Serializable;
 import java.sql.*;
@@ -32,7 +28,7 @@ public class Account implements Serializable {
 
 	public Account(String email, String unformattedEmail, String password, User USER, Long telegramId) {
 		this.ACCOUNT_SIGN_UP_DATE = LocalDate.now();
-		this.email = formatEmail(email);
+		this.email = email;
 		this.unformattedEmail = unformattedEmail.trim().strip();
 		this.USER = USER;
 		this.USER_ID = USER.getUserId();
@@ -41,11 +37,12 @@ public class Account implements Serializable {
 
 		insertAccountIntoDB(formatEmail(email), unformattedEmail, password, Integer.valueOf(USER.getUserId()), this.ACCOUNT_SIGN_UP_DATE);
 		this.ACCOUNT_ID = Account.getAccountIdFromDB(email);
+		usersAccount.put(email, this);
 	}
 
 	public Account(String email, String unformattedEmail, String password, String accountId, String userId, LocalDate signUpDate) {
 		this.ACCOUNT_SIGN_UP_DATE = signUpDate;
-		this.email = formatEmail(email);
+		this.email = email;
 		this.unformattedEmail = unformattedEmail.trim().strip();
 		this.ACCOUNT_ID = accountId;
 		this.USER_ID = userId;
@@ -59,6 +56,7 @@ public class Account implements Serializable {
 
 		Employee emp = Employee.getEmployee(userId);
 		this.USER = emp;
+		usersAccount.put(email, this);
 	}
 
 	public Boolean isAuthenticated(Long telegramId) {
@@ -109,7 +107,7 @@ public class Account implements Serializable {
 	}
 
 	static public String formatEmail(String email) {
-		assert (Authentication.isEmailValid(email));
+		assert (AuthenticationController.isEmailValid(email));
 		String formattedEmail = email.strip().trim().toLowerCase();
 		String username = formattedEmail.substring(0, formattedEmail.indexOf("@"));
 		username = username.replace(".", "");
@@ -118,7 +116,7 @@ public class Account implements Serializable {
 	}
 
 	static public String formatName(String name) {
-		assert (name != null && !name.isBlank());
+		if (name == null || name.isBlank()) return null;
 		String formattedName = name.strip().trim().toLowerCase();
 		formattedName = formattedName.replaceAll("\\s{2,}", " ").trim();
 		String[] words = formattedName.split(" ");
@@ -210,7 +208,7 @@ public class Account implements Serializable {
 			}
 		} catch (SQLException e) {
 			// Handle SQL exception
-			System.err.println("Database error: " + e.getMessage());
+			System.err.println("DatabaseOperation error: " + e.getMessage());
 		}
 
 		return accountId;
@@ -247,7 +245,7 @@ public class Account implements Serializable {
 				accounts.put(email, userAccount);
 			}
 		} catch (SQLException e) {
-			System.err.println("Database error: " + e.getMessage());
+			System.err.println("DatabaseOperation error: " + e.getMessage());
 		}
 		return accounts;
 	}

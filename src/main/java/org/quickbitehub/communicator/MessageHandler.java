@@ -20,15 +20,30 @@ import java.util.concurrent.TimeUnit;
 public class MessageHandler {
 	private static final TelegramClient telegramClient = new OkHttpTelegramClient(Dotenv.load().get("BOT_TOKEN"));
 	private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+	private static final String TEXT_PARSE_MODE = "MarkdownV2";
+
+	private static String addMarkdownMarkUp(String message) {
+		String specialChars = "[]()~`>#.+'-=|{}!";
+		StringBuilder escapedString = new StringBuilder();
+
+		for (char ch : message.toCharArray()) {
+			if (specialChars.indexOf(ch) != -1) {
+				escapedString.append("\\");
+			}
+			escapedString.append(ch);
+		}
+		return escapedString.toString();
+	}
 
 	public static void shutdownScheduler() {
 		Runtime.getRuntime().addShutdownHook(new Thread(scheduler::shutdown));
 	}
 	public static Integer sendForceReply(Long telegramId, String message, long autoDeleteDelayTime) {
+		message = addMarkdownMarkUp(message);
 		SendMessage sm = SendMessage
 				.builder()
 				.chatId(telegramId)
-				.parseMode("MarkdownV2")
+				.parseMode(TEXT_PARSE_MODE)
 				.text(message)
 				.replyMarkup(KeyboardFactory.getForceReplyKeyboard())
 				.build();
@@ -48,10 +63,11 @@ public class MessageHandler {
 		return null;
 	}
 	public static Message sendInlineKeyboard(Long telegramId, String message, InlineKeyboardMarkup kb, long autoDeleteDelayTime){
+		message = addMarkdownMarkUp(message);
 		SendMessage sm = SendMessage
 				.builder()
 				.chatId(telegramId)
-				.parseMode("MarkdownV2")
+				.parseMode(TEXT_PARSE_MODE)
 				.text(message)
 				.replyMarkup(kb)
 				.build();
@@ -71,10 +87,11 @@ public class MessageHandler {
 		return null;
 	}
 	public static Message sendReplyKeyboard(Long telegramId, String message, ReplyKeyboardMarkup kb, long autoDeleteDelayTime) {
+		message = addMarkdownMarkUp(message);
 		SendMessage sm = SendMessage
 				.builder()
 				.chatId(telegramId)
-				.parseMode("MarkdownV2")
+				.parseMode(TEXT_PARSE_MODE)
 				.text(message)
 				.replyMarkup(kb)
 				.build();
@@ -133,12 +150,13 @@ public class MessageHandler {
 		}
 	}
 	public static void editInlineKeyboardAndMessage(Long telegramId, Integer messageId, String message, InlineKeyboardMarkup kb) {
+		message = addMarkdownMarkUp(message);
 		EditMessageText newContent = EditMessageText
 				.builder()
 				.chatId(telegramId)
 				.messageId(messageId)
 				.text(message)
-				.parseMode("MarkdownV2")
+				.parseMode(TEXT_PARSE_MODE)
 				.build();
 		try {
 			telegramClient.execute(newContent);
@@ -148,11 +166,12 @@ public class MessageHandler {
 		editInlineKeyboardOnly(telegramId, messageId, kb);
 	}
 	public static void sendText(Long telegramId, String textMessage, long autoDeleteDelayTime) {
+		textMessage = addMarkdownMarkUp(textMessage);
 		SendMessage msg = SendMessage
 				.builder()
 				.chatId(telegramId)
 				.text(textMessage)
-				.parseMode("MarkdownV2")
+				.parseMode(TEXT_PARSE_MODE)
 				.build();
 
 		try {

@@ -121,6 +121,27 @@ public enum UserState {
 				this == __GET_SIGNUP_MIDDLE_NAMES ||
 				this == __CONFIRM_SIGNUP;
 	}
+
+	public UserState getOppositeAuthState() {
+		return switch (this) {
+			case __SET_SIGNIN_EMAIL -> __GET_SIGNIN_EMAIL;
+			case __GET_SIGNIN_EMAIL -> __SET_SIGNIN_EMAIL;
+			case __SET_SIGNIN_PASSWORD -> __GET_SIGNIN_PASSWORD;
+			case __GET_SIGNIN_PASSWORD -> __SET_SIGNIN_PASSWORD;
+			case __SET_SIGNUP_EMAIL -> __GET_SIGNUP_EMAIL;
+			case __GET_SIGNUP_EMAIL -> __SET_SIGNUP_EMAIL;
+			case __SET_SIGNUP_PASSWORD -> __GET_SIGNUP_PASSWORD;
+			case __GET_SIGNUP_PASSWORD -> __SET_SIGNUP_PASSWORD;
+			case __SET_SIGNUP_FIRST_NAME -> __GET_SIGNUP_FIRST_NAME;
+			case __GET_SIGNUP_FIRST_NAME -> __SET_SIGNUP_FIRST_NAME;
+			case __SET_SIGNUP_LAST_NAME -> __GET_SIGNUP_LAST_NAME;
+			case __GET_SIGNUP_LAST_NAME -> __SET_SIGNUP_LAST_NAME;
+			case __SET_SIGNUP_MIDDLE_NAMES -> __GET_SIGNUP_MIDDLE_NAMES;
+			case __GET_SIGNUP_MIDDLE_NAMES -> __SET_SIGNUP_MIDDLE_NAMES;
+			default -> null;
+		};
+	}
+
 	// task: this is outdated && update cancel current operation
 	public boolean isOperationState() {
 		return this == SIGNIN_PAGE ||

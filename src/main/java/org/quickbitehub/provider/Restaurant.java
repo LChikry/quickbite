@@ -1,14 +1,6 @@
 package org.quickbitehub.provider;
 
-import org.quickbitehub.app.State;
-import org.quickbitehub.app.UserState;
-import org.quickbitehub.authentication.Account;
-import org.quickbitehub.authentication.Authentication;
-import org.quickbitehub.authentication.DBCredentials;
-import org.quickbitehub.communicator.KeyboardFactory;
-import org.quickbitehub.communicator.MessageHandler;
-import org.quickbitehub.communicator.Emoji;
-import org.quickbitehub.communicator.PageFactory;
+import org.quickbitehub.database.DBCredentials;
 
 import java.sql.*;
 import java.time.DayOfWeek;

@@ -1,8 +1,9 @@
 package org.quickbitehub.app;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.quickbitehub.authentication.Authentication;
+import org.quickbitehub.authentication.AuthenticationController;
 
+import org.quickbitehub.communicator.MessageFactory;
 import org.quickbitehub.communicator.TimeConstants;
 import org.quickbitehub.provider.Restaurant;
 import org.quickbitehub.communicator.MessageHandler;
@@ -21,30 +22,35 @@ import static org.quickbitehub.app.State.*;
 public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 	public static final String BOT_USERNAME = "QuickBiteHub_bot";
 
+	private Long extractTelegramId(Update update) {
+		if (update.hasMessage()) return update.getMessage().getChatId();
+		if (update.hasCallbackQuery()) return update.getCallbackQuery().getFrom().getId();
+		if (update.hasInlineQuery()) return update.getInlineQuery().getFrom().getId();
+		return null;
+	}
+	private boolean isMessageExpired(Update update) {
+		if (!update.hasMessage()) return false;
+		if (update.getMessage().getDate() + 20 >= Instant.now().getEpochSecond()) return false;
+		MessageHandler.deleteMessage(update.getMessage().getChatId(), update.getMessage().getMessageId(), TimeConstants.NO_TIME.time());
+		return true;
+	}
 	@Override
 	public void consume(Update update) {
-		long telegramId = -1;
+		if (isMessageExpired(update)) return;
+		Long telegramId = extractTelegramId(update);
+		if (telegramId == null) return;
+		userState.putIfAbsent(telegramId, new Stack<>());
+		keyboardState.putIfAbsent(telegramId, Pair.of(new ArrayList<>(), new UserState[NUM_KEYBOARD_STATES]));
+
 		if (update.hasMessage()) {
 			Message msg = update.getMessage();
-			telegramId = msg.getChatId();
-			if (msg.getDate() + 20 < Instant.now().getEpochSecond()) {
-				MessageHandler.deleteMessage(telegramId, msg.getMessageId(), TimeConstants.NO_TIME.time());
-				return;
-			}
-			if (State.isUserStateless(telegramId)) userState.put(telegramId, new Stack<>());
-			if (!keyboardState.containsKey(telegramId)) keyboardState.put(telegramId, Pair.of(new ArrayList<>(), new UserState[NUM_KEYBOARD_STATES]));
 			if (msg.isCommand()) botCommandsHandler(msg);
 			else if (msg.isReply()) botRepliesHandler(msg);
 			else if (msg.hasText()) botMessageHandler(msg);
-		} else if (update.hasCallbackQuery()) {
-			telegramId = update.getCallbackQuery().getFrom().getId();
-			if (State.isUserStateless(telegramId)) userState.put(telegramId, new Stack<>());
-			if (!keyboardState.containsKey(telegramId)) keyboardState.put(telegramId, Pair.of(new ArrayList<>(), new UserState[NUM_KEYBOARD_STATES]));
-			botCallBackQueryHandler(update.getCallbackQuery());
-		} else if (update.hasInlineQuery()) botInlineQueryHandler(update.getInlineQuery());
+		} else if (update.hasCallbackQuery()) botCallBackQueryHandler(update.getCallbackQuery());
+		else if (update.hasInlineQuery()) botInlineQueryHandler(update.getInlineQuery());
 
-		assert (userState.get(telegramId) != null && keyboardState.get(telegramId) != null);
-		if (telegramId != -1 && !State.isUserStateless(telegramId) && State.getUserState(telegramId) == UserState.__BEFORE_NEXT_UPDATE) {
+		if (!State.isUserStateless(telegramId) && State.getUserState(telegramId) == UserState.__BEFORE_NEXT_UPDATE) {
 			userState.get(telegramId).pop();
 			navigateToProperState(telegramId, null);
 		}
@@ -53,7 +59,7 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 		Long telegramId = message.getFrom().getId();
 		UserState newState = UserState.getValueOf(message.getText());
 		if (State.isUserStateless(telegramId) ||
-				Authentication.isSessionAuthenticated(telegramId) ||
+				AuthenticationController.isSessionAuthenticated(telegramId) ||
 				newState.isImmediateState() ||
 				newState.isStateAuthRelated() ||
 				!State.getUserState(telegramId).isStateAuthRelated()) {
@@ -65,7 +71,7 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 		Long telegramId = cbq.getFrom().getId();
 		UserState newState = UserState.getValueOf(cbq.getData());
 		if (State.isUserStateless(telegramId) ||
-				Authentication.isSessionAuthenticated(telegramId) ||
+				AuthenticationController.isSessionAuthenticated(telegramId) ||
 				newState.isImmediateState() ||
 				newState.isStateAuthRelated()) {
 			State.pushImmediateState(telegramId, Pair.of(newState, null));
@@ -77,11 +83,25 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 		Long telegramId = message.getChat().getId();
 		String messageId = String.valueOf(message.getReplyToMessage().getMessageId());
 
-		if (messageId.equals(Authentication.getAuthStepValue(telegramId, UserState.__SET_SIGNIN_EMAIL))) {
+		if (messageId.equals(AuthenticationController.getAuthStepValue(telegramId, UserState.__SET_SIGNIN_EMAIL))) {
 			State.pushImmediateState(telegramId, Pair.of(UserState.__GET_SIGNIN_EMAIL, null));
-		} else if (messageId.equals(Authentication.getAuthStepValue(telegramId, UserState.__SET_SIGNIN_PASSWORD))) {
+		} else if (messageId.equals(AuthenticationController.getAuthStepValue(telegramId, UserState.__SET_SIGNIN_PASSWORD))) {
 			State.pushImmediateState(telegramId, Pair.of(UserState.__GET_SIGNIN_PASSWORD, null));
+		} else if (messageId.equals(AuthenticationController.getAuthStepValue(telegramId, UserState.__SET_SIGNUP_EMAIL))) {
+			State.pushImmediateState(telegramId, Pair.of(UserState.__GET_SIGNUP_EMAIL, null));
+		} else if (messageId.equals(AuthenticationController.getAuthStepValue(telegramId, UserState.__SET_SIGNUP_PASSWORD))) {
+			State.pushImmediateState(telegramId, Pair.of(UserState.__GET_SIGNUP_PASSWORD, null));
+		} else if (messageId.equals(AuthenticationController.getAuthStepValue(telegramId, UserState.__SET_SIGNUP_FIRST_NAME))) {
+			State.pushImmediateState(telegramId, Pair.of(UserState.__GET_SIGNUP_FIRST_NAME, null));
+		} else if (messageId.equals(AuthenticationController.getAuthStepValue(telegramId, UserState.__SET_SIGNUP_LAST_NAME))) {
+			State.pushImmediateState(telegramId, Pair.of(UserState.__GET_SIGNUP_LAST_NAME, null));
+		} else if (messageId.equals(AuthenticationController.getAuthStepValue(telegramId, UserState.__SET_SIGNUP_MIDDLE_NAMES))) {
+			State.pushImmediateState(telegramId, Pair.of(UserState.__GET_SIGNUP_MIDDLE_NAMES, null));
+		} else {
+			MessageFactory.sendIncorrectInputNotice(telegramId);
+			return;
 		}
+
 		navigateToProperState(telegramId, message);
 	}
 	private void botMessageHandler(Message message) {

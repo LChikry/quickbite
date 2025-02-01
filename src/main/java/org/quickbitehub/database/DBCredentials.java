@@ -1,4 +1,4 @@
-package org.quickbitehub.authentication;
+package org.quickbitehub.database;
 
 import io.github.cdimascio.dotenv.Dotenv;
 

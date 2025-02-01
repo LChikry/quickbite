@@ -1,7 +1,7 @@
 package org.quickbitehub.app;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.quickbitehub.authentication.Authentication;
+import org.quickbitehub.authentication.AuthenticationController;
 import org.quickbitehub.communicator.*;
 import org.telegram.telegrambots.meta.api.objects.message.Message;
 
@@ -47,9 +47,9 @@ public class State {
 	static void navigateToProperState(Long telegramId, Message message) {
 		Stack<Pair<UserState, Integer>> eventualState = userState.get(telegramId);
 		assert (eventualState.peek().getLeft() != null);
-		if (eventualState.isEmpty() && Authentication.isSessionAuthenticated(telegramId)) {
+		if (eventualState.isEmpty() && AuthenticationController.isSessionAuthenticated(telegramId)) {
 			eventualState.push(Pair.of(UserState.DASHBOARD_PAGE, null));
-		} else if (!Authentication.isSessionAuthenticated(telegramId) &&
+		} else if (!AuthenticationController.isSessionAuthenticated(telegramId) &&
 				!eventualState.peek().getLeft().isStateAuthRelated() &&
 				!eventualState.peek().getLeft().isImmediateState()) {
 			clearState(telegramId, eventualState);
@@ -67,20 +67,15 @@ public class State {
 		System.out.println("state: " + properState + "   msgId: " + messageId);
 //		System.out.println("the state now is: " + properState);
 		switch (properState) {
-			case AUTHENTICATION_PAGE -> pageId = Authentication.authenticate(telegramId, messageId);
-			case SIGNIN_PAGE, __SET_SIGNIN_EMAIL, __GET_SIGNIN_EMAIL, __SET_SIGNIN_PASSWORD, __GET_SIGNIN_PASSWORD, __CONFIRM_SIGNIN-> Authentication.signIn(telegramId, properState, messageId, olderMessageId, messageText);
-//			case SIGNUP_PAGE, __SET_SIGNUP_EMAIL, __SET_SIGNUP_PASSWORD, __SET_SIGNUP_FIRST_NAME, __SET_SIGNUP_LAST_NAME, __SET_SIGNUP_MIDDLE_NAMES, __CONFIRM_SIGNUP -> {
-//				pageId = Authentication.signUp(telegramId, properState,
-//						message.getReplyToMessage().getMessageId(),
-//						null,
-//						null);
-//			}
-//			case __GET_SIGNUP_EMAIL, __GET_SIGNUP_PASSWORD, __GET_SIGNUP_FIRST_NAME, __GET_SIGNUP_LAST_NAME, __GET_SIGNUP_MIDDLE_NAMES -> {
-//				Authentication.signUp(telegramId, properState,
-//						message.getReplyToMessage().getMessageId(),
-//						messageId,
-//						message.getText());
-//			}
+			case AUTHENTICATION_PAGE -> pageId = AuthenticationController.authenticate(telegramId, messageId);
+			case SIGNIN_PAGE, __SET_SIGNIN_EMAIL, __GET_SIGNIN_EMAIL, __SET_SIGNIN_PASSWORD, __GET_SIGNIN_PASSWORD, __CONFIRM_SIGNIN-> {
+				AuthenticationController.signIn(telegramId, properState, messageId, olderMessageId, messageText);
+			}
+			case SIGNUP_PAGE, __SET_SIGNUP_EMAIL, __GET_SIGNUP_EMAIL, __SET_SIGNUP_PASSWORD, __GET_SIGNUP_PASSWORD, __SET_SIGNUP_FIRST_NAME,
+			     __GET_SIGNUP_FIRST_NAME, __SET_SIGNUP_LAST_NAME, __GET_SIGNUP_LAST_NAME, __SET_SIGNUP_MIDDLE_NAMES,
+			     __GET_SIGNUP_MIDDLE_NAMES, __CONFIRM_SIGNUP -> {
+				AuthenticationController.signUp(telegramId, properState, messageId, olderMessageId, messageText);
+			}
 			case DASHBOARD_PAGE -> pageId = PageFactory.viewDashboardPage(telegramId, messageId);
 //			case MANAGE_ORDERS_PAGE -> pageId = viewManageOrdersPage();
 			case SELECT_FAVORITE_RESTAURANT -> PageFactory.viewFavoriteRestaurants(telegramId);
@@ -89,7 +84,7 @@ public class State {
 //			case CONFIRM_ORDER ->
 //			case CANCEL_PENDING_ORDER -> cancelPendingOrder();
 			case AUTHENTICATION_SIGNOUT -> {
-				Authentication.signOut(telegramId);
+				AuthenticationController.signOut(telegramId);
 				clearState(telegramId, eventualState);
 			}
 			case SETTINGS_PAGE -> pageId = PageFactory.viewSettingsPage(telegramId, messageId);
@@ -111,8 +106,8 @@ public class State {
 	private static void goBack(Long telegramId, UserState prevKeyboard, Integer msgId) {
 		Integer pageId = null;
 		switch (prevKeyboard) {
-			case AUTHENTICATION_PAGE -> pageId = Authentication.authenticate(telegramId, msgId);
-			case SIGNIN_PAGE -> Authentication.signIn(telegramId, prevKeyboard, msgId, null, null);
+			case AUTHENTICATION_PAGE -> pageId = AuthenticationController.authenticate(telegramId, msgId);
+			case SIGNIN_PAGE -> AuthenticationController.signIn(telegramId, prevKeyboard, msgId, null, null);
 //			case SIGNUP_PAGE -> Authentication.signUp(telegramId, prevKeyboard, msgId, null, null);
 			case DASHBOARD_PAGE -> pageId = PageFactory.viewDashboardPage(telegramId, msgId);
 //			case MANAGE_ORDERS_PAGE -> pageId = viewManageOrdersPage();

@@ -1,6 +1,6 @@
 package org.quickbitehub.consumer;
 
-import org.quickbitehub.authentication.DBCredentials;
+import org.quickbitehub.database.DBCredentials;
 
 import java.sql.*;
 import java.util.HashMap;
@@ -60,7 +60,7 @@ public class Employee extends User {
 
 			}
 		} catch (SQLException e) {
-			System.err.println("Database error: " + e.getMessage());
+			System.err.println("DatabaseOperation error: " + e.getMessage());
 		}
 
 		return employees;

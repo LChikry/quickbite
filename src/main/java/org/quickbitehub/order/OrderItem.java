@@ -1,6 +1,6 @@
 package org.quickbitehub.order;
 
-import org.quickbitehub.authentication.DBCredentials;
+import org.quickbitehub.database.DBCredentials;
 
 import java.sql.Connection;
 import java.sql.DriverManager;

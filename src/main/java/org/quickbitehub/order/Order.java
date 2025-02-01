@@ -1,9 +1,6 @@
 package org.quickbitehub.order;
 
-import org.quickbitehub.app.State;
-import org.quickbitehub.authentication.DBCredentials;
-import org.quickbitehub.app.UserState;
-import org.quickbitehub.provider.Restaurant;
+import org.quickbitehub.database.DBCredentials;
 
 import javax.money.Monetary;
 import javax.money.MonetaryAmount;
@@ -222,7 +219,7 @@ public class Order {
 				}
 			}
 		} catch (SQLException e) {
-			System.err.println("Database error in getCurrentOrders: " + e.getMessage());
+			System.err.println("DatabaseOperation error in getCurrentOrders: " + e.getMessage());
 		}
 
 		return orders;
@@ -271,7 +268,7 @@ public class Order {
 				}
 			}
 		} catch (SQLException e) {
-			System.err.println("Database error in getPast30DayOrders: " + e.getMessage());
+			System.err.println("DatabaseOperation error in getPast30DayOrders: " + e.getMessage());
 		}
 
 		return orders;

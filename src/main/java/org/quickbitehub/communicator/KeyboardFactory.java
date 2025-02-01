@@ -1,6 +1,6 @@
 package org.quickbitehub.communicator;
 
-import org.quickbitehub.authentication.Account;
+import org.quickbitehub.account.Account;
 import org.quickbitehub.utils.LanguageType;
 import org.quickbitehub.app.UserState;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ForceReplyKeyboard;

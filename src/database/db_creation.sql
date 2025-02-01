@@ -52,7 +52,7 @@ CREATE TABLE RestaurantAvailability (
 );
 
 CREATE TABLE Customer (
-	customer_balance        NUMERIC(8, 2) DEFAULT 5000.00 NOT NULL,
+--	customer_balance        NUMERIC(8, 2) DEFAULT 5000.00 NOT NULL,
 	currency CHAR(3)        DEFAULT 'MAD' NOT NULL,
 
 	CONSTRAINT uq_customer_primary_key UNIQUE (user_id),

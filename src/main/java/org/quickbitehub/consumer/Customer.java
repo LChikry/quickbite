@@ -1,25 +1,22 @@
 package org.quickbitehub.consumer;
 
-import org.quickbitehub.authentication.DBCredentials;
+import org.quickbitehub.database.DBCredentials;
 
 import java.sql.*;
 import java.util.HashMap;
 
 public class Customer extends User {
-	private Double customerBalance;
 	private String currency = "MAD";
 	private static HashMap<String, Customer> allCustomers = getAllCustomers(); // UserId -> Customer
 
-	public Customer(String firstName, String lastName, String middleNames, String userId, String currency, Double customerBalance) {
+	public Customer(String firstName, String lastName, String middleNames, String userId, String currency) {
 		super(firstName, lastName, middleNames, UserType.CUSTOMER.getText(), userId);
 
 		this.currency = currency;
-		this.customerBalance = customerBalance;
 	}
 
 	public Customer(String firstName, String lastName, String middleNames) {
 		super(firstName, lastName, middleNames, UserType.CUSTOMER.getText(), 0);
-		this.customerBalance = 5000.00;
 
 		allCustomers.put(this.USER_ID, this);
 	}
@@ -40,6 +37,7 @@ public class Customer extends User {
 		try {
 			Class.forName("org.postgresql.Driver");
 		} catch (ClassNotFoundException e) {
+			System.out.println("PostgreSQL Driver is not Found");
 			throw new RuntimeException(e);
 		}
 
@@ -53,27 +51,26 @@ public class Customer extends User {
 				String firstName = resultSet.getString("user_first_name");
 				String lastName = resultSet.getString("user_last_name");
 				String middleNames = resultSet.getString("user_middle_names");
-				Double balance = resultSet.getDouble("customer_balance");
 				String currency = resultSet.getString("currency");
 				if (middleNames == null) middleNames = "";
 
-				Customer customerData = new Customer(firstName, lastName, middleNames, customerId, currency, balance);
+				Customer customerData = new Customer(firstName, lastName, middleNames, customerId, currency);
 				customers.put(customerId, customerData);
 			}
 		} catch (SQLException e) {
-			System.err.println("Database error: " + e.getMessage());
+			System.err.println("DatabaseOperation error: " + e.getMessage());
 		}
 
 		return customers;
 	}
 
 
-	public static String insertCustomer(String cus_fname, String cus_lname, double balance) {
+	public static String insertCustomer(String cus_fname, String cus_lname) {
 		// Insert query for the Users table
 		String userSQL = "INSERT INTO Users (user_first_name, user_last_name, user_type) VALUES (?, ?, ?) RETURNING user_id";
 
 		// Insert query for the Customer table
-		String insertSQL = "INSERT INTO Customer (user_id, user_first_name, user_last_name, customer_balance, user_type) VALUES (?, ?, ?, ?, ?)";
+		String insertSQL = "INSERT INTO Customer (user_id, user_first_name, user_last_name, user_type) VALUES (?, ?, ?, ?)";
 		int userId = 0;
 
 
@@ -101,7 +98,6 @@ public class Customer extends User {
 						insertStatement.setInt(1, userId);  // Use the generated user_id
 						insertStatement.setString(2, cus_fname);
 						insertStatement.setString(3, cus_lname);
-						insertStatement.setDouble(4, balance);
 						insertStatement.setString(5, "Customer");
 						int rowsAffected = insertStatement.executeUpdate();
 						System.out.println("Customer insert successful, rows affected: " + rowsAffected);
@@ -148,7 +144,7 @@ public class Customer extends User {
 			}
 		} catch (SQLException e) {
 			// Handle SQL exception
-			System.err.println("Database error in getCustomerBalance: " + e.getMessage());
+			System.err.println("DatabaseOperation error in getCustomerBalance: " + e.getMessage());
 		}
 
 
