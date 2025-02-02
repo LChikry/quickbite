@@ -48,16 +48,14 @@ enum SignInService {
 		String password = authService.getAuthStateValue(chatId, UserState.__GET_SIGNIN_PASSWORD);
 		Account userAccount = Account.authenticate(chatId, email, password);
 		if (userAccount == null) {
-			String textMsg = Emoji.RED_CIRCLE.getCode() + " *Sign In Failed*\nIncorrect Email or Password " + Emoji.SAD_FACE.getCode();
-			MessageHandler.sendShortNotice(chatId, textMsg);
+			MessageHandler.sendShortNotice(chatId, AuthMessages.FAILED_SIGNIN.getPrompt());
 			State.applyImmediateState(chatId, Pair.of(UserState.__CANCEL_CURRENT_OPERATION_WITHOUT_NOTICE, null));
 			return;
 		}
 		authService.removeChatAuthState(chatId);
 		authService.addChatAccount(chatId, userAccount);
 
-		String feedbackMsg = Emoji.GREEN_CIRCLE.getCode() + " You Signed In Successfully " + Emoji.HAND_WAVING.getCode();
-		MessageHandler.sendShortNotice(chatId, feedbackMsg);
+		MessageHandler.sendShortNotice(chatId, AuthMessages.SUCCESSFUL_SIGNIN.getPrompt());
 		State.popAuthRelatedState(chatId);
 		State.applyImmediateState(chatId, Pair.of(UserState.DASHBOARD_PAGE, null));
 	}

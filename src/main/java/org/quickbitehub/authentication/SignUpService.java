@@ -69,8 +69,7 @@ enum SignUpService {
 		authService.removeChatAuthState(chatId);
 		authService.addChatAccount(chatId, userAccount);
 
-		String feedbackMsg = Emoji.GREEN_CIRCLE.getCode() + " You Have Created Your Account Successfully " + Emoji.HAND_WAVING.getCode();
-		MessageHandler.sendShortNotice(chatId, feedbackMsg);
+		MessageHandler.sendShortNotice(chatId, AuthMessages.SUCCESSFUL_SIGNUP.getPrompt());
 		State.popAuthRelatedState(chatId);
 		State.applyImmediateState(chatId, Pair.of(UserState.DASHBOARD_PAGE, null));
 	}

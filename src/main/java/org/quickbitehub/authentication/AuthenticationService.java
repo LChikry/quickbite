@@ -67,15 +67,13 @@ public class AuthenticationService {
 	void handleSignOut(Long chatId) {
 		Account userAccount = getChatAccount(chatId);
 		if (userAccount == null) {
-			String msg = Emoji.ORANGE_CIRCLE.getCode() + " You are already signed out!";
-			MessageHandler.sendShortNotice(chatId, msg);
+			MessageHandler.sendShortNotice(chatId, AuthMessages.USER_ALREADY_SIGNED_OUT.getPrompt());
 			return;
 		}
 		assert userAccount.isAuthenticated(chatId);
 		userAccount.logOut(chatId);
 		removeChatAccount(chatId);
-		String msg = Emoji.GREEN_CIRCLE.getCode() + " *_You have log out successfully. See you soon!_* " + Emoji.HAND_WAVING.getCode();
-		MessageHandler.sendShortNotice(chatId, msg);
+		MessageHandler.sendShortNotice(chatId, AuthMessages.SUCCESSFUL_SIGNOUT.getPrompt());
 	}
 
 	/**
@@ -87,17 +85,18 @@ public class AuthenticationService {
 		String errorMessage = null;
 		switch (authState) {
 			case __GET_SIGNIN_EMAIL -> {
-				if (isEmailFormatInvalid(credential)) errorMessage = "Invalid Email Address";
+				if (isEmailFormatInvalid(credential)) errorMessage = AuthMessages.INVALID_EMAIL.getPrompt();
+				else if (!Account.isAccountExist(credential)) errorMessage = AuthMessages.EMAIL_DOES_NOT_EXIST.getPrompt();
 			}
 			case __GET_SIGNUP_EMAIL -> {
-				if (isEmailFormatInvalid(credential)) errorMessage = "Invalid Email Address";
-				else if (Account.isAccountExist(credential)) errorMessage = "This Email Is Already Linked to Another Account";
+				if (isEmailFormatInvalid(credential)) errorMessage = AuthMessages.INVALID_EMAIL.getPrompt();
+				else if (Account.isAccountExist(credential)) errorMessage = AuthMessages.EMAIL_ALREADY_EXIST.getPrompt();
 			}
 			case __GET_SIGNUP_FIRST_NAME, __GET_SIGNUP_LAST_NAME -> {
-				if (!isSingleNameFormatValid(credential)) errorMessage = "Invalid Name";
+				if (!isSingleNameFormatValid(credential)) errorMessage = AuthMessages.INVALID_NAME.getPrompt();
 			}
 			case __GET_SIGNUP_MIDDLE_NAMES -> {
-				if (!isMultiNamesFormatValid(credential)) errorMessage = "Invalid Middle Name(s)";
+				if (!isMultiNamesFormatValid(credential)) errorMessage = AuthMessages.INVALID_MIDDLE_NAMES.getPrompt();
 			}
 		}
 		return errorMessage;
@@ -111,8 +110,7 @@ public class AuthenticationService {
 		return authenticatedChats.get(chatId) != null;
 	}
 	void respondToUnnecessaryAuthRequest(Long chatId) {
-		String msg = Emoji.ORANGE_CIRCLE.getCode() + " You are already signed in!";
-		MessageHandler.sendShortNotice(chatId, msg);
+		MessageHandler.sendShortNotice(chatId, AuthMessages.USER_ALREADY_SIGNED_IN.getPrompt());
 		State.popAuthRelatedState(chatId);
 	}
 
