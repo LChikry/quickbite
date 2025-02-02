@@ -11,14 +11,13 @@ public enum PostgreSqlDbConnection implements DatabaseConnection{
 	private Connection connection;
 
 	public Connection getDbConnection() {
+		if (connection != null)	return connection;
 		try {
-			if (connection == null) {
-				Class.forName("org.postgresql.Driver");
-				String DB_USER = Dotenv.load().get("DB_USER");
-				String DB_PASSWORD = Dotenv.load().get("DB_PASSWORD");
-				String DB_URL = Dotenv.load().get("DB_URL");
-				this.connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
-			}
+			Class.forName("org.postgresql.Driver");
+			String DB_USER = Dotenv.load().get("DB_USER");
+			String DB_PASSWORD = Dotenv.load().get("DB_PASSWORD");
+			String DB_URL = Dotenv.load().get("DB_URL");
+			connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
 			return connection;
 		} catch (SQLException e) {
 			System.out.println("DatabaseOperation Connection is Failed to be Established");
