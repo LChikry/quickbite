@@ -52,7 +52,6 @@ public class Customer extends User {
 				String lastName = resultSet.getString("user_last_name");
 				String middleNames = resultSet.getString("user_middle_names");
 				String currency = resultSet.getString("currency");
-				if (middleNames == null) middleNames = "";
 
 				Customer customerData = new Customer(firstName, lastName, middleNames, customerId, currency);
 				customers.put(customerId, customerData);
@@ -98,7 +97,7 @@ public class Customer extends User {
 						insertStatement.setInt(1, userId);  // Use the generated user_id
 						insertStatement.setString(2, cus_fname);
 						insertStatement.setString(3, cus_lname);
-						insertStatement.setString(5, "Customer");
+						insertStatement.setString(4, "Customer");
 						int rowsAffected = insertStatement.executeUpdate();
 						System.out.println("Customer insert successful, rows affected: " + rowsAffected);
 					}

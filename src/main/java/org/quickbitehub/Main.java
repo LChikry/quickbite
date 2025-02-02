@@ -7,6 +7,9 @@ import org.quickbitehub.authentication.AuthenticationService;
 import org.quickbitehub.communicator.MessageHandler;
 import org.telegram.telegrambots.longpolling.TelegramBotsLongPollingApplication;
 
+import com.password4j.*;
+
+
 public class Main {
 	public static void main(String[] args) {
 		// Using try-with-resources to allow autoclose to run upon finishing

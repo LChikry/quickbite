@@ -31,22 +31,22 @@ enum SignInService {
 			authService.respondToInvalidCredentials(chatId, errorMessage, authState);
 			return;
 		}
-
 		authService.addAuthStateWithValue(chatId, authState, credential);
-		String email = authService.getAuthStateValue(chatId, UserState.__GET_SIGNIN_EMAIL);
-		String password = null;
+
+		String rawEmail = authService.getAuthStateValue(chatId, UserState.__GET_SIGNIN_EMAIL);
+		String rawPassword = null;
 		if (authService.getAuthStateValue(chatId, UserState.__GET_SIGNIN_PASSWORD) != null) {
-			password = Emoji.PASSWORD_DOT.getCode().repeat(10);
+			rawPassword = Emoji.PASSWORD_DOT.getCode().repeat(10);
 		}
 		Integer signInPageId = Integer.valueOf(authService.getAuthStateValue(chatId, UserState.SIGNIN_PAGE));
-		PageFactory.updateSignInPage(chatId, signInPageId, email, password);
+		PageFactory.updateSignInPage(chatId, signInPageId, rawEmail, rawPassword);
 	}
 
 	void confirmSignIn(Long chatId) {
-		String email = authService.getAuthStateValue(chatId, UserState.__GET_SIGNIN_EMAIL);
-		email = Account.formatEmail(email);
-		String password = authService.getAuthStateValue(chatId, UserState.__GET_SIGNIN_PASSWORD);
-		Account userAccount = Account.authenticate(chatId, email, password);
+		String pureEmail = authService.getAuthStateValue(chatId, UserState.__GET_SIGNIN_EMAIL);
+		pureEmail = Account.formatEmail(pureEmail);
+		String rawPassword = authService.getAuthStateValue(chatId, UserState.__GET_SIGNIN_PASSWORD);
+		Account userAccount = Account.authenticate(chatId, pureEmail, rawPassword);
 		if (userAccount == null) {
 			MessageHandler.sendShortNotice(chatId, AuthMessages.FAILED_SIGNIN.getPrompt());
 			State.applyImmediateState(chatId, Pair.of(UserState.__CANCEL_CURRENT_OPERATION_WITHOUT_NOTICE, null));

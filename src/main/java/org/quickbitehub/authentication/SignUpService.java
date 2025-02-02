@@ -24,8 +24,7 @@ enum SignUpService {
 	void collectSignUpCredentials(Long chatId, UserState authState, Integer answerMessageId, Integer promptMessageId, String credential) {
 		assert (answerMessageId != null && promptMessageId != null && credential != null);
 
-		UserState oppositeState = authState.getOppositeAuthState();
-		String stateValue = authService.getAuthStateValue(chatId, oppositeState);
+		String stateValue = authService.getAuthStateValue(chatId, authState.getOppositeAuthState());
 		MessageHandler.deleteMessage(chatId, Integer.valueOf(stateValue), TimeConstants.NO_TIME.time());
 		MessageHandler.deleteMessage(chatId, answerMessageId, TimeConstants.NO_TIME.time());
 
@@ -34,12 +33,13 @@ enum SignUpService {
 			authService.respondToInvalidCredentials(chatId, errorMessage, authState);
 			return;
 		}
-
+		if (authState == UserState.__GET_SIGNUP_PASSWORD) credential = Account.getPasswordHashSalted(credential);
 		authService.addAuthStateWithValue(chatId, authState, credential);
+
 		String email = authService.getAuthStateValue(chatId, UserState.__GET_SIGNUP_EMAIL);
-		String password = null;
+		String passwordHashSalted = null;
 		if (authService.getAuthStateValue(chatId, UserState.__GET_SIGNUP_PASSWORD) != null) {
-			password = Emoji.PASSWORD_DOT.getCode().repeat(10);
+			passwordHashSalted = Emoji.PASSWORD_DOT.getCode().repeat(10);
 		}
 		String firstName = authService.getAuthStateValue(chatId, UserState.__GET_SIGNUP_FIRST_NAME);
 		firstName = Account.formatName(firstName);
@@ -49,13 +49,13 @@ enum SignUpService {
 		middleNames = Account.formatName(middleNames);
 
 		Integer signUpPageId = Integer.valueOf(authService.getAuthStateValue(chatId, UserState.SIGNUP_PAGE));
-		PageFactory.updateSignUpPage(chatId, signUpPageId, email, password, firstName, lastName, middleNames);
+		PageFactory.updateSignUpPage(chatId, signUpPageId, email, passwordHashSalted, firstName, lastName, middleNames);
 	}
 
 	void confirmSignUp(Long chatId) {
-		String unformattedEmail = authService.getAuthStateValue(chatId, UserState.__GET_SIGNUP_EMAIL);
-		String email = Account.formatEmail(unformattedEmail);
-		String password = authService.getAuthStateValue(chatId, UserState.__GET_SIGNUP_PASSWORD);
+		String rawEmail = authService.getAuthStateValue(chatId, UserState.__GET_SIGNUP_EMAIL);
+		String pureEmail = Account.formatEmail(rawEmail);
+		String passwordHashSalted = authService.getAuthStateValue(chatId, UserState.__GET_SIGNUP_PASSWORD);
 		String firstName = authService.getAuthStateValue(chatId, UserState.__GET_SIGNUP_FIRST_NAME);
 		firstName = Account.formatName(firstName);
 		String lastName = authService.getAuthStateValue(chatId, UserState.__GET_SIGNUP_LAST_NAME);
@@ -65,7 +65,7 @@ enum SignUpService {
 
 		Customer user = new Customer(firstName, lastName, middleNames);
 //		Account userAccount = Account.signUp(email, unformattedEmail, password, telegramId, firstName, lastName, middleNames, UserType.CUSTOMER.getText(), null);
-		Account userAccount = new Account(email, unformattedEmail, password, user, chatId);
+		Account userAccount = new Account(pureEmail, rawEmail, passwordHashSalted, user, chatId);
 		authService.removeChatAuthState(chatId);
 		authService.addChatAccount(chatId, userAccount);
 

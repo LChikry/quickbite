@@ -135,7 +135,7 @@ public class KeyboardFactory {
 		return replyKb;
 	}
 	public static InlineKeyboardMarkup getCustomerSettingsKeyboard(Account customerAccount) {
-		String email = customerAccount.getUnformattedEmail();
+		String email = customerAccount.getRawEmail();
 		var emailButton = InlineKeyboardButton.builder().text("Email: " + email).callbackData(UserState.CHANGE_EMAIL.getState()).build();
 		var passwordButton = InlineKeyboardButton.builder().text("Change Password").callbackData(UserState.CHANGE_PASSWORD.getState()).build();
 

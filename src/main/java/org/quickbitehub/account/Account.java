@@ -1,6 +1,8 @@
 package org.quickbitehub.account;
 
-import org.quickbitehub.authentication.AuthenticationController;
+import com.password4j.Hash;
+import com.password4j.Password;
+import io.github.cdimascio.dotenv.Dotenv;
 import org.quickbitehub.database.DBCredentials;
 import org.quickbitehub.consumer.*;
 import org.quickbitehub.utils.LanguageType;
@@ -17,36 +19,36 @@ public class Account implements Serializable {
 	private final String USER_ID;
 	private final User USER;
 	private final LocalDate ACCOUNT_SIGN_UP_DATE;
-	private String email;
-	private String unformattedEmail;
-	private String password;
+	private String pureEmail;
+	private String rawEmail;
+	private String passwordHashSalted;
 	private LanguageType interfaceLanguage = LanguageType.ENGLISH;
 	private final HashMap<Long, Boolean> isAuthenticated = new HashMap<>(); // TelegramId (device) to isAuthentication
 	public static final int MAX_FAVORITE_RESTAURANT_LENGTH = 20;
 	private final ArrayList<String> favoriteRestaurants = new ArrayList<>(MAX_FAVORITE_RESTAURANT_LENGTH); // recent used restaurantName in index 0
-	public static HashMap<String, Account> usersAccount = getAllAccountsFromDB(); // email to Account
+	public static HashMap<String, Account> usersAccount = getAllAccountsFromDB(); // pureEmail to Account
 
-	public Account(String email, String unformattedEmail, String password, User USER, Long telegramId) {
+	public Account(String pureEmail, String rawEmail, String passwordHashSalted, User USER, Long telegramId) {
 		this.ACCOUNT_SIGN_UP_DATE = LocalDate.now();
-		this.email = email;
-		this.unformattedEmail = unformattedEmail.trim().strip();
+		this.pureEmail = pureEmail;
+		this.rawEmail = rawEmail.trim().strip();
 		this.USER = USER;
 		this.USER_ID = USER.getUserId();
-		this.password = password;
+		this.passwordHashSalted = passwordHashSalted;
 		this.isAuthenticated.put(telegramId, true);
 
-		insertAccountIntoDB(formatEmail(email), unformattedEmail, password, Integer.valueOf(USER.getUserId()), this.ACCOUNT_SIGN_UP_DATE);
-		this.ACCOUNT_ID = Account.getAccountIdFromDB(email);
-		usersAccount.put(email, this);
+		insertAccountIntoDB(pureEmail, rawEmail, passwordHashSalted, Integer.valueOf(USER.getUserId()), this.ACCOUNT_SIGN_UP_DATE);
+		this.ACCOUNT_ID = Account.getAccountIdFromDB(pureEmail);
+		usersAccount.put(pureEmail, this);
 	}
 
-	public Account(String email, String unformattedEmail, String password, String accountId, String userId, LocalDate signUpDate) {
+	public Account(String pureEmail, String rawEmail, String password, String accountId, String userId, LocalDate signUpDate) {
 		this.ACCOUNT_SIGN_UP_DATE = signUpDate;
-		this.email = email;
-		this.unformattedEmail = unformattedEmail.trim().strip();
+		this.pureEmail = pureEmail;
+		this.rawEmail = rawEmail.trim().strip();
 		this.ACCOUNT_ID = accountId;
 		this.USER_ID = userId;
-		this.password = password;
+		this.passwordHashSalted = password;
 
 		Customer cus = Customer.getCustomer(userId);
 		if (cus != null) {
@@ -56,17 +58,23 @@ public class Account implements Serializable {
 
 		Employee emp = Employee.getEmployee(userId);
 		this.USER = emp;
-		usersAccount.put(email, this);
+		usersAccount.put(pureEmail, this);
 	}
 
 	public Boolean isAuthenticated(Long telegramId) {
 		return isAuthenticated.getOrDefault(telegramId, false);
 	}
 
-	static public Account authenticate(Long telegramId, String email, String password) {
-		Account userAccount = usersAccount.get(email);
+	public static String getPasswordHashSalted(String password) {
+		Hash hash = Password.hash(password).addRandomSalt().addPepper(Dotenv.load().get("PEPPER")).withArgon2();
+		return hash.getResult();
+	}
+
+	static public Account authenticate(Long telegramId, String pureEmail, String rawPassword) {
+		Account userAccount = usersAccount.get(pureEmail);
 		if (userAccount == null) return null;
-		if (!password.equals(userAccount.password)) return null;
+		boolean verified = Password.check(rawPassword, userAccount.passwordHashSalted).withArgon2();
+		if (verified) return null;
 
 		userAccount.isAuthenticated.put(telegramId, true);
 		return userAccount;
@@ -89,20 +97,20 @@ public class Account implements Serializable {
 	}
 
 	public boolean changeAccountPassword(Long telegramId, String oldPassword, String newPassword) {
-		if (!this.isAuthenticated.get(telegramId) && oldPassword.equals(this.password)) return false;
+		if (!this.isAuthenticated.get(telegramId) && oldPassword.equals(this.passwordHashSalted)) return false;
 		// task change it in db
-		this.password = newPassword;
+		this.passwordHashSalted = newPassword;
 		return true;
 	}
 
 	public boolean changeAccountEmail(Long telegramId, String newEmail) {
 		if (!this.isAuthenticated(telegramId)) return false;
 		// task change it in db
-		Account currentAccount = usersAccount.get(email);
-		usersAccount.remove(email);
-		this.email = formatEmail(newEmail);
-		this.unformattedEmail = newEmail;
-		usersAccount.put(email, currentAccount);
+		Account currentAccount = usersAccount.get(pureEmail);
+		usersAccount.remove(pureEmail);
+		this.pureEmail = formatEmail(newEmail);
+		this.rawEmail = newEmail;
+		usersAccount.put(pureEmail, currentAccount);
 		return true;
 	}
 
@@ -131,9 +139,9 @@ public class Account implements Serializable {
 	static public boolean isAccountExist(String email) {return usersAccount.get(formatEmail(email)) != null;}
 	public String getAccountId() {return ACCOUNT_ID;}
 	public String getAccountEmail() {
-		return email;
+		return pureEmail;
 	}
-	public String getUnformattedEmail() {return unformattedEmail;}
+	public String getRawEmail() {return rawEmail;}
 	public User getUser() {return USER;}
 	public LocalDate getAccountSignUpDate() {return ACCOUNT_SIGN_UP_DATE;}
 	public String getUserId() {return USER_ID;}
@@ -151,8 +159,8 @@ public class Account implements Serializable {
 		}
 	}
 
-	public static void insertAccountIntoDB(String email, String unformattedEmail, String password, Integer userId, LocalDate signupDate) {
-		String insertSQL = "INSERT INTO Account (account_email, unformatted_account_email, account_password, user_id, account_signup_date) VALUES (?, ?, ?, ?, ?)";
+	public static void insertAccountIntoDB(String pureEmail, String rawEmail, String passwordHashSalted, Integer userId, LocalDate signupDate) {
+		String insertSQL = "INSERT INTO Account (account_pure_email, account_raw_email, account_password_hash_salted, user_id, account_signup_date) VALUES (?, ?, ?, ?, ?)";
 
 		try {
 			Class.forName("org.postgresql.Driver");
@@ -165,9 +173,9 @@ public class Account implements Serializable {
 		     PreparedStatement preparedStatement = connection.prepareStatement(insertSQL)) {
 
 			// Parse the signupDate String to java.sql.Date (for DATE column)
-			preparedStatement.setString(1, email);
-			preparedStatement.setString(2, unformattedEmail);
-			preparedStatement.setString(3, password);
+			preparedStatement.setString(1, pureEmail);
+			preparedStatement.setString(2, rawEmail);
+			preparedStatement.setString(3, passwordHashSalted);
 			preparedStatement.setInt(4, userId);
 			java.sql.Date sqlDate = java.sql.Date.valueOf(signupDate);
 			preparedStatement.setDate(5, sqlDate);
@@ -182,7 +190,7 @@ public class Account implements Serializable {
 
 	public static String getAccountIdFromDB(String email) {
 		email = formatEmail(email);
-		String query = "SELECT account_id FROM Account WHERE account_email = ?;";
+		String query = "SELECT account_id FROM Account WHERE account_pure_email = ?;";
 		String accountId = null;
 
 		try {
@@ -234,15 +242,15 @@ public class Account implements Serializable {
 				// Create a HashMap for each row
 				HashMap<String, Account> accountData = new HashMap<>();
 				String account_id = resultSet.getString("account_id");
-				String email = formatEmail(resultSet.getString("account_email"));
-				String unformattedEmail = resultSet.getString("unformatted_account_email");
-				String password = resultSet.getString("account_password");
+				String pureEmail = formatEmail(resultSet.getString("account_pure_email"));
+				String rawEmail = resultSet.getString("account_raw_email");
+				String password = resultSet.getString("account_password_hash_salted");
 				String userId = String.valueOf(resultSet.getInt("user_id"));
 				Date sqlDate = resultSet.getDate("account_signup_date");
 				LocalDate signUpDate = sqlDate.toLocalDate();
 
-				Account userAccount = new Account(email, unformattedEmail, password, account_id, userId, signUpDate);
-				accounts.put(email, userAccount);
+				Account userAccount = new Account(pureEmail, rawEmail, password, account_id, userId, signUpDate);
+				accounts.put(pureEmail, userAccount);
 			}
 		} catch (SQLException e) {
 			System.err.println("DatabaseOperation error: " + e.getMessage());

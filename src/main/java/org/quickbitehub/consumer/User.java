@@ -4,7 +4,7 @@ public abstract class User {
 	protected final String USER_ID;
 	protected String firstName;
 	protected String lastName;
-	protected String middleNames = "";
+	protected String middleNames;
 	protected final String userType;
 
 
@@ -30,7 +30,7 @@ public abstract class User {
 	}
 
 	public String getUserFullName() {
-		if (!middleNames.isBlank()) return firstName + " " + middleNames + " " + lastName;
+		if (middleNames != null) return firstName + " " + middleNames + " " + lastName;
 		return firstName + " " + lastName;
 	}
 
