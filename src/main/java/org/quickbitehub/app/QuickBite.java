@@ -4,6 +4,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.quickbitehub.authentication.AuthenticationController;
 
 import org.quickbitehub.communicator.MessageFactory;
+import org.quickbitehub.communicator.PageFactory;
 import org.quickbitehub.communicator.TimeConstants;
 import org.quickbitehub.provider.Restaurant;
 import org.quickbitehub.communicator.MessageHandler;
@@ -21,6 +22,12 @@ import static org.quickbitehub.app.State.*;
 
 public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 	public static final String BOT_USERNAME = "QuickBiteHub_bot";
+	private final AuthenticationController authController;
+	
+	public QuickBite(AuthenticationController authController) {
+		this.authController = authController;
+		PageFactory.authController = authController;
+	}
 
 	private Long extractTelegramId(Update update) {
 		if (update.hasMessage()) return update.getMessage().getChatId();
@@ -59,7 +66,7 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 		Long telegramId = message.getFrom().getId();
 		UserState newState = UserState.getValueOf(message.getText());
 		if (State.isUserStateless(telegramId) ||
-				AuthenticationController.isSessionAuthenticated(telegramId) ||
+				authController.isChatAuthenticated(telegramId) ||
 				newState.isImmediateState() ||
 				newState.isStateAuthRelated() ||
 				!State.getUserState(telegramId).isStateAuthRelated()) {
@@ -71,7 +78,7 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 		Long telegramId = cbq.getFrom().getId();
 		UserState newState = UserState.getValueOf(cbq.getData());
 		if (State.isUserStateless(telegramId) ||
-				AuthenticationController.isSessionAuthenticated(telegramId) ||
+				authController.isChatAuthenticated(telegramId) ||
 				newState.isImmediateState() ||
 				newState.isStateAuthRelated()) {
 			State.pushImmediateState(telegramId, Pair.of(newState, null));
@@ -83,19 +90,19 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 		Long telegramId = message.getChat().getId();
 		String messageId = String.valueOf(message.getReplyToMessage().getMessageId());
 
-		if (messageId.equals(AuthenticationController.getAuthStepValue(telegramId, UserState.__SET_SIGNIN_EMAIL))) {
+		if (messageId.equals(authController.getAuthStateValue(telegramId, UserState.__SET_SIGNIN_EMAIL))) {
 			State.pushImmediateState(telegramId, Pair.of(UserState.__GET_SIGNIN_EMAIL, null));
-		} else if (messageId.equals(AuthenticationController.getAuthStepValue(telegramId, UserState.__SET_SIGNIN_PASSWORD))) {
+		} else if (messageId.equals(authController.getAuthStateValue(telegramId, UserState.__SET_SIGNIN_PASSWORD))) {
 			State.pushImmediateState(telegramId, Pair.of(UserState.__GET_SIGNIN_PASSWORD, null));
-		} else if (messageId.equals(AuthenticationController.getAuthStepValue(telegramId, UserState.__SET_SIGNUP_EMAIL))) {
+		} else if (messageId.equals(authController.getAuthStateValue(telegramId, UserState.__SET_SIGNUP_EMAIL))) {
 			State.pushImmediateState(telegramId, Pair.of(UserState.__GET_SIGNUP_EMAIL, null));
-		} else if (messageId.equals(AuthenticationController.getAuthStepValue(telegramId, UserState.__SET_SIGNUP_PASSWORD))) {
+		} else if (messageId.equals(authController.getAuthStateValue(telegramId, UserState.__SET_SIGNUP_PASSWORD))) {
 			State.pushImmediateState(telegramId, Pair.of(UserState.__GET_SIGNUP_PASSWORD, null));
-		} else if (messageId.equals(AuthenticationController.getAuthStepValue(telegramId, UserState.__SET_SIGNUP_FIRST_NAME))) {
+		} else if (messageId.equals(authController.getAuthStateValue(telegramId, UserState.__SET_SIGNUP_FIRST_NAME))) {
 			State.pushImmediateState(telegramId, Pair.of(UserState.__GET_SIGNUP_FIRST_NAME, null));
-		} else if (messageId.equals(AuthenticationController.getAuthStepValue(telegramId, UserState.__SET_SIGNUP_LAST_NAME))) {
+		} else if (messageId.equals(authController.getAuthStateValue(telegramId, UserState.__SET_SIGNUP_LAST_NAME))) {
 			State.pushImmediateState(telegramId, Pair.of(UserState.__GET_SIGNUP_LAST_NAME, null));
-		} else if (messageId.equals(AuthenticationController.getAuthStepValue(telegramId, UserState.__SET_SIGNUP_MIDDLE_NAMES))) {
+		} else if (messageId.equals(authController.getAuthStateValue(telegramId, UserState.__SET_SIGNUP_MIDDLE_NAMES))) {
 			State.pushImmediateState(telegramId, Pair.of(UserState.__GET_SIGNUP_MIDDLE_NAMES, null));
 		} else {
 			MessageFactory.sendIncorrectInputNotice(telegramId);

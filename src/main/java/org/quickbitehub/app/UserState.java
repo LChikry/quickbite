@@ -25,7 +25,7 @@ public enum UserState {
 	HELP_PAGE("/help"),
 
 	AUTHENTICATION_PAGE("/authenticate"),
-	AUTHENTICATION_SIGNOUT("/signout"),
+	SIGNOUT("/signout"),
 
 	SIGNIN_PAGE("/signin"),
 	__SET_SIGNIN_EMAIL("__set_signin_email"),
@@ -66,14 +66,15 @@ public enum UserState {
 
 	private final String state;
 	private static final HashMap<String, UserState> stateMap = new HashMap<>();
+
+	UserState(String state) {
+		this.state = state;
+	}
+
 	static {
 		for (UserState userState : UserState.values()) {
 			stateMap.put(userState.state, userState);
 		}
-	}
-
-	UserState(String state) {
-		this.state = state;
 	}
 	public static UserState getValueOf(String name) {
 		if (stateMap.get(name) != null) return stateMap.get(name);
@@ -82,46 +83,6 @@ public enum UserState {
 	public String getState() {
 		return state;
 	}
-	// Check if the new state is immediate and doesn't require authentication
-	public boolean isImmediateState() {
-		return this == HELP_PAGE ||
-				this == AUTHENTICATION_SIGNOUT ||
-				this == CANCEL_CURRENT_OPERATION_WITH_NOTICE ||
-				this == __BEFORE_NEXT_UPDATE ||
-				this == __PREVIOUS_KEYBOARD;
-	}
-	public boolean isPageCreationState() {
-		return this == AUTHENTICATION_PAGE ||
-				this == SIGNIN_PAGE ||
-				this == SIGNUP_PAGE ||
-				this == HELP_PAGE ||
-				this == DASHBOARD_PAGE ||
-				this == MANAGE_ORDERS_PAGE ||
-				this == SETTINGS_PAGE ||
-				this == CHANGE_LANGUAGE;
-	}
-	public boolean isStateAuthRelated() {
-		return this == AUTHENTICATION_PAGE ||
-				this == SIGNIN_PAGE ||
-				this == SIGNUP_PAGE ||
-				this == __SET_SIGNIN_EMAIL ||
-				this == __GET_SIGNIN_EMAIL ||
-				this == __SET_SIGNIN_PASSWORD ||
-				this == __GET_SIGNIN_PASSWORD ||
-				this == __CONFIRM_SIGNIN ||
-				this == __SET_SIGNUP_EMAIL ||
-				this == __GET_SIGNUP_EMAIL ||
-				this == __SET_SIGNUP_PASSWORD ||
-				this == __GET_SIGNUP_PASSWORD ||
-				this == __SET_SIGNUP_FIRST_NAME ||
-				this == __GET_SIGNUP_FIRST_NAME ||
-				this == __SET_SIGNUP_LAST_NAME ||
-				this == __GET_SIGNUP_LAST_NAME ||
-				this == __SET_SIGNUP_MIDDLE_NAMES ||
-				this == __GET_SIGNUP_MIDDLE_NAMES ||
-				this == __CONFIRM_SIGNUP;
-	}
-
 	public UserState getOppositeAuthState() {
 		return switch (this) {
 			case __SET_SIGNIN_EMAIL -> __GET_SIGNIN_EMAIL;
@@ -142,6 +103,52 @@ public enum UserState {
 		};
 	}
 
+	public boolean isStateAuthRelated() {
+		return this == AUTHENTICATION_PAGE ||
+				this == SIGNIN_PAGE ||
+				isSignInProcess() ||
+				this == SIGNUP_PAGE ||
+				isSignUpProcess();
+	}
+	public boolean isSignInProcess() {
+		return 	this == __SET_SIGNIN_EMAIL ||
+				this == __GET_SIGNIN_EMAIL ||
+				this == __SET_SIGNIN_PASSWORD ||
+				this == __GET_SIGNIN_PASSWORD ||
+				this == __CONFIRM_SIGNIN;
+	}
+	public boolean isSignUpProcess() {
+		return this == __SET_SIGNUP_EMAIL ||
+				this == __GET_SIGNUP_EMAIL ||
+				this == __SET_SIGNUP_PASSWORD ||
+				this == __GET_SIGNUP_PASSWORD ||
+				this == __SET_SIGNUP_FIRST_NAME ||
+				this == __GET_SIGNUP_FIRST_NAME ||
+				this == __SET_SIGNUP_LAST_NAME ||
+				this == __GET_SIGNUP_LAST_NAME ||
+				this == __SET_SIGNUP_MIDDLE_NAMES ||
+				this == __GET_SIGNUP_MIDDLE_NAMES ||
+				this == __CONFIRM_SIGNUP;
+	}
+
+	// Check if the new state is immediate and doesn't require authentication
+	public boolean isImmediateState() {
+		return this == HELP_PAGE ||
+				this == SIGNOUT ||
+				this == CANCEL_CURRENT_OPERATION_WITH_NOTICE ||
+				this == __BEFORE_NEXT_UPDATE ||
+				this == __PREVIOUS_KEYBOARD;
+	}
+	public boolean isPageCreationState() {
+		return this == AUTHENTICATION_PAGE ||
+				this == SIGNIN_PAGE ||
+				this == SIGNUP_PAGE ||
+				this == HELP_PAGE ||
+				this == DASHBOARD_PAGE ||
+				this == MANAGE_ORDERS_PAGE ||
+				this == SETTINGS_PAGE ||
+				this == CHANGE_LANGUAGE;
+	}
 	// task: this is outdated && update cancel current operation
 	public boolean isOperationState() {
 		return this == SIGNIN_PAGE ||
@@ -151,7 +158,7 @@ public enum UserState {
 				this == SEARCH_FOR_PRODUCTS ||
 				this == CONFIRM_ORDER ||
 				this == CANCEL_PENDING_ORDER ||
-				this == AUTHENTICATION_SIGNOUT ||
+				this == SIGNOUT ||
 				this == CHANGE_EMAIL ||
 				this == CHANGE_PASSWORD ||
 				this == CHANGE_FAVORITE_RESTAURANTS ||

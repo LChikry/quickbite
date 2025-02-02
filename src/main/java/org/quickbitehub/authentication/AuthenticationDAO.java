@@ -1,4 +1,5 @@
 package org.quickbitehub.authentication;
 
-public class AuthenticationDAO {
+enum AuthenticationDAO {
+	INSTANCE;
 }

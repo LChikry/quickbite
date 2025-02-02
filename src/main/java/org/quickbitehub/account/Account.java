@@ -107,7 +107,7 @@ public class Account implements Serializable {
 	}
 
 	static public String formatEmail(String email) {
-		assert (AuthenticationController.isEmailValid(email));
+		if (email == null || email.isBlank()) return null;
 		String formattedEmail = email.strip().trim().toLowerCase();
 		String username = formattedEmail.substring(0, formattedEmail.indexOf("@"));
 		username = username.replace(".", "");

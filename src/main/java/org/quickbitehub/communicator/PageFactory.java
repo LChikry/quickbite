@@ -2,12 +2,15 @@ package org.quickbitehub.communicator;
 
 import org.quickbitehub.account.Account;
 import org.quickbitehub.authentication.AuthenticationController;
+import org.quickbitehub.authentication.AuthenticationService;
 import org.quickbitehub.order.OrderStatus;
 
 import java.time.LocalDate;
 import java.util.Objects;
 
 public class PageFactory {
+	public static AuthenticationController authController;
+
 	public static Integer viewAuthenticationPage(Long telegramId, Integer messageId) {
 		String msg = Emoji.LOCK_WITH_KEY.getCode() + " *Authenticate*\n" +
 				"\n" +
@@ -29,7 +32,6 @@ public class PageFactory {
 		return null;
 	}
 	public static Integer viewSignInPage(Long telegramId, Integer messageId, String email, String hiddenPassword) {
-		assert (!AuthenticationController.isSessionAuthenticated(telegramId));
 		String message = Emoji.GOLDEN_KEY.getCode() + " *Sign In*\n" +
 				"\n" +
 				"Click to provide your credentials.";
@@ -51,7 +53,6 @@ public class PageFactory {
 		MessageHandler.editInlineKeyboardOnly(telegramId, messageId, KeyboardFactory.getSignInKeyboard(email, hiddenPassword));
 	}
 	public static Integer viewSignUpPage(Long telegramId, Integer messageId, String email, String hiddenPassword, String firstName, String lastName, String middleNames) {
-		assert (!AuthenticationController.isSessionAuthenticated(telegramId));
 		String message = Emoji.REGISTRATION_PAPER.getCode() + " *Sign Up*\n" +
 				"\n" +
 				"Click to provide your credentials.\n";
@@ -73,11 +74,10 @@ public class PageFactory {
 		MessageHandler.editInlineKeyboardOnly(telegramId, messageId, KeyboardFactory.getSignUpKeyboard(email, hiddenPassword, firstName, lastName, middleNames));
 	}
 	public static Integer viewDashboardPage(Long telegramId, Integer messageId) {
-		assert (AuthenticationController.isSessionAuthenticated(telegramId));
 		// task add money and order values
 		String message = "*Welcome to Dashboard* " + Emoji.YELLOW_STARS.getCode() +
 				"\n" +
-				"\n*" + AuthenticationController.getSessionAccount(telegramId).getUser().getUserFullName() + "*, from here you can take control of everything!" +
+				"\n*" + authController.getChatAccount(telegramId).getUser().getUserFullName() + "*, from here you can take control of everything!" +
 				"\n" +
 				"\nMoney spent so far: *" + "*" +
 				"\n" +
@@ -101,7 +101,7 @@ public class PageFactory {
 		return null;
 	}
 	public static void viewFavoriteRestaurants(Long telegramId) {
-		Account account = AuthenticationController.userSession.get(telegramId);
+		Account account = authController.getChatAccount(telegramId);
 		assert (account != null);
 
 		String message;
@@ -115,8 +115,7 @@ public class PageFactory {
 				TimeConstants.NO_TIME.time());
 	}
 	public static Integer viewSettingsPage(Long telegramId, Integer messageId) {
-		assert (AuthenticationController.isSessionAuthenticated(telegramId));
-		Account userAccount = AuthenticationController.getSessionAccount(telegramId);
+		Account userAccount = authController.getChatAccount(telegramId);
 		LocalDate signUpDate = userAccount.getAccountSignUpDate();
 		String message = "*Settings*" +
 				"\n" +

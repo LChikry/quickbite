@@ -99,7 +99,7 @@ public class KeyboardFactory {
 
 		var settingsButton = InlineKeyboardButton.builder().text("Settings").callbackData(UserState.SETTINGS_PAGE.getState()).build();
 		var helpButton = InlineKeyboardButton.builder().text("Help").callbackData(UserState.HELP_PAGE.getState()).build();
-		var signOutButton = InlineKeyboardButton.builder().text("Sign Out").callbackData(UserState.AUTHENTICATION_SIGNOUT.getState()).build();
+		var signOutButton = InlineKeyboardButton.builder().text("Sign Out").callbackData(UserState.SIGNOUT.getState()).build();
 
 		var cancelButton = InlineKeyboardButton.builder().text("Cancel Current Operation").callbackData(UserState.CANCEL_CURRENT_OPERATION_WITH_NOTICE.getState()).build();
 		return InlineKeyboardMarkup

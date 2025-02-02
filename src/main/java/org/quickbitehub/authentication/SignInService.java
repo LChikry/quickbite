@@ -1,0 +1,64 @@
+package org.quickbitehub.authentication;
+
+import org.apache.commons.lang3.tuple.Pair;
+import org.quickbitehub.account.Account;
+import org.quickbitehub.app.State;
+import org.quickbitehub.app.UserState;
+import org.quickbitehub.communicator.Emoji;
+import org.quickbitehub.communicator.MessageHandler;
+import org.quickbitehub.communicator.PageFactory;
+import org.quickbitehub.communicator.TimeConstants;
+
+enum SignInService {
+	INSTANCE;
+	private final AuthenticationService authService = AuthenticationService.getInstance();
+
+	void viewSignInPage(Long chatId, Integer messageId) {
+		authService.clearChatAuthState(chatId);
+		var kbId = PageFactory.viewSignInPage(chatId, messageId, null, null);
+		if (kbId == null) kbId = messageId;
+		authService.addAuthStateWithValue(chatId, UserState.SIGNIN_PAGE, String.valueOf(kbId.intValue()));
+		if (!kbId.equals(messageId)) State.updateKeyboardState(chatId, kbId, UserState.SIGNIN_PAGE);
+	}
+	void collectSignInCredentials(Long chatId, UserState authState, Integer answerMessageId, Integer promptMessageId, String credential) {
+		assert (answerMessageId != null && promptMessageId != null && credential != null);
+		UserState oppositeState = authState.getOppositeAuthState();
+		String stateValue = authService.getAuthStateValue(chatId, oppositeState);
+		MessageHandler.deleteMessage(chatId, Integer.valueOf(stateValue), TimeConstants.NO_TIME.time());
+		MessageHandler.deleteMessage(chatId, answerMessageId, TimeConstants.NO_TIME.time());
+		String errorMessage = authService.isUserCredentialFormatValid(authState, credential);
+		if (errorMessage != null) {
+			authService.respondToInvalidCredentials(chatId, errorMessage, authState);
+			return;
+		}
+
+		authService.addAuthStateWithValue(chatId, authState, credential);
+		String email = authService.getAuthStateValue(chatId, UserState.__GET_SIGNIN_EMAIL);
+		String password = null;
+		if (authService.getAuthStateValue(chatId, UserState.__GET_SIGNIN_PASSWORD) != null) {
+			password = Emoji.PASSWORD_DOT.getCode().repeat(10);
+		}
+		Integer signInPageId = Integer.valueOf(authService.getAuthStateValue(chatId, UserState.SIGNIN_PAGE));
+		PageFactory.updateSignInPage(chatId, signInPageId, email, password);
+	}
+
+	void confirmSignIn(Long chatId) {
+		String email = authService.getAuthStateValue(chatId, UserState.__GET_SIGNIN_EMAIL);
+		email = Account.formatEmail(email);
+		String password = authService.getAuthStateValue(chatId, UserState.__GET_SIGNIN_PASSWORD);
+		Account userAccount = Account.authenticate(chatId, email, password);
+		if (userAccount == null) {
+			String textMsg = Emoji.RED_CIRCLE.getCode() + " *Sign In Failed*\nIncorrect Email or Password " + Emoji.SAD_FACE.getCode();
+			MessageHandler.sendShortNotice(chatId, textMsg);
+			State.applyImmediateState(chatId, Pair.of(UserState.__CANCEL_CURRENT_OPERATION_WITHOUT_NOTICE, null));
+			return;
+		}
+		authService.removeChatAuthState(chatId);
+		authService.addChatAccount(chatId, userAccount);
+
+		String feedbackMsg = Emoji.GREEN_CIRCLE.getCode() + " You Signed In Successfully " + Emoji.HAND_WAVING.getCode();
+		MessageHandler.sendShortNotice(chatId, feedbackMsg);
+		State.popAuthRelatedState(chatId);
+		State.applyImmediateState(chatId, Pair.of(UserState.DASHBOARD_PAGE, null));
+	}
+}
