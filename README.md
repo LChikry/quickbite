@@ -21,6 +21,17 @@
 
 ---
 
+<br />
+<br />
+<br />
+<strong><h2 align="center"> DISCLAIMER:</h2></strong>
+<p align="center">
+  THIS PROJECT IS CURRENTLY <strong>UNDER DEVELOPMENT</strong> AND IS IN <strong>ALPHA</strong> STATE/VERSION. SOME FEATURES MAY NOT BE FULLY IMPLEMENTED, AND BUGS MAY STILL BE PRESENT. PLEASE USE WITH CAUTION AND CHECK FOR UPDATES REGULARLY.
+</p>
+<br />
+<br />
+<br />
+
 ## ✨ Features
 
 - **Menu Browsing** – Customers can view the restaurant's menu directly within Telegram.
@@ -32,12 +43,12 @@
 
 ### Prerequisites
 
-- **Java Development Kit (JDK) 17 or higher**
-- **Maven**
+- **Java Development Kit (JDK) 21 or higher**
+- **Postgres Database**
 - **A Telegram bot token** (obtain from [@BotFather](https://core.telegram.org/bots#botfather))
+- **Optional: Docker**
 
 ### Installation
-
 1. **Clone the Repository**:
 
    ```bash
@@ -46,23 +57,25 @@
    ```
 
 2. **Configure the Bot**:
-   - create a `.env` file at the root directory and add your Telegram bot token and database connection information. For example,
+    - create a `.env` file at the root directory and add the following information to it:
 
-     ```properties
-     BOT_TOKEN=YOUR_TELEGRAM_BOT_TOKEN
-     DB_PASSWORD=YOUR_DATABASE_PASSWORD
-     ```
+      ```properties
+       BOT_TOKEN=YOUR_TELEGRAM_TOKEN_HERE
+       DB_PASSWORD=YOUR_POSTGRES_DATABASE_PASSWORD_HERE
+       DB_USER=YOUR_POSTGRES_DATABASE_USERNAME_HERE
+       DB_URL=YOUR_POSTGRES_DATABASE_URL_HERE
+       PEPPER=YOUR_CUSTOM_PASSWORD_PEPPER_FOR_HASHING_HERE
+      ```
 
-3. **Build the Project**:
+3. **Build & Run the Project**:
+    - Without Docker: just use your idea building mechanism, which also will run the bot for you. It's easier.
+    - With Docker: run the commands below. The first one for building the project and second to run it.
 
    ```bash
-   mvn clean install
+   docker build -t quickbitejar .
    ```
-
-4. **Run the Bot**:
-
    ```bash
-   java -jar target/quickbite-1.0.jar
+   docker run quickbitejar:latest
    ```
 
 ## 📌 Usage
