@@ -2,7 +2,7 @@ package org.quickbitehub.communicator;
 
 import org.quickbitehub.account.Account;
 import org.quickbitehub.utils.LanguageType;
-import org.quickbitehub.app.UserState;
+import org.quickbitehub.state.UserState;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ForceReplyKeyboard;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;

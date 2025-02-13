@@ -1,7 +1,7 @@
 package org.quickbitehub;
 
 import io.github.cdimascio.dotenv.Dotenv;
-import org.quickbitehub.app.QuickBite;
+import org.quickbitehub.app.*;
 import org.quickbitehub.authentication.AuthenticationController;
 import org.quickbitehub.authentication.AuthenticationService;
 import org.quickbitehub.communicator.MessageHandler;

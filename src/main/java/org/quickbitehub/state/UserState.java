@@ -1,4 +1,4 @@
-package org.quickbitehub.app;
+package org.quickbitehub.state;
 
 /* commands creation message to BotFather
 start - Dashboard

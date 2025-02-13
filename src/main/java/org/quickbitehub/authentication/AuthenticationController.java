@@ -1,7 +1,7 @@
 package org.quickbitehub.authentication;
 
 import org.quickbitehub.account.Account;
-import org.quickbitehub.app.UserState;
+import org.quickbitehub.state.UserState;
 import org.quickbitehub.communicator.*;
 
 public class AuthenticationController {
