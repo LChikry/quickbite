@@ -1,0 +1,156 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36" version="26.0.13">
+  <diagram id="C5RBs43oDa-KdzZeNtuy" name="Page-1">
+    <mxGraphModel dx="2265" dy="1042" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" math="0" shadow="0">
+      <root>
+        <mxCell id="WIyWlLk6GJQsqaUBKTNV-0" />
+        <mxCell id="WIyWlLk6GJQsqaUBKTNV-1" parent="WIyWlLk6GJQsqaUBKTNV-0" />
+        <mxCell id="_KcpCNYEIu_KBrQlZRJj-1" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;i style=&quot;&quot;&gt;UpdateHandler&lt;/i&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot; style=&quot;border-style:solid;&quot;&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;# nextHandler: UpdateHandler&lt;br&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot; style=&quot;border-style:solid;&quot;&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ chain(UpdateHandler first, UpdateHandler... handlers): UpdateHandler&lt;/p&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;&lt;i&gt;+ handleUpdate(Update update, Long chatId): void&lt;/i&gt;&lt;br&gt;&lt;/p&gt;" style="verticalAlign=top;align=left;overflow=fill;html=1;whiteSpace=wrap;" parent="WIyWlLk6GJQsqaUBKTNV-1" vertex="1">
+          <mxGeometry x="220" y="270" width="357.5" height="129" as="geometry" />
+        </mxCell>
+        <mxCell id="_KcpCNYEIu_KBrQlZRJj-32" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=0;exitX=0.433;exitY=0;exitDx=0;exitDy=0;exitPerimeter=0;" parent="WIyWlLk6GJQsqaUBKTNV-1" source="_KcpCNYEIu_KBrQlZRJj-43" target="_KcpCNYEIu_KBrQlZRJj-1" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="_KcpCNYEIu_KBrQlZRJj-18" value="CommandUpdateHandler" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" parent="WIyWlLk6GJQsqaUBKTNV-1" vertex="1">
+          <mxGeometry x="-430" y="570" width="350" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="_KcpCNYEIu_KBrQlZRJj-19" value="- ^nextHandler: UpdateHandler" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" parent="_KcpCNYEIu_KBrQlZRJj-18" vertex="1">
+          <mxGeometry y="26" width="350" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="_KcpCNYEIu_KBrQlZRJj-20" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=inherit;" parent="_KcpCNYEIu_KBrQlZRJj-18" vertex="1">
+          <mxGeometry y="52" width="350" height="8" as="geometry" />
+        </mxCell>
+        <mxCell id="_KcpCNYEIu_KBrQlZRJj-21" value="&lt;p style=&quot;margin: 0px 0px 0px 4px;&quot;&gt;+ ^chain(UpdateHandler first, UpdateHandler... handlers): UpdateHandler&lt;/p&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" parent="_KcpCNYEIu_KBrQlZRJj-18" vertex="1">
+          <mxGeometry y="60" width="350" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="_KcpCNYEIu_KBrQlZRJj-35" value="+ ^handleUpdate(Update update, Long chatId): void" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" parent="_KcpCNYEIu_KBrQlZRJj-18" vertex="1">
+          <mxGeometry y="100" width="350" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="_KcpCNYEIu_KBrQlZRJj-30" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;" parent="WIyWlLk6GJQsqaUBKTNV-1" source="_KcpCNYEIu_KBrQlZRJj-18" target="_KcpCNYEIu_KBrQlZRJj-1" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="-50" y="563" as="sourcePoint" />
+            <mxPoint x="344.1099999999999" y="399.00199999999995" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="-235" y="453" />
+              <mxPoint x="344" y="453" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="_KcpCNYEIu_KBrQlZRJj-31" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;" parent="WIyWlLk6GJQsqaUBKTNV-1" source="_KcpCNYEIu_KBrQlZRJj-37" target="_KcpCNYEIu_KBrQlZRJj-1" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="205" y="570" as="sourcePoint" />
+            <mxPoint x="450" y="490" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="-60" y="720" />
+              <mxPoint x="-60" y="500" />
+              <mxPoint x="370" y="500" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="_KcpCNYEIu_KBrQlZRJj-33" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=0;exitX=0.597;exitY=0.009;exitDx=0;exitDy=0;exitPerimeter=0;" parent="WIyWlLk6GJQsqaUBKTNV-1" source="_KcpCNYEIu_KBrQlZRJj-48" target="_KcpCNYEIu_KBrQlZRJj-1" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="430" y="761" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="_KcpCNYEIu_KBrQlZRJj-34" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=0;exitX=0.5;exitY=0;exitDx=0;exitDy=0;" parent="WIyWlLk6GJQsqaUBKTNV-1" source="_KcpCNYEIu_KBrQlZRJj-53" target="_KcpCNYEIu_KBrQlZRJj-1" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1080" y="449.9999999999998" as="sourcePoint" />
+            <mxPoint x="500" y="430" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="1085" y="450" />
+              <mxPoint x="478" y="450" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="_KcpCNYEIu_KBrQlZRJj-37" value="CallBackUpdateHandler" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" parent="WIyWlLk6GJQsqaUBKTNV-1" vertex="1">
+          <mxGeometry x="-410" y="720" width="350" height="130" as="geometry" />
+        </mxCell>
+        <mxCell id="_KcpCNYEIu_KBrQlZRJj-38" value="- ^nextHandler: UpdateHandler" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" parent="_KcpCNYEIu_KBrQlZRJj-37" vertex="1">
+          <mxGeometry y="26" width="350" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="_KcpCNYEIu_KBrQlZRJj-39" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=inherit;" parent="_KcpCNYEIu_KBrQlZRJj-37" vertex="1">
+          <mxGeometry y="52" width="350" height="8" as="geometry" />
+        </mxCell>
+        <mxCell id="_KcpCNYEIu_KBrQlZRJj-40" value="&lt;p style=&quot;margin: 0px 0px 0px 4px;&quot;&gt;+ ^chain(UpdateHandler first, UpdateHandler... handlers): UpdateHandler&lt;/p&gt;&lt;div&gt;&lt;br&gt;&lt;/div&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" parent="_KcpCNYEIu_KBrQlZRJj-37" vertex="1">
+          <mxGeometry y="60" width="350" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="_KcpCNYEIu_KBrQlZRJj-41" value="+ ^handleUpdate(Update update, Long chatId): void" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" parent="_KcpCNYEIu_KBrQlZRJj-37" vertex="1">
+          <mxGeometry y="100" width="350" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="_KcpCNYEIu_KBrQlZRJj-43" value="MessageUpdateHandler" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" parent="WIyWlLk6GJQsqaUBKTNV-1" vertex="1">
+          <mxGeometry x="-40" y="710" width="350" height="126" as="geometry" />
+        </mxCell>
+        <mxCell id="_KcpCNYEIu_KBrQlZRJj-44" value="- ^nextHandler: UpdateHandler" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" parent="_KcpCNYEIu_KBrQlZRJj-43" vertex="1">
+          <mxGeometry y="26" width="350" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="_KcpCNYEIu_KBrQlZRJj-45" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=inherit;" parent="_KcpCNYEIu_KBrQlZRJj-43" vertex="1">
+          <mxGeometry y="52" width="350" height="8" as="geometry" />
+        </mxCell>
+        <mxCell id="_KcpCNYEIu_KBrQlZRJj-46" value="&lt;p style=&quot;margin: 0px 0px 0px 4px;&quot;&gt;+ ^chain(UpdateHandler first, UpdateHandler... handlers): UpdateHandler&lt;/p&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" parent="_KcpCNYEIu_KBrQlZRJj-43" vertex="1">
+          <mxGeometry y="60" width="350" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="_KcpCNYEIu_KBrQlZRJj-47" value="+ ^handleUpdate(Update update, Long chatId): void" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" parent="_KcpCNYEIu_KBrQlZRJj-43" vertex="1">
+          <mxGeometry y="100" width="350" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="_KcpCNYEIu_KBrQlZRJj-48" value="ReplyUpdateHandler" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" parent="WIyWlLk6GJQsqaUBKTNV-1" vertex="1">
+          <mxGeometry x="320" y="760" width="350" height="126" as="geometry" />
+        </mxCell>
+        <mxCell id="_KcpCNYEIu_KBrQlZRJj-49" value="- ^nextHandler: UpdateHandler" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" parent="_KcpCNYEIu_KBrQlZRJj-48" vertex="1">
+          <mxGeometry y="26" width="350" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="_KcpCNYEIu_KBrQlZRJj-50" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=inherit;" parent="_KcpCNYEIu_KBrQlZRJj-48" vertex="1">
+          <mxGeometry y="52" width="350" height="8" as="geometry" />
+        </mxCell>
+        <mxCell id="_KcpCNYEIu_KBrQlZRJj-51" value="&lt;p style=&quot;margin: 0px 0px 0px 4px;&quot;&gt;+ ^chain(UpdateHandler first, UpdateHandler... handlers): UpdateHandler&lt;/p&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" parent="_KcpCNYEIu_KBrQlZRJj-48" vertex="1">
+          <mxGeometry y="60" width="350" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="_KcpCNYEIu_KBrQlZRJj-52" value="+ ^handleUpdate(Update update, Long chatId): void" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" parent="_KcpCNYEIu_KBrQlZRJj-48" vertex="1">
+          <mxGeometry y="100" width="350" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="_KcpCNYEIu_KBrQlZRJj-53" value="InlineQueryUpdateHandler" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" parent="WIyWlLk6GJQsqaUBKTNV-1" vertex="1">
+          <mxGeometry x="1040" y="710" width="310" height="126" as="geometry" />
+        </mxCell>
+        <mxCell id="_KcpCNYEIu_KBrQlZRJj-54" value="- ^nextHandler: UpdateHandler" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" parent="_KcpCNYEIu_KBrQlZRJj-53" vertex="1">
+          <mxGeometry y="26" width="310" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="_KcpCNYEIu_KBrQlZRJj-55" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=inherit;" parent="_KcpCNYEIu_KBrQlZRJj-53" vertex="1">
+          <mxGeometry y="52" width="310" height="8" as="geometry" />
+        </mxCell>
+        <mxCell id="_KcpCNYEIu_KBrQlZRJj-56" value="+ ^chain(UpdateHandler first, UpdateHandler... handlers): UpdateHandler" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" parent="_KcpCNYEIu_KBrQlZRJj-53" vertex="1">
+          <mxGeometry y="60" width="310" height="40" as="geometry" />
+        </mxCell>
+        <mxCell id="_KcpCNYEIu_KBrQlZRJj-57" value="+ ^handleUpdate(Update update, Long chatId): void" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" parent="_KcpCNYEIu_KBrQlZRJj-53" vertex="1">
+          <mxGeometry y="100" width="310" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="c1xWqFcsF3JT7yTkNDiz-0" value="StateUpdateHandler" style="swimlane;fontStyle=1;align=center;verticalAlign=top;childLayout=stackLayout;horizontal=1;startSize=26;horizontalStack=0;resizeParent=1;resizeParentMax=0;resizeLast=0;collapsible=1;marginBottom=0;whiteSpace=wrap;html=1;" parent="WIyWlLk6GJQsqaUBKTNV-1" vertex="1">
+          <mxGeometry x="690" y="740" width="310" height="136" as="geometry" />
+        </mxCell>
+        <mxCell id="c1xWqFcsF3JT7yTkNDiz-1" value="- ^nextHandler: UpdateHandler" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" parent="c1xWqFcsF3JT7yTkNDiz-0" vertex="1">
+          <mxGeometry y="26" width="310" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="c1xWqFcsF3JT7yTkNDiz-2" value="" style="line;strokeWidth=1;fillColor=none;align=left;verticalAlign=middle;spacingTop=-1;spacingLeft=3;spacingRight=3;rotatable=0;labelPosition=right;points=[];portConstraint=eastwest;strokeColor=inherit;" parent="c1xWqFcsF3JT7yTkNDiz-0" vertex="1">
+          <mxGeometry y="52" width="310" height="8" as="geometry" />
+        </mxCell>
+        <mxCell id="c1xWqFcsF3JT7yTkNDiz-3" value="&lt;p style=&quot;margin: 0px 0px 0px 4px;&quot;&gt;+ ^chain(UpdateHandler first, UpdateHandler... handlers): UpdateHandler&lt;/p&gt;" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" parent="c1xWqFcsF3JT7yTkNDiz-0" vertex="1">
+          <mxGeometry y="60" width="310" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="c1xWqFcsF3JT7yTkNDiz-4" value="+ ^handleUpdate(Update update, Long chatId): void" style="text;strokeColor=none;fillColor=none;align=left;verticalAlign=top;spacingLeft=4;spacingRight=4;overflow=hidden;rotatable=0;points=[[0,0.5],[1,0.5]];portConstraint=eastwest;whiteSpace=wrap;html=1;" parent="c1xWqFcsF3JT7yTkNDiz-0" vertex="1">
+          <mxGeometry y="110" width="310" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="c1xWqFcsF3JT7yTkNDiz-5" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;endArrow=block;endFill=0;exitX=0.355;exitY=0;exitDx=0;exitDy=0;exitPerimeter=0;" parent="WIyWlLk6GJQsqaUBKTNV-1" source="c1xWqFcsF3JT7yTkNDiz-0" target="_KcpCNYEIu_KBrQlZRJj-1" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="760" y="580" />
+              <mxPoint x="460" y="580" />
+            </Array>
+            <mxPoint x="515" y="771" as="sourcePoint" />
+            <mxPoint x="453" y="409" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
