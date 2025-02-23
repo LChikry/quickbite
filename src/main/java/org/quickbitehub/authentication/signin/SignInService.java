@@ -1,7 +1,9 @@
-package org.quickbitehub.authentication;
+package org.quickbitehub.authentication.signin;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.quickbitehub.account.Account;
+import org.quickbitehub.authentication.AuthMessages;
+import org.quickbitehub.authentication.AuthenticationService;
 import org.quickbitehub.state.State;
 import org.quickbitehub.state.UserState;
 import org.quickbitehub.communicator.Emoji;
