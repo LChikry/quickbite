@@ -10,6 +10,7 @@ public enum PostgreSqlDbConnection implements DatabaseConnection{
 	INSTANCE;
 	private Connection connection;
 
+	@Override
 	public Connection getDbConnection() {
 		if (connection != null)	return connection;
 		try {
@@ -21,7 +22,7 @@ public enum PostgreSqlDbConnection implements DatabaseConnection{
 			return connection;
 		} catch (SQLException e) {
 			System.out.println("DatabaseOperation Connection is Failed to be Established");
-			return null;
+			throw new RuntimeException(e);
 		} catch (ClassNotFoundException e) {
 			System.out.println("PostgreSQL Driver Class is not Found");
 			throw new RuntimeException(e);
