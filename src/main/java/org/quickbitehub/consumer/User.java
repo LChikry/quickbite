@@ -22,11 +22,7 @@ public abstract class User {
 		this.middleNames = middleNames;
 		this.userType = userType;
 
-		if (userType.equals(UserType.CUSTOMER.getText())) {
-			this.USER_ID = Customer.insertCustomer(firstName, lastName);
-		} else {
-			this.USER_ID = Employee.insertEmployee(firstName, lastName, restaurantId);
-		}
+		this.USER_ID = Customer.insertCustomer(firstName, lastName);
 	}
 
 	public String getUserFullName() {

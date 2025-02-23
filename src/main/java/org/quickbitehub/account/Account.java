@@ -51,13 +51,7 @@ public class Account implements Serializable {
 		this.passwordHashSalted = password;
 
 		Customer cus = Customer.getCustomer(userId);
-		if (cus != null) {
-			this.USER = cus;
-			return;
-		}
-
-		Employee emp = Employee.getEmployee(userId);
-		this.USER = emp;
+		this.USER = cus;
 		usersAccount.put(pureEmail, this);
 	}
 
@@ -82,16 +76,8 @@ public class Account implements Serializable {
 
 	static public Account signUp(String email, String unformattedEmail, String password, Long telegramId, String first_name, String last_name, String middle_names, String userType, String restaurantId) {
 		email = formatEmail(email);
-		Customer customer = null;
-		Employee employee = null;
-		if (Objects.equals(userType, UserType.CUSTOMER.getText())) {
-			customer = new Customer(first_name, last_name, middle_names);
-		} else {
-			employee = new Employee(first_name, last_name, middle_names, restaurantId);
-		}
-		Account userAccount;
-		if (customer != null) userAccount = new Account(email, unformattedEmail, password, customer, telegramId);
-		else userAccount = new Account(email, unformattedEmail, password, employee, telegramId);
+		Customer customer = new Customer(first_name, last_name, middle_names);
+		Account userAccount = new Account(email, unformattedEmail, password, customer, telegramId);
 		usersAccount.put(email, userAccount);
 		return userAccount;
 	}
