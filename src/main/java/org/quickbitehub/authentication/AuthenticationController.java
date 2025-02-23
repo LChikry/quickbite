@@ -1,8 +1,6 @@
 package org.quickbitehub.authentication;
 
 import org.quickbitehub.account.Account;
-import org.quickbitehub.authentication.signin.SignInService;
-import org.quickbitehub.authentication.signup.SignUpService;
 import org.quickbitehub.state.UserState;
 import org.quickbitehub.communicator.*;
 
