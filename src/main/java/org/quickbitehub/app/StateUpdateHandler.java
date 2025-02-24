@@ -10,7 +10,7 @@ import java.util.Stack;
 
 import static org.quickbitehub.state.State.*;
 
-public class StateUpdateHandler extends UpdateHandler {
+class StateUpdateHandler extends UpdateHandler {
 	public void handleUpdate(Update update, Long chatId) {
 		State.userState.putIfAbsent(chatId, new Stack<>());
 		State.keyboardState.putIfAbsent(chatId, Pair.of(new ArrayList<>(), new UserState[NUM_KEYBOARD_STATES]));

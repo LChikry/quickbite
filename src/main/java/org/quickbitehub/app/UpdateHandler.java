@@ -7,6 +7,13 @@ import java.util.*;
 abstract class UpdateHandler {
 	protected UpdateHandler nextHandler;
 
+	/**
+	 * @param firstHandler mandatory first handler since the chain should have at least one handler
+	 * @param handlers optional list of handlers that will make the chain in same order they are passed.
+	 *                 If MessageUpdateHandler was passed before Command/Reply handlers, it will get rearranged
+	 *                 to be after both of them.
+	 * @return StateUpdateHandler as the first handler in the chain even if you didn't passed it
+	 */
 	public static UpdateHandler chain(UpdateHandler firstHandler, UpdateHandler... handlers) {
 		// Ensuring uniqueness
 		Set<Class<? extends UpdateHandler>> handlerTypes = new HashSet<>();

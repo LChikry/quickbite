@@ -7,7 +7,7 @@ import org.quickbitehub.state.State;
 import org.quickbitehub.state.UserState;
 import org.telegram.telegrambots.meta.api.objects.Update;
 
-public class MessageUpdateHandler extends UpdateHandler {
+class MessageUpdateHandler extends UpdateHandler {
 	public void handleUpdate(Update update, Long chatId) {
 		if (!update.hasMessage() || !update.getMessage().hasText()) {
 			if (nextHandler != null) nextHandler.handleUpdate(update, chatId);

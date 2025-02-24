@@ -9,7 +9,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 
 import static org.quickbitehub.state.State.navigateToProperState;
 
-public class ReplyUpdateHandler extends UpdateHandler {
+class ReplyUpdateHandler extends UpdateHandler {
 	private final AuthenticationController authController;
 
 	public ReplyUpdateHandler(AuthenticationController authController) {
