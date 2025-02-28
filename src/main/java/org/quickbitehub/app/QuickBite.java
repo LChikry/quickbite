@@ -12,10 +12,20 @@ import java.time.Instant;
 public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 	public static final String BOT_USERNAME = "QuickBiteHub_bot";
 	private final AuthenticationController authController;
+	private final UpdateHandler updateHandler;
 
 	public QuickBite(AuthenticationController authController) {
 		this.authController = authController;
 		PageFactory.authController = authController;
+
+		updateHandler = UpdateHandler.chain(
+				new StateUpdateHandler(),
+				new CommandUpdateHandler(authController),
+				new CallBackQueryUpdateHandler(authController),
+				new ReplyUpdateHandler(authController),
+				new MessageUpdateHandler(),
+				new InlineQueryUpdateHandler()
+		);
 	}
 
 	private Long extractChatId(Update update) {
@@ -36,16 +46,6 @@ public class QuickBite implements LongPollingSingleThreadUpdateConsumer {
 	@Override
 	public void consume(Update update) {
 		if (isMessageExpired(update)) return;
-		// ALWAYS keep MessageUpdateHandler after command and reply handlers
-		// ALSO, keep the StateUpdateHandler first
-		UpdateHandler handler = UpdateHandler.chain(
-				new StateUpdateHandler(),
-				new CommandUpdateHandler(authController),
-				new CallBackQueryUpdateHandler(authController),
-				new ReplyUpdateHandler(authController),
-				new MessageUpdateHandler(),
-				new InlineQueryUpdateHandler()
-		);
-		handler.handleUpdate(update, extractChatId(update));
+		updateHandler.handleUpdate(update, extractChatId(update));
 	}
 }

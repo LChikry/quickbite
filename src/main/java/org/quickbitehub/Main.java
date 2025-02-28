@@ -9,7 +9,6 @@ import org.telegram.telegrambots.longpolling.TelegramBotsLongPollingApplication;
 
 public class Main {
 	public static void main(String[] args) {
-		// Using try-with-resources to allow autoclose to run upon finishing
 		try (TelegramBotsLongPollingApplication botsApplication = new TelegramBotsLongPollingApplication()) {
 			// Singleton Objects
 			AuthenticationController authController = AuthenticationController.initInstance(AuthenticationService.getInstance());
